@@ -7,8 +7,7 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExamDTO {
-    private Long examId;
-    private Long courseId;
-    private String questions;
+public class LoginDTO {
+    private String email;
+    private String password;
 }
