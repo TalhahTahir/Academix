@@ -20,21 +20,20 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
     private final ModelMapper modelMapper;
+
     @Override
     public UserDTO createUser(CreateUserDTO dto) {
-        
-        User user = modelMapper.map(dto, User.class);
-        User savedUser = userRepo.save(user);
-        UserDTO userDTO = modelMapper.map(savedUser, UserDTO.class);
-        return userDTO;
 
-        
+        User user = modelMapper.map(dto, User.class);
+        user = userRepo.save(user);
+        UserDTO userDTO = modelMapper.map(user, UserDTO.class);
+        return userDTO;
     }
 
     @Override
     public UserDTO getUserById(Long id) {
         User user = userRepo.findById(id)
-            .orElseThrow(()-> new ResourceNotFoundException("User not found with id : "+id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + id));
         return modelMapper.map(user, UserDTO.class);
     }
 
@@ -42,32 +41,32 @@ public class UserServiceImpl implements UserService {
     public List<UserDTO> getAllUsers() {
         List<User> users = userRepo.findAll();
         return users.stream()
-            .map(user -> modelMapper.map(user, UserDTO.class))
-            .toList();
+                .map(user -> modelMapper.map(user, UserDTO.class))
+                .toList();
     }
 
     @Override
     public void deleteUser(Long id) {
         User user = userRepo.findById(id)
-        .orElseThrow(()-> new ResourceNotFoundException("User not found with id : "+id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + id));
         userRepo.delete(user);
     }
 
     @Override
     public UserDTO updateUser(Long id, CreateUserDTO dto) {
         User user = userRepo.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + id));
 
-            user.setUsername(dto.getUsername());
-            user.setGender(dto.getGender());
-            user.setPassword(dto.getPassword());
-            user.setEmail(dto.getEmail());  
-            user.setRole(dto.getRole());
-            user.setPhone(dto.getPhone());
-            user.setImage(dto.getImage());
-        
-            User updatedUser = userRepo.save(user);
-            return modelMapper.map(updatedUser, UserDTO.class);
+        user.setUsername(dto.getUsername());
+        user.setGender(dto.getGender());
+        user.setPassword(dto.getPassword());
+        user.setEmail(dto.getEmail());
+        user.setRole(dto.getRole());
+        user.setPhone(dto.getPhone());
+        user.setImage(dto.getImage());
+
+        User updatedUser = userRepo.save(user);
+        return modelMapper.map(updatedUser, UserDTO.class);
     }
-    
+
 }
