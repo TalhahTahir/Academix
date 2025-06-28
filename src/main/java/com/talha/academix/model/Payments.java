@@ -28,7 +28,9 @@ public class Payments {
     @NotEmpty
     private Integer amount;
     @NotEmpty
-    private String method;
+    private String medium;
+    @NotEmpty
+    private String account;
     @NotEmpty
     private Date date;
 

@@ -1,6 +1,10 @@
 package com.talha.academix.model;
 
+import com.talha.academix.enums.PaymentMedium;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,8 +23,7 @@ public class Wallet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long walletID;
     private Long userID;
-    private String jazzcash;
-    private String easypaisa;
-    private String bankAccount;
-
+    @Enumerated(EnumType.STRING)
+    private PaymentMedium medium;
+    private String account;
 }
