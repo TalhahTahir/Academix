@@ -1,6 +1,10 @@
 package com.talha.academix.model;
 
+import com.talha.academix.enums.Degree;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,7 +27,8 @@ public class TeacherQualification {
     @NotEmpty
     private Long teacherId;
 
-    private String degreeName;
+    @Enumerated(EnumType.STRING)
+    private Degree degree;
 
     private String institute;
 
