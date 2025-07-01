@@ -77,7 +77,12 @@ public class EnrollmentServiceImpl implements EnrollmentServices {
         enrollment.setStatus(EnrollmentStatus.IN_PROGRESS);
         enrollmentRepo.save(enrollment);
 
+        
         return modelMapper.map(enrollment, EnrollmentDTO.class);
+
+    }
+
+    public void notifyStudentEnrollment(){
 
     }
 
