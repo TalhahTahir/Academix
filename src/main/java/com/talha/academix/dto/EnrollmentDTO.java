@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 
 import java.util.Date;
 
+import com.talha.academix.enums.EnrollmentStatus;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,7 +16,7 @@ public class EnrollmentDTO {
     private Long studentID;
     private Long courseID;
     private Date enrollmentDate;
-    private String status;
+    private EnrollmentStatus status;
     private String grade;
     private Integer rating;
 }

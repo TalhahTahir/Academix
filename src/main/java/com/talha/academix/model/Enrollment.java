@@ -2,6 +2,8 @@ package com.talha.academix.model;
 
 import java.util.Date;
 
+import com.talha.academix.enums.EnrollmentStatus;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,7 +24,7 @@ public class Enrollment {
     private Long studentID;
     private Long courseID;
     private Date enrollmentDate;
-    private String status; //enum(completed / in progress)
+    private EnrollmentStatus status; //enum(completed / in progress)
     private String Grade;
     private Integer rating;
 

@@ -1,5 +1,8 @@
 package com.talha.academix.dto;
 
+import com.talha.academix.enums.CourseAvailability;
+import com.talha.academix.enums.CourseCatagory;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -12,6 +15,8 @@ public class CourseDTO {
     private String coursename;
     private String duration;
     private Integer fees;
+    private CourseAvailability availability;
+    private CourseCatagory catagory;
     private Long teacherid;
     private Long examid;
     private Long contentid;
