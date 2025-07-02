@@ -98,7 +98,6 @@ public class DocumentServiceImpl implements DocumentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found with id: " + documentId));
         documentRepo.delete(document);
     }
-    
 
     public boolean TeacherAuth(Long teacherId, Long contentId) {
         Course course = courseRepo.findByContentID(contentId);

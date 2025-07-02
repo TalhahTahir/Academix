@@ -11,4 +11,8 @@ public interface ExamService {
     List<ExamDTO> getExamsByCourse(Long courseId);
     void deleteExam(Long examId);
 
+    ExamDTO createExamByTeacher(Long teacherId, ExamDTO dto);
+    ExamDTO updateExamByTeacher(Long teacherId, Long examId, ExamDTO dto);
+    void deleteExamByTeacher(Long teacherId, Long examId);
+
 }
