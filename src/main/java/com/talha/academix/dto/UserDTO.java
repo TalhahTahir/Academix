@@ -1,5 +1,7 @@
 package com.talha.academix.dto;
 
+import com.talha.academix.enums.Role;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -12,7 +14,7 @@ public class UserDTO {
     private String username;
     private String gender;
     private String email;
-    private String role;
+    private Role role;
     private String phone;
     private String image;
 }

@@ -12,4 +12,5 @@ public interface TeachingRequestService {
     List<TeachingRequestDTO> getRequestsByTeacher(Long teacherId);
     List<TeachingRequestDTO> getRequestsByCourse(Long courseId);
     void deleteRequest(Long requestId);
+    List<TeachingRequestDTO> getAllRequests();
 }

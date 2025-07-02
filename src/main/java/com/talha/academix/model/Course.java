@@ -1,6 +1,5 @@
 package com.talha.academix.model;
 
-import com.talha.academix.enums.CourseAvailability;
 import com.talha.academix.enums.CourseCatagory;
 
 import jakarta.persistence.Entity;
@@ -29,9 +28,11 @@ public class Course {
     @NotEmpty
     private Integer fees;
 
-    private CourseAvailability availability;
     private CourseCatagory catagory;
+
     private Long teacherid;
+
     private Long examid;
+
     private Long contentid;
 }

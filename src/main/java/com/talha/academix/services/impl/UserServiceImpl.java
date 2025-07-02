@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.CreateUserDTO;
 import com.talha.academix.dto.UserDTO;
+import com.talha.academix.enums.Role;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.User;
 import com.talha.academix.repository.UserRepo;
@@ -61,7 +62,7 @@ public class UserServiceImpl implements UserService {
         user.setGender(dto.getGender());
         user.setPassword(dto.getPassword());
         user.setEmail(dto.getEmail());
-        user.setRole(dto.getRole());
+        user.setRole(Role.valueOf(dto.getRole()));
         user.setPhone(dto.getPhone());
         user.setImage(dto.getImage());
 
