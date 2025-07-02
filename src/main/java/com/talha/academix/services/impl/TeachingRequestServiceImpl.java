@@ -35,15 +35,16 @@ public class TeachingRequestServiceImpl implements TeachingRequestService {
     public TeachingRequestDTO createRequest(TeachingRequestDTO dto) {
 
         Long userId = dto.getTeacherId();
-        User user = userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User not found"));
+        User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         if (!Role.TEACHER.equals(user.getRole())) {
-             throw new RoleMismatchException("User is not a teacher");
+            throw new RoleMismatchException("User is not a teacher");
         }
-        
+
         Long courseId = dto.getCourseId();
-        Course course = courseRepo.findById(courseId).orElseThrow(()-> new ResourceNotFoundException("Course not found"));
-        if (course.getTeacherid()!= null) {
-             throw new AlreadyEnrolledException("This Course has a teacher");
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        if (course.getTeacherid() != null) {
+            throw new AlreadyEnrolledException("This Course has a teacher");
         }
 
         TeachingRequest request = modelMapper.map(dto, TeachingRequest.class);
@@ -58,11 +59,11 @@ public class TeachingRequestServiceImpl implements TeachingRequestService {
         existing.setStatus(status);
         requestRepo.save(existing);
         if (Status.APPROVED.equals(status)) {
-            Course course = courseRepo.findById(existing.getCourseId()).orElseThrow(() ->
-            new ResourceNotFoundException("Course not found with id: " + existing.getCourseId()));
+            Course course = courseRepo.findById(existing.getCourseId()).orElseThrow(
+                    () -> new ResourceNotFoundException("Course not found with id: " + existing.getCourseId()));
             course.setTeacherid(existing.getTeacherId());
             courseRepo.save(course);
-            }
+        }
         return modelMapper.map(existing, TeachingRequestDTO.class);
     }
 
@@ -100,7 +101,7 @@ public class TeachingRequestServiceImpl implements TeachingRequestService {
     public List<TeachingRequestDTO> getAllRequests() {
         List<TeachingRequest> requests = requestRepo.findAll();
         return requests.stream()
-        .map(r -> modelMapper.map(r, TeachingRequestDTO.class))
-        .toList();
+                .map(r -> modelMapper.map(r, TeachingRequestDTO.class))
+                .toList();
     }
 }

@@ -9,4 +9,8 @@ public interface DocumentService {
     DocumentDTO getDocumentById(Long documentId);
     List<DocumentDTO> getDocumentsByContent(Long contentId);
     void deleteDocument(Long documentId);
+
+    DocumentDTO addDocByTeacher(Long teacherId, DocumentDTO dto);
+    DocumentDTO updateDocByTeacher(Long teacherId, Long id, DocumentDTO dto);
+    void deleteDocByTeacher(Long teacherId, Long id);
 }
