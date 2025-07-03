@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.talha.academix.dto.CourseDTO;
 import com.talha.academix.dto.EnrollmentDTO;
@@ -165,7 +166,7 @@ public boolean updateCourseCompletionPercentage(Long studentId, Long courseId) {
                 .orElseThrow(() ->
                 new ResourceNotFoundException("Enrollment not found with id: " + enrollmentId));
         
-                if (!enrollment.getCompletionPercentage().equals(100)){
+                if (enrollment.getCompletionPercentage() < 100){
                     throw new ResourceNotFoundException("Complete 100% of the course to get the certificate");
                 }
         
