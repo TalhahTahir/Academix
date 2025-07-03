@@ -14,6 +14,8 @@ public interface DocumentRepo extends JpaRepository<Document, Long> {
     @Query("SELECT d.contentId FROM document d WHERE d.documentId = :documentId")
     Long findContentIdByDocumentId(@Param("documentId") Long documentId);
 
+    public int countByCourseId(Long courseId);
+
 }
 
 

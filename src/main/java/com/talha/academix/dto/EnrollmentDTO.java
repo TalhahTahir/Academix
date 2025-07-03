@@ -17,6 +17,6 @@ public class EnrollmentDTO {
     private Long courseID;
     private Date enrollmentDate;
     private EnrollmentStatus status;
-    private String grade;
-    private Integer rating;
+    private double completionPercentage;
+    private float marks;
 }

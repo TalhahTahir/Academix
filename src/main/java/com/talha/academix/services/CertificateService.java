@@ -4,6 +4,7 @@ import com.talha.academix.dto.CertificateDTO;
 import java.util.List;
 
 public interface CertificateService {
+    CertificateDTO awardCertificate(CertificateDTO dto);
     CertificateDTO addCertificate(CertificateDTO dto);
     CertificateDTO updateCertificate(Long certificateId, CertificateDTO dto);
     CertificateDTO getCertificateById(Long certificateId);

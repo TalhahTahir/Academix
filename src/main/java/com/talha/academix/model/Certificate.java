@@ -31,7 +31,7 @@ public class Certificate {
     @NotEmpty
     private Long teacherId;
 
-    private String grade;
+    private float marks;
 
     private Date date;
 }

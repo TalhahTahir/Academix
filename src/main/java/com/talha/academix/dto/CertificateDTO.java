@@ -14,6 +14,6 @@ public class CertificateDTO {
     private Long studentId;
     private Long courseId;
     private Long teacherId;
-    private String grade;
+    private float marks;
     private Date date;
 }

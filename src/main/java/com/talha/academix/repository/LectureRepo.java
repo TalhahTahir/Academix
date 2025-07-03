@@ -9,4 +9,6 @@ import com.talha.academix.model.Lecture;
 public interface LectureRepo extends JpaRepository<Lecture, Long> {
 
     public List<Lecture> findByContentID(Long contentId);
+
+    public int countByCourseId(Long courseId);
 }

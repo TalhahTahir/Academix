@@ -25,8 +25,6 @@ public class Enrollment {
     private Long courseID;
     private Date enrollmentDate;
     private EnrollmentStatus status; //enum(completed / in progress)
-    private String Grade;
-    private Integer rating;
-
-    
+    private double completionPercentage;
+    private float marks; 
 }

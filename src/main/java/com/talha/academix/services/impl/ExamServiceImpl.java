@@ -5,6 +5,7 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.talha.academix.dto.CourseDTO;
 import com.talha.academix.dto.ExamDTO;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
@@ -106,6 +107,5 @@ public class ExamServiceImpl implements ExamService {
         }
         return true;
     }
-    
     
 }

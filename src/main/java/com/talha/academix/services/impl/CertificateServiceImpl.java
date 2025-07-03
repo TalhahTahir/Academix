@@ -3,19 +3,29 @@ package com.talha.academix.services.impl;
 import com.talha.academix.dto.CertificateDTO;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Certificate;
+import com.talha.academix.model.Enrollment;
 import com.talha.academix.repository.CertificateRepo;
 import com.talha.academix.services.CertificateService;
+
 import lombok.RequiredArgsConstructor;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+
+import com.talha.academix.enums.EnrollmentStatus;
+import com.talha.academix.repository.EnrollmentRepo;
+import com.talha.academix.repository.ExamRepo;
 
 @Service
 @RequiredArgsConstructor
 public class CertificateServiceImpl implements CertificateService {
 
     private final CertificateRepo certificateRepo;
+    private final EnrollmentRepo enrollmentRepo;
+    private final ExamRepo examRepo;
     private final ModelMapper modelMapper;
 
     @Override
@@ -31,7 +41,7 @@ public class CertificateServiceImpl implements CertificateService {
                 .orElseThrow(() -> new ResourceNotFoundException("Certificate not found with id: " + certificateId));
         existing.setStudentId(dto.getStudentId());
         existing.setCourseId(dto.getCourseId());
-        existing.setGrade(dto.getGrade());
+        existing.setMarks(dto.getMarks());
         existing.setDate(dto.getDate());
         existing.setTeacherId(dto.getTeacherId());
         existing = certificateRepo.save(existing);
@@ -67,4 +77,31 @@ public class CertificateServiceImpl implements CertificateService {
                 .orElseThrow(() -> new ResourceNotFoundException("Certificate not found with id: " + certificateId));
         certificateRepo.delete(cert);
     }
+
+	@Override
+	public CertificateDTO awardCertificate( CertificateDTO dto) {
+		
+        Enrollment enrollment = enrollmentRepo.findByStudentIDAndCourseID(dto.getStudentId(), dto.getCourseId());
+
+        if(enrollment == null) {
+            throw new ResourceNotFoundException("Enrollment not found ");
+            }
+
+        if(!enrollment.getStatus().equals(EnrollmentStatus.COMPLETED)){
+            throw new ResourceNotFoundException("Enrollment not completed");
+        }
+
+        // create certificate
+    Certificate certificate = new Certificate();
+    certificate.setStudentId(dto.getStudentId());
+    certificate.setTeacherId(dto.getTeacherId()); 
+    certificate.setCourseId(dto.getCourseId());
+    certificate.setMarks(enrollment.getMarks());
+    certificate.setDate(new Date());
+
+    certificate = certificateRepo.save(certificate);
+
+    return modelMapper.map(certificate, CertificateDTO.class);
+        
+	}
 }
