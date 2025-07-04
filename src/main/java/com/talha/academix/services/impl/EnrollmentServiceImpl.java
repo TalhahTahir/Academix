@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.talha.academix.dto.CourseDTO;
 import com.talha.academix.dto.EnrollmentDTO;
+import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.enums.EnrollmentStatus;
 import com.talha.academix.enums.PaymentType;
 import com.talha.academix.exception.AlreadyEnrolledException;
@@ -25,6 +26,7 @@ import com.talha.academix.repository.LectureRepo;
 import com.talha.academix.repository.PaymentRepo;
 import com.talha.academix.repository.StudentContentProgressRepo;
 import com.talha.academix.repository.WalletRepo;
+import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.EnrollmentServices;
 import com.talha.academix.services.PaymentGatewayService;
 
@@ -44,6 +46,8 @@ public class EnrollmentServiceImpl implements EnrollmentServices {
     private final LectureRepo lectureRepo;
     private final DocumentRepo documentRepo;
     private final StudentContentProgressRepo progressRepo;
+
+    private final ActivityLogService activityLogService;
 
     // business Logics
 
@@ -88,6 +92,13 @@ public class EnrollmentServiceImpl implements EnrollmentServices {
         enrollmentRepo.save(enrollment);
 
         
+    // log activity
+    activityLogService.logAction(
+        studentId,
+        ActivityAction.ENROLLMENT,
+        "Student " + studentId + " enrolled in Course " + courseId
+    );
+
         return modelMapper.map(enrollment, EnrollmentDTO.class);
 
     }
