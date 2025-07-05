@@ -64,30 +64,7 @@ public class ExamServiceImpl implements ExamService {
         examRepo.delete(exam);
     }
 
-    @Override
-    public ExamDTO createExamByTeacher(Long teacherId, ExamDTO dto) {
 
-        Long courseId = courseRepo.findContentIdByCourseId(dto.getCourseId());
-        TeacherAuth(teacherId, courseId);
-
-        Exam exam = modelMapper.map(dto, Exam.class);
-        exam = examRepo.save(exam);
-        return modelMapper.map(exam, ExamDTO.class);
-    }
-
-    @Override
-    public ExamDTO updateExamByTeacher(Long teacherId, Long examId, ExamDTO dto) {
-
-        Long courseId = courseRepo.findContentIdByCourseId(dto.getCourseId());
-        TeacherAuth(teacherId, courseId);
-
-        Exam existing = examRepo.findById(examId)
-       .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id " + examId));
-       existing.setCourseId(dto.getCourseId());
-       existing.setQuestions(dto.getQuestions());
-       existing = examRepo.save(existing);
-       return modelMapper.map(existing, ExamDTO.class);
-    }
 
     @Override
     public void deleteExamByTeacher(Long teacherId, Long examId) {
@@ -107,5 +84,17 @@ public class ExamServiceImpl implements ExamService {
         }
         return true;
     }
+
+     @Override
+     public ExamDTO createExamByTeacher(Long teacherId, ExamDTO dto) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'createExamByTeacher'");
+     }
+
+     @Override
+     public ExamDTO updateExamByTeacher(Long teacherId, Long examId, ExamDTO dto) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateExamByTeacher'");
+     }
     
 }

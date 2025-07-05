@@ -7,28 +7,24 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.talha.academix.dto.CourseDTO;
 import com.talha.academix.dto.EnrollmentDTO;
 import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.enums.EnrollmentStatus;
-import com.talha.academix.enums.PaymentType;
 import com.talha.academix.exception.AlreadyEnrolledException;
 import com.talha.academix.exception.PaymentFailedException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.Enrollment;
-import com.talha.academix.model.Payment;
 import com.talha.academix.model.Wallet;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.DocumentRepo;
 import com.talha.academix.repository.EnrollmentRepo;
 import com.talha.academix.repository.LectureRepo;
-import com.talha.academix.repository.PaymentRepo;
 import com.talha.academix.repository.StudentContentProgressRepo;
 import com.talha.academix.repository.WalletRepo;
 import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.EnrollmentServices;
-import com.talha.academix.services.PaymentGatewayService;
+import com.talha.academix.services.PaymentService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -40,8 +36,7 @@ public class EnrollmentServiceImpl implements EnrollmentServices {
     private final ModelMapper modelMapper;
     private final CourseRepo courseRepo;
     private final WalletRepo walletRepo;
-    private final PaymentRepo paymentRepo;
-    private final PaymentGatewayService paymentGatewayService;
+    private final PaymentService paymentService;
 
     private final LectureRepo lectureRepo;
     private final DocumentRepo documentRepo;
@@ -64,24 +59,10 @@ public class EnrollmentServiceImpl implements EnrollmentServices {
         Wallet wallet = walletRepo.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
 
-        boolean paymentSuccess = paymentGatewayService.charge(
-                wallet.getMedium(),
-                wallet.getAccount(),
-                course.getFees());
-
-        if (!paymentSuccess) {
-            throw new PaymentFailedException("Payment failed or declined!");
+        boolean paymentSuccess = paymentService.processPayment(studentId, course, wallet);
+        if (!paymentSuccess) {  
+            throw new PaymentFailedException("Payment failed");
         }
-
-        Payment payment = new Payment();
-        payment.setUserID(studentId);
-        payment.setCourseID(courseId);
-        payment.setAmount(course.getFees());
-        payment.setMedium(wallet.getMedium());
-        payment.setAccount(wallet.getAccount());
-        payment.setPaymentType(PaymentType.INCOMING);
-        payment.setDate(new Date());
-        paymentRepo.save(payment);
 
         Enrollment enrollment = new Enrollment();
         enrollment.setStudentID(studentId);
@@ -91,19 +72,17 @@ public class EnrollmentServiceImpl implements EnrollmentServices {
         enrollment.setCompletionPercentage(0);
         enrollmentRepo.save(enrollment);
 
-        
-    // log activity
-    activityLogService.logAction(
-        studentId,
-        ActivityAction.ENROLLMENT,
-        "Student " + studentId + " enrolled in Course " + courseId
-    );
+        // log activity
+        activityLogService.logAction(
+                studentId,
+                ActivityAction.ENROLLMENT,
+                "Student " + studentId + " enrolled in Course " + courseId);
 
         return modelMapper.map(enrollment, EnrollmentDTO.class);
 
     }
 
-    public void notifyStudentEnrollment(){
+    public void notifyStudentEnrollment() {
 
     }
 
@@ -139,56 +118,57 @@ public class EnrollmentServiceImpl implements EnrollmentServices {
     }
 
     @Transactional
-@Override
-public boolean updateCourseCompletionPercentage(Long studentId, Long courseId) {
+    @Override
+    public boolean updateCourseCompletionPercentage(Long studentId, Long courseId) {
 
-    // 1️⃣ Find enrollment
-    Enrollment enrollment = enrollmentRepo.findByStudentIDAndCourseID(studentId, courseId);
-    if (enrollment == null) {
-        throw new ResourceNotFoundException("Enrollment not found for studentId: " + studentId + " and courseId: " + courseId);
+        // 1️⃣ Find enrollment
+        Enrollment enrollment = enrollmentRepo.findByStudentIDAndCourseID(studentId, courseId);
+        if (enrollment == null) {
+            throw new ResourceNotFoundException(
+                    "Enrollment not found for studentId: " + studentId + " and courseId: " + courseId);
+        }
+
+        // 2️⃣ Get total content items (videos + documents)
+        int totalLectures = lectureRepo.countByCourseId(courseId);
+        int totalDocuments = documentRepo.countByCourseId(courseId);
+        int totalItems = totalLectures + totalDocuments;
+
+        if (totalItems == 0) {
+            throw new IllegalStateException("Course has no content items to complete.");
+        }
+
+        // 3️⃣ Get completed items by this student
+        int completedItems = progressRepo.countCompletedByStudentAndCourse(studentId, courseId);
+
+        // 4️⃣ Calculate percentage
+        double percentage = ((double) completedItems / totalItems) * 100;
+        enrollment.setCompletionPercentage(percentage);
+
+        // 5️⃣ Save update
+        enrollmentRepo.save(enrollment);
+
+        return true;
     }
-
-    // 2️⃣ Get total content items (videos + documents)
-    int totalLectures = lectureRepo.countByCourseId(courseId);
-    int totalDocuments = documentRepo.countByCourseId(courseId);
-    int totalItems = totalLectures + totalDocuments;
-
-    if (totalItems == 0) {
-        throw new IllegalStateException("Course has no content items to complete.");
-    }
-
-    // 3️⃣ Get completed items by this student
-    int completedItems = progressRepo.countCompletedByStudentAndCourse(studentId, courseId);
-
-    // 4️⃣ Calculate percentage
-    double percentage = ((double) completedItems / totalItems) * 100;
-    enrollment.setCompletionPercentage(percentage);
-
-    // 5️⃣ Save update
-    enrollmentRepo.save(enrollment);
-
-    return true;
-}
 
     @Override
     public boolean courseCompletion(Long enrollmentId) {
-    
-        Enrollment enrollment = enrollmentRepo.findById(enrollmentId)
-                .orElseThrow(() ->
-                new ResourceNotFoundException("Enrollment not found with id: " + enrollmentId));
-        
-                if (enrollment.getCompletionPercentage() < 100){
-                    throw new ResourceNotFoundException("Complete 100% of the course to get the certificate");
-                }
-        
-                if (enrollment.getMarks() < 50) {
-                    throw new ResourceNotFoundException("Pass the Exam to get the certificate");
-                }
 
-                enrollment.setStatus(EnrollmentStatus.COMPLETED);
-                enrollmentRepo.save(enrollment);
-                return true;
-       
+        Enrollment enrollment = enrollmentRepo.findById(enrollmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + enrollmentId));
+
+        if (enrollment.getCompletionPercentage() < 100) {
+            throw new ResourceNotFoundException("Complete 100% of the course to get the certificate");
+        }
+
+        if (enrollment.getMarks() < 50) {
+            throw new ResourceNotFoundException("Pass the Exam to get the certificate");
+        }
+
+        enrollment.setStatus(EnrollmentStatus.COMPLETED);
+        enrollmentRepo.save(enrollment);
+
+        return true;
+
     }
 
 }

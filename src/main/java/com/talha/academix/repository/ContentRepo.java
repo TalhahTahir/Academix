@@ -9,4 +9,8 @@ import com.talha.academix.model.Content;
 public interface ContentRepo extends JpaRepository<Content, Long> {
 
     public List<Content> findByCourseID(Long courseId);
+
+    public Long findCourseIdByContentId(Long contentId);
+
+
 }

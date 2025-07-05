@@ -15,9 +15,11 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 
+import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.enums.EnrollmentStatus;
 import com.talha.academix.repository.EnrollmentRepo;
 import com.talha.academix.repository.ExamRepo;
+import com.talha.academix.services.ActivityLogService;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class CertificateServiceImpl implements CertificateService {
     private final EnrollmentRepo enrollmentRepo;
     private final ExamRepo examRepo;
     private final ModelMapper modelMapper;
+    private final ActivityLogService activityLogService;
 
     @Override
     public CertificateDTO addCertificate(CertificateDTO dto) {
@@ -100,6 +103,13 @@ public class CertificateServiceImpl implements CertificateService {
     certificate.setDate(new Date());
 
     certificate = certificateRepo.save(certificate);
+
+        // log activity
+    activityLogService.logAction(
+        certificate.getStudentId(),
+        ActivityAction.CERTIFICATE_AWARDED,
+        "Student " + certificate.getStudentId() + " enrolled in Course " + certificate.getCourseId()
+    );
 
     return modelMapper.map(certificate, CertificateDTO.class);
         

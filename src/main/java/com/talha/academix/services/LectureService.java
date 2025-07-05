@@ -9,4 +9,7 @@ public interface LectureService {
     LectureDTO getLectureById(Long lectureId);
     List<LectureDTO> getLecturesByContent(Long contentId);
     void deleteLecture(Long lectureId);
+
+    LectureDTO uploadLeatureByTeacher(Long teacherId, LectureDTO lectureDTO);
+    void deleteLectureByTeacher(Long teacherId, Long lectureId);
 }

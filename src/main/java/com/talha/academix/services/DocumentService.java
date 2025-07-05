@@ -11,6 +11,5 @@ public interface DocumentService {
     void deleteDocument(Long documentId);
 
     DocumentDTO addDocByTeacher(Long teacherId, DocumentDTO dto);
-    DocumentDTO updateDocByTeacher(Long teacherId, Long id, DocumentDTO dto);
     void deleteDocByTeacher(Long teacherId, Long id);
 }

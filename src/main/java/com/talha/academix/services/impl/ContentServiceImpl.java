@@ -3,7 +3,9 @@ package com.talha.academix.services.impl;
 import com.talha.academix.dto.ContentDTO;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Content;
+import com.talha.academix.model.Course;
 import com.talha.academix.repository.ContentRepo;
+import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.services.ContentService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -18,6 +20,8 @@ public class ContentServiceImpl implements ContentService {
     private final ContentRepo contentRepo;
     private final ModelMapper modelMapper;
 
+    private final CourseRepo courseRepo;
+
     @Override
     public ContentDTO addContent(ContentDTO dto) {
         Content content = modelMapper.map(dto, Content.class);
@@ -28,7 +32,7 @@ public class ContentServiceImpl implements ContentService {
     @Override
     public ContentDTO updateContent(Long contentId, ContentDTO dto) {
         Content existing = contentRepo.findById(contentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Content not found with id: " + contentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found with id: " + contentId));
         // update fields
         existing.setDescription(dto.getDescription());
         existing.setImage(dto.getImage());
@@ -40,7 +44,7 @@ public class ContentServiceImpl implements ContentService {
     @Override
     public ContentDTO getContentById(Long contentId) {
         Content content = contentRepo.findById(contentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Content not found with id: " + contentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found with id: " + contentId));
         return modelMapper.map(content, ContentDTO.class);
     }
 
@@ -55,7 +59,17 @@ public class ContentServiceImpl implements ContentService {
     @Override
     public void deleteContent(Long contentId) {
         Content content = contentRepo.findById(contentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Content not found with id: " + contentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found with id: " + contentId));
         contentRepo.delete(content);
+    }
+
+    @Override
+    public boolean verifyTeacher(Long teacherId, Long courseId) {
+        Course course = courseRepo.verifyTeacher(teacherId, courseId);
+        if (course != null) {
+            return true;
+        } else
+            return false;
+
     }
 }

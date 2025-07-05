@@ -10,4 +10,6 @@ public interface ContentService {
     ContentDTO getContentById(Long contentId);
     List<ContentDTO> getContentByCourse(Long courseId);
     void deleteContent(Long contentId);
+
+    boolean verifyTeacher(Long teacherid, Long courseid);
 }
