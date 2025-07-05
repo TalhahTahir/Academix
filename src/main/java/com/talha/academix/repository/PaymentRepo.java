@@ -1,18 +1,15 @@
 package com.talha.academix.repository;
 
-import java.util.List;
-
+import com.talha.academix.model.Payment;
+import com.talha.academix.model.User;
+import com.talha.academix.model.Course;
+import com.talha.academix.enums.PaymentType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.talha.academix.enums.PaymentType;
-import com.talha.academix.model.Payment;
+import java.util.List;
 
 public interface PaymentRepo extends JpaRepository<Payment, Long> {
-
-    public List<Payment> findByUser(Long userId);
-
-    public List<Payment> findByCourse(Long courseId);
-
-    public List<Payment> findByType(PaymentType paymentype);
-    
+    List<Payment> findByUser(User user);
+    List<Payment> findByCourse(Course course);
+    List<Payment> findByPaymentType(PaymentType type);
 }

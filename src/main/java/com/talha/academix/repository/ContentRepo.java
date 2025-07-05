@@ -1,16 +1,11 @@
 package com.talha.academix.repository;
 
-import java.util.List;
-
+import com.talha.academix.model.Content;
+import com.talha.academix.model.Course;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.talha.academix.model.Content;
+import java.util.List;
 
 public interface ContentRepo extends JpaRepository<Content, Long> {
-
-    public List<Content> findByCourseID(Long courseId);
-
-    public Long findCourseIdByContentId(Long contentId);
-
-
+    List<Content> findByCourse(Course course);
 }

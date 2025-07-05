@@ -1,17 +1,17 @@
 package com.talha.academix.repository;
 
+import com.talha.academix.model.Enrollment;
+import com.talha.academix.model.User;
+import com.talha.academix.model.Course;
+import com.talha.academix.enums.EnrollmentStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.talha.academix.model.Enrollment;
-
-public interface EnrollmentRepo extends JpaRepository<Enrollment, Long>{
-
-    List<Enrollment> findByStudentId(Long studentId);
-    List<Enrollment> findByCourseId(Long courseId);
-
-    public boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
-
-    public Enrollment findByStudentIDAndCourseID(Long studentId, Long courseId);
+public interface EnrollmentRepo extends JpaRepository<Enrollment, Long> {
+    Optional<Enrollment> findByStudentAndCourse(User student, Course course);
+    boolean existsByStudentAndCourse(User student, Course course);
+    List<Enrollment> findByStudent(User student);
+    List<Enrollment> findByCourse(Course course);
+    List<Enrollment> findByStatus(EnrollmentStatus status);
 }

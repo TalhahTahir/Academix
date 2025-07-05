@@ -2,6 +2,8 @@ package com.talha.academix.model;
 
 import java.util.Date;
 
+import com.talha.academix.enums.RequestStatus;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -23,11 +25,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "teaching_request")
 public class TeachingRequest {
-    public enum Status {
-        PENDING,
-        APPROVED,
-        REJECTED
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +39,7 @@ public class TeachingRequest {
     private Course course;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private RequestStatus status;
 
     private Date date;
 }

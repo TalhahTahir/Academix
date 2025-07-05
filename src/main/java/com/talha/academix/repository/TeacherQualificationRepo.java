@@ -1,15 +1,13 @@
 package com.talha.academix.repository;
 
-import java.util.List;
-
+import com.talha.academix.model.TeacherQualification;
+import com.talha.academix.model.User;
+import com.talha.academix.enums.Degree;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.talha.academix.enums.Degree;
-import com.talha.academix.model.TeacherQualification;
+import java.util.List;
 
 public interface TeacherQualificationRepo extends JpaRepository<TeacherQualification, Long> {
-
+    List<TeacherQualification> findByTeacher(User teacher);
     List<TeacherQualification> findByDegree(Degree degree);
-
-    public List<TeacherQualification> findByTeacherID(Long teacherId);
 }
