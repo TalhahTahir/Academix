@@ -20,13 +20,15 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long paymentID;
 
-    @NotNull
-    private Long userID;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="User_id", nullable= false)
+    private User user;
 
-    @NotNull
-    private Long courseID;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="Course_id", nullable= false)
+    private Course course;
 
-    @NotNull
+    @NotNull    
     private Integer amount;
 
     @Enumerated(EnumType.STRING)

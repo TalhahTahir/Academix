@@ -15,11 +15,13 @@ public class StudentContentProgress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
 
-    private Long studentId; // userId of student
-    private Long courseId;  // redundancy to ease queries
-
-    private Long contentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "content_id", nullable = false)
+    private Content content;
     
     @Enumerated(EnumType.STRING)
     private ProgressStatus status; // COMPLETED or IN_PROGRESS

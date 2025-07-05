@@ -17,7 +17,8 @@ public class ActivityLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;  // Nullable if it's a system event
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="user_id", nullable=false)
 
     @Enumerated(EnumType.STRING)
     private ActivityAction action;

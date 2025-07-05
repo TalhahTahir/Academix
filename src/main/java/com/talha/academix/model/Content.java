@@ -1,11 +1,8 @@
 package com.talha.academix.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotEmpty;
+import java.util.List;
+
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,8 +16,19 @@ public class Content {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long contentID;
-    @NotEmpty
-    private Long courseID;
+
+    @ManyToOne(fetch= FetchType.LAZY)
+    @JoinColumn(name="course_id", nullable=false)
+    private Course course;
+
     private String description;
+
     private String image;
+
+    @OneToMany(mappedBy="content", cascade=CascadeType.ALL, orphanRemoval=true)
+    private List<Lecture> lectures;
+
+    @OneToMany(mappedBy="content", cascade=CascadeType.ALL, orphanRemoval=true)
+    private List<Document> documents;
+
 }
