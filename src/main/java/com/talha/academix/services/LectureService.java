@@ -1,7 +1,8 @@
 package com.talha.academix.services;
 
-import com.talha.academix.dto.LectureDTO;
 import java.util.List;
+
+import com.talha.academix.dto.LectureDTO;
 
 public interface LectureService {
     LectureDTO addLecture(LectureDTO dto);
@@ -9,7 +10,4 @@ public interface LectureService {
     LectureDTO getLectureById(Long lectureId);
     List<LectureDTO> getLecturesByContent(Long contentId);
     void deleteLecture(Long lectureId);
-
-    LectureDTO uploadLeatureByTeacher(Long teacherId, LectureDTO lectureDTO);
-    void deleteLectureByTeacher(Long teacherId, Long lectureId);
 }

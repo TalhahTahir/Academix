@@ -7,8 +7,8 @@ import com.talha.academix.dto.UserDTO;
 
 public interface UserService {
     UserDTO createUser(CreateUserDTO dto);
-    UserDTO getUserById(Long id);
+    UserDTO getUserById(Long userId);
     List<UserDTO> getAllUsers();
-    void deleteUser(Long id);
-    UserDTO updateUser(Long id, CreateUserDTO dto);
+    UserDTO updateUser(Long userId, CreateUserDTO dto);
+    void deleteUser(Long userId);
 }

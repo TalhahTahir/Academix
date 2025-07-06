@@ -1,7 +1,8 @@
 package com.talha.academix.services;
 
-import com.talha.academix.dto.DocumentDTO;
 import java.util.List;
+
+import com.talha.academix.dto.DocumentDTO;
 
 public interface DocumentService {
     DocumentDTO addDocument(DocumentDTO dto);
@@ -9,7 +10,4 @@ public interface DocumentService {
     DocumentDTO getDocumentById(Long documentId);
     List<DocumentDTO> getDocumentsByContent(Long contentId);
     void deleteDocument(Long documentId);
-
-    DocumentDTO addDocByTeacher(Long teacherId, DocumentDTO dto);
-    void deleteDocByTeacher(Long teacherId, Long id);
 }

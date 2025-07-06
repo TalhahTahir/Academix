@@ -1,14 +1,12 @@
 package com.talha.academix.services;
 
-import com.talha.academix.dto.CertificateDTO;
 import java.util.List;
 
+import com.talha.academix.dto.CertificateDTO;
+
 public interface CertificateService {
-    CertificateDTO awardCertificate(CertificateDTO dto);
-    CertificateDTO addCertificate(CertificateDTO dto);
-    CertificateDTO updateCertificate(Long certificateId, CertificateDTO dto);
-    CertificateDTO getCertificateById(Long certificateId);
+    CertificateDTO awardCertificate(Long enrollmentId);
     List<CertificateDTO> getCertificatesByStudent(Long studentId);
-    List<CertificateDTO> getCertificatesByCourse(Long courseId);
-    void deleteCertificate(Long certificateId);
+    CertificateDTO getCertificateById(Long certificateId);
+    void revokeCertificate(Long certificateId);
 }
