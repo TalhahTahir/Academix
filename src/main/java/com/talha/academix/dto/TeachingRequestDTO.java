@@ -1,12 +1,13 @@
 package com.talha.academix.dto;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
 import java.util.Date;
 
-import com.talha.academix.model.TeachingRequest.Status;
+import com.talha.academix.enums.RequestStatus;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 
 @Data
 @NoArgsConstructor
@@ -15,6 +16,6 @@ public class TeachingRequestDTO {
     private Long requestId;
     private Long teacherId;
     private Long courseId;
-    private Status status;
+    private RequestStatus status;
     private Date date;
 }

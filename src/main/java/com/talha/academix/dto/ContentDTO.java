@@ -1,8 +1,8 @@
 package com.talha.academix.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -12,4 +12,5 @@ public class ContentDTO {
     private Long courseID;
     private String description;
     private String image;
+    // Collections like lectures and documents are omitted
 }

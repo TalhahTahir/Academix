@@ -1,10 +1,10 @@
 package com.talha.academix.dto;
 
+import java.util.Date;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
-import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -12,8 +12,8 @@ import java.util.Date;
 public class CertificateDTO {
     private Long certificateId;
     private Long studentId;
-    private Long courseId;
     private Long teacherId;
+    private Long courseId;
     private float marks;
     private Date date;
 }

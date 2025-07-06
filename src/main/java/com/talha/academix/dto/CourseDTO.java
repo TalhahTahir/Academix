@@ -2,9 +2,9 @@ package com.talha.academix.dto;
 
 import com.talha.academix.enums.CourseCatagory;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -16,6 +16,5 @@ public class CourseDTO {
     private Integer fees;
     private CourseCatagory catagory;
     private Long teacherid;
-    private Long examid;
-    private Long contentid;
+    // Representing collections by IDs or omitted
 }
