@@ -1,10 +1,17 @@
+// TeachingRequestServiceImpl.java
 package com.talha.academix.services.impl;
 
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
 import com.talha.academix.dto.TeachingRequestDTO;
-import com.talha.academix.enums.Role;
+import com.talha.academix.enums.RequestStatus;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.model.Course;
 import com.talha.academix.model.TeachingRequest;
-import com.talha.academix.model.TeachingRequest.Status;
+import com.talha.academix.model.User;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.TeachingRequestRepo;
 import com.talha.academix.repository.UserRepo;
@@ -12,96 +19,71 @@ import com.talha.academix.services.TeachingRequestService;
 
 import lombok.RequiredArgsConstructor;
 
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-import com.talha.academix.exception.AlreadyEnrolledException;
-import com.talha.academix.exception.RoleMismatchException;
-import com.talha.academix.model.Course;
-import com.talha.academix.model.User;
-
 @Service
 @RequiredArgsConstructor
 public class TeachingRequestServiceImpl implements TeachingRequestService {
-
     private final TeachingRequestRepo requestRepo;
     private final UserRepo userRepo;
     private final CourseRepo courseRepo;
-    private final ModelMapper modelMapper;
+    private final ModelMapper mapper;
 
     @Override
-    public TeachingRequestDTO createRequest(TeachingRequestDTO dto) {
-
-        Long userId = dto.getTeacherId();
-        User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        if (!Role.TEACHER.equals(user.getRole())) {
-            throw new RoleMismatchException("User is not a teacher");
-        }
-
-        Long courseId = dto.getCourseId();
+    public TeachingRequestDTO submitRequest(Long teacherId, Long courseId) {
+        User teacher = userRepo.findById(teacherId)
+            .orElseThrow(() -> new ResourceNotFoundException("Teacher not found: " + teacherId));
         Course course = courseRepo.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
-        if (course.getTeacherid() != null) {
-            throw new AlreadyEnrolledException("This Course has a teacher");
-        }
-
-        TeachingRequest request = modelMapper.map(dto, TeachingRequest.class);
-        request = requestRepo.save(request);
-        return modelMapper.map(request, TeachingRequestDTO.class);
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
+        TeachingRequest req = new TeachingRequest();
+        req.setTeacher(teacher);
+        req.setCourse(course);
+        req.setStatus(RequestStatus.PENDING);
+        req = requestRepo.save(req);
+        return mapper.map(req, TeachingRequestDTO.class);
     }
 
     @Override
-    public TeachingRequestDTO updateRequestStatus(Long requestId, Status status) {
-        TeachingRequest existing = requestRepo.findById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Request not found with id: " + requestId));
-        existing.setStatus(status);
-        requestRepo.save(existing);
-        if (Status.APPROVED.equals(status)) {
-            Course course = courseRepo.findById(existing.getCourseId()).orElseThrow(
-                    () -> new ResourceNotFoundException("Course not found with id: " + existing.getCourseId()));
-            course.setTeacherid(existing.getTeacherId());
+    public TeachingRequestDTO processRequest(Long requestId, RequestStatus status) {
+        TeachingRequest req = requestRepo.findById(requestId)
+            .orElseThrow(() -> new ResourceNotFoundException("Request not found: " + requestId));
+        req.setStatus(status);
+        if (status == RequestStatus.APPROVED) {
+            Course course = req.getCourse();
+            course.setTeacher(req.getTeacher());
             courseRepo.save(course);
         }
-        return modelMapper.map(existing, TeachingRequestDTO.class);
-    }
-
-    @Override
-    public TeachingRequestDTO getRequestById(Long requestId) {
-        TeachingRequest request = requestRepo.findById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Request not found with id: " + requestId));
-        return modelMapper.map(request, TeachingRequestDTO.class);
+        req = requestRepo.save(req);
+        return mapper.map(req, TeachingRequestDTO.class);
     }
 
     @Override
     public List<TeachingRequestDTO> getRequestsByTeacher(Long teacherId) {
-        List<TeachingRequest> requests = requestRepo.findByTeacherId(teacherId);
-        return requests.stream()
-                .map(r -> modelMapper.map(r, TeachingRequestDTO.class))
-                .toList();
+        User teacher = userRepo.findById(teacherId)
+            .orElseThrow(() -> new ResourceNotFoundException("Teacher not found: " + teacherId));
+        return requestRepo.findByTeacher(teacher).stream()
+            .map(r -> mapper.map(r, TeachingRequestDTO.class))
+            .toList();
     }
 
     @Override
     public List<TeachingRequestDTO> getRequestsByCourse(Long courseId) {
-        List<TeachingRequest> requests = requestRepo.findByCourseId(courseId);
-        return requests.stream()
-                .map(r -> modelMapper.map(r, TeachingRequestDTO.class))
-                .toList();
+        Course course = courseRepo.findById(courseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
+        return requestRepo.findByCourse(course).stream()
+            .map(r -> mapper.map(r, TeachingRequestDTO.class))
+            .toList();
+    }
+
+    @Override
+    public List<TeachingRequestDTO> getRequestsByStatus(RequestStatus status) {
+        return requestRepo.findByStatus(status).stream()
+            .map(r -> mapper.map(r, TeachingRequestDTO.class))
+            .toList();
     }
 
     @Override
     public void deleteRequest(Long requestId) {
-        TeachingRequest request = requestRepo.findById(requestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Request not found with id: " + requestId));
-        requestRepo.delete(request);
-    }
-
-    @Override
-    public List<TeachingRequestDTO> getAllRequests() {
-        List<TeachingRequest> requests = requestRepo.findAll();
-        return requests.stream()
-                .map(r -> modelMapper.map(r, TeachingRequestDTO.class))
-                .toList();
+        TeachingRequest req = requestRepo.findById(requestId)
+            .orElseThrow(() -> new ResourceNotFoundException("Request not found: " + requestId));
+        requestRepo.delete(req);
     }
 }

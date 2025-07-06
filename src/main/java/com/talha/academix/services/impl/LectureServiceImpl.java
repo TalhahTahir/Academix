@@ -1,100 +1,83 @@
+// LectureServiceImpl.java
 package com.talha.academix.services.impl;
 
-import com.talha.academix.dto.LectureDTO;
-import com.talha.academix.enums.ActivityAction;
-import com.talha.academix.exception.ForbiddenException;
-import com.talha.academix.exception.ResourceNotFoundException;
-import com.talha.academix.model.Lecture;
-import com.talha.academix.repository.LectureRepo;
-import com.talha.academix.services.LectureService;
-
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
+import com.talha.academix.dto.LectureDTO;
+import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.model.Content;
+import com.talha.academix.model.Lecture;
 import com.talha.academix.repository.ContentRepo;
-import com.talha.academix.services.ActivityLogService;
-import com.talha.academix.services.ContentService;
+import com.talha.academix.repository.LectureRepo;
+import com.talha.academix.services.LectureService;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class LectureServiceImpl implements LectureService {
 
     private final LectureRepo lectureRepo;
-    private final ModelMapper modelMapper;
     private final ContentRepo contentRepo;
-    private final ContentService contentService;
-    private final ActivityLogService activityLogService;
+    private final ModelMapper mapper;
 
     @Override
     public LectureDTO addLecture(LectureDTO dto) {
-        Lecture lecture = modelMapper.map(dto, Lecture.class);
+        Content content = contentRepo.findById(dto.getContentId())
+            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
+
+        Lecture lecture = new Lecture();
+        lecture.setContent(content);
+        lecture.setTitle(dto.getTitle());
+        lecture.setVideoUrl(dto.getVideoUrl());
+        lecture.setDuration(dto.getDuration());
         lecture = lectureRepo.save(lecture);
-        return modelMapper.map(lecture, LectureDTO.class);
+
+        return mapper.map(lecture, LectureDTO.class);
     }
 
     @Override
     public LectureDTO updateLecture(Long lectureId, LectureDTO dto) {
         Lecture existing = lectureRepo.findById(lectureId)
-                .orElseThrow(() -> new ResourceNotFoundException("Lecture not found with id: " + lectureId));
+            .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
+
+        // if contentId changed, reassign content
+        if (!existing.getContent().getContentID().equals(dto.getContentId())) {
+            Content content = contentRepo.findById(dto.getContentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
+            existing.setContent(content);
+        }
         existing.setTitle(dto.getTitle());
         existing.setVideoUrl(dto.getVideoUrl());
         existing.setDuration(dto.getDuration());
-        existing.setContentId(dto.getContentId());
         existing = lectureRepo.save(existing);
-        return modelMapper.map(existing, LectureDTO.class);
+
+        return mapper.map(existing, LectureDTO.class);
     }
 
     @Override
     public LectureDTO getLectureById(Long lectureId) {
         Lecture lecture = lectureRepo.findById(lectureId)
-                .orElseThrow(() -> new ResourceNotFoundException("Lecture not found with id: " + lectureId));
-        return modelMapper.map(lecture, LectureDTO.class);
+            .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
+        return mapper.map(lecture, LectureDTO.class);
     }
 
     @Override
     public List<LectureDTO> getLecturesByContent(Long contentId) {
-        List<Lecture> lectures = lectureRepo.findByContentID(contentId);
-        return lectures.stream()
-                .map(l -> modelMapper.map(l, LectureDTO.class))
-                .toList();
+        Content content = contentRepo.findById(contentId)
+            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
+        return lectureRepo.findByContent(content).stream()
+            .map(l -> mapper.map(l, LectureDTO.class))
+            .toList();
     }
 
     @Override
     public void deleteLecture(Long lectureId) {
         Lecture lecture = lectureRepo.findById(lectureId)
-                .orElseThrow(() -> new ResourceNotFoundException("Lecture not found with id: " + lectureId));
+            .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
         lectureRepo.delete(lecture);
     }
-
-    @Override
-    public LectureDTO uploadLeatureByTeacher(Long teacherId, LectureDTO dto) {
-        Long contentId = dto.getContentId();
-        Long courseId = contentRepo.findCourseIdByContentId(contentId);
-
-        if (contentService.verifyTeacher(teacherId, courseId)) {
-
-            activityLogService.logAction(teacherId,
-             ActivityAction.CONTENT_UPLOAD,
-             "Upload lecture by teacher " + teacherId + " for course " + courseId);
-
-            return addLecture(dto);
-
-        } else
-            throw new ForbiddenException("Teacher is not authorized to upload lecture");
-    }
-
-    @Override
-    public void deleteLectureByTeacher(Long teacherId, Long lectureId) {
-        Long contentId = getLectureById(lectureId).getContentId();
-        Long courseId = contentRepo.findCourseIdByContentId(contentId);
-        if (contentService.verifyTeacher(teacherId, courseId)) {
-            deleteLecture(lectureId);
-        } else
-            throw new ForbiddenException("Teacher is not authorized to delete lecture");
-    }
-
 }

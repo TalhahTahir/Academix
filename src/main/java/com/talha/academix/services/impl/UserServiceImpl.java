@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.CreateUserDTO;
 import com.talha.academix.dto.UserDTO;
-import com.talha.academix.enums.Role;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.User;
 import com.talha.academix.repository.UserRepo;
@@ -20,29 +19,27 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
-    private final ModelMapper modelMapper;
+    private final ModelMapper mapper;
 
     @Override
     public UserDTO createUser(CreateUserDTO dto) {
-
-        User user = modelMapper.map(dto, User.class);
+        User user = mapper.map(dto, User.class);
         user = userRepo.save(user);
-        UserDTO userDTO = modelMapper.map(user, UserDTO.class);
-        return userDTO;
+        return mapper.map(user, UserDTO.class);
     }
 
     @Override
     public UserDTO getUserById(Long id) {
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + id));
-        return modelMapper.map(user, UserDTO.class);
+        return mapper.map(user, UserDTO.class);
     }
 
     @Override
     public List<UserDTO> getAllUsers() {
         List<User> users = userRepo.findAll();
         return users.stream()
-                .map(user -> modelMapper.map(user, UserDTO.class))
+                .map(user -> mapper.map(user, UserDTO.class))
                 .toList();
     }
 
@@ -62,12 +59,14 @@ public class UserServiceImpl implements UserService {
         user.setGender(dto.getGender());
         user.setPassword(dto.getPassword());
         user.setEmail(dto.getEmail());
-        user.setRole(Role.valueOf(dto.getRole()));
         user.setPhone(dto.getPhone());
         user.setImage(dto.getImage());
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPassword(dto.getPassword());
+        }
 
         User updatedUser = userRepo.save(user);
-        return modelMapper.map(updatedUser, UserDTO.class);
+        return mapper.map(updatedUser, UserDTO.class);
     }
 
 }

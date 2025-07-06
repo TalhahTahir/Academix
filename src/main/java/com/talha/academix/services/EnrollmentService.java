@@ -6,7 +6,9 @@ import com.talha.academix.dto.EnrollmentDTO;
 
 public interface EnrollmentService {
     EnrollmentDTO enrollStudent(Long studentId, Long courseId);
+    EnrollmentDTO createEnrollment(Long studentId, Long courseId);
     List<EnrollmentDTO> getEnrollmentsByStudent(Long studentId);
     List<EnrollmentDTO> getEnrollmentsByCourse(Long courseId);
     void withdrawEnrollment(Long enrollmentId);
+
 }

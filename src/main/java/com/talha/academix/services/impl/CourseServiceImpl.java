@@ -18,22 +18,25 @@ import lombok.RequiredArgsConstructor;
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepo courseRepo;
-    private final ModelMapper modelMapper;
+    private final ModelMapper mapper;
 
     @Override
     public CourseDTO createCourse(CourseDTO dto) {
-        Course course = modelMapper.map(dto, Course.class);
+        Course course = mapper.map(dto, Course.class);
         course = courseRepo.save(course);
-        return modelMapper.map(course, CourseDTO.class);
+        return mapper.map(course, CourseDTO.class);
     }
 
     @Override
-    public CourseDTO updateCourse(Long id, CourseDTO dto) {
-        Course course = courseRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
-        modelMapper.map(dto, Course.class);
-        course = courseRepo.save(course);
-        return modelMapper.map(course, CourseDTO.class);
+    public CourseDTO updateCourse(Long courseId, CourseDTO dto) {
+        Course existing = courseRepo.findById(courseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+        existing.setCoursename(dto.getCoursename());
+        existing.setDuration(dto.getDuration());
+        existing.setFees(dto.getFees());
+        existing.setCatagory(dto.getCatagory());
+        existing = courseRepo.save(existing);
+        return mapper.map(existing, CourseDTO.class);
     }
 
     @Override
@@ -47,14 +50,14 @@ public class CourseServiceImpl implements CourseService {
     public CourseDTO getCourseById(Long id) {
         Course course = courseRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
-        return modelMapper.map(course, CourseDTO.class);
+        return mapper.map(course, CourseDTO.class);
     }
 
     @Override
     public List<CourseDTO> getAllCourses() {
         List<Course> courses = courseRepo.findAll();
         return courses.stream()
-                .map(course -> modelMapper.map(course, CourseDTO.class))
+                .map(course -> mapper.map(course, CourseDTO.class))
                 .toList();
     }
 

@@ -1,71 +1,78 @@
+// TeacherQualificationServiceImpl.java
 package com.talha.academix.services.impl;
+
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.TeacherQualificationDTO;
 import com.talha.academix.enums.Degree;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.TeacherQualification;
+import com.talha.academix.model.User;
 import com.talha.academix.repository.TeacherQualificationRepo;
+import com.talha.academix.repository.UserRepo;
 import com.talha.academix.services.TeacherQualificationService;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class TeacherQualificationServiceImpl implements TeacherQualificationService {
-
-    private final TeacherQualificationRepo qualificationRepo;
-    private Degree degree;
-    private final ModelMapper modelMapper;
+    private final TeacherQualificationRepo qualRepo;
+    private final UserRepo userRepo;
+    private final ModelMapper mapper;
 
     @Override
     public TeacherQualificationDTO addQualification(TeacherQualificationDTO dto) {
-        TeacherQualification qualification = modelMapper.map(dto, TeacherQualification.class);
-        qualification = qualificationRepo.save(qualification);
-        return modelMapper.map(qualification, TeacherQualificationDTO.class);
+        User teacher = userRepo.findById(dto.getTeacherId())
+            .orElseThrow(() -> new ResourceNotFoundException("Teacher not found: " + dto.getTeacherId()));
+        TeacherQualification qual = mapper.map(dto, TeacherQualification.class);
+        qual.setTeacher(teacher);
+        qual = qualRepo.save(qual);
+        return mapper.map(qual, TeacherQualificationDTO.class);
     }
 
     @Override
     public TeacherQualificationDTO updateQualification(Long qualificationId, TeacherQualificationDTO dto) {
-        TeacherQualification existing = qualificationRepo.findById(qualificationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Qualification not found with id: " + qualificationId));
-        existing.setTeacherId(dto.getTeacherId());
-        existing.setDegree(dto.getDegree());
-        existing.setInstitute(dto.getInstitute());
-        existing.setYear(dto.getYear());
-        existing = qualificationRepo.save(existing);
-        return modelMapper.map(existing, TeacherQualificationDTO.class);
+        TeacherQualification qual = qualRepo.findById(qualificationId)
+            .orElseThrow(() -> new ResourceNotFoundException("Qualification not found: " + qualificationId));
+        qual.setDegree(dto.getDegree());
+        qual.setInstitute(dto.getInstitute());
+        qual.setYear(dto.getYear());
+        qual = qualRepo.save(qual);
+        return mapper.map(qual, TeacherQualificationDTO.class);
     }
 
     @Override
     public TeacherQualificationDTO getQualificationById(Long qualificationId) {
-        TeacherQualification qualification = qualificationRepo.findById(qualificationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Qualification not found with id: " + qualificationId));
-        return modelMapper.map(qualification, TeacherQualificationDTO.class);
+        TeacherQualification qual = qualRepo.findById(qualificationId)
+            .orElseThrow(() -> new ResourceNotFoundException("Qualification not found: " + qualificationId));
+        return mapper.map(qual, TeacherQualificationDTO.class);
     }
 
     @Override
     public List<TeacherQualificationDTO> getQualificationsByTeacher(Long teacherId) {
-        List<TeacherQualification> qualifications = qualificationRepo.findByTeacherID(teacherId);
-        return qualifications.stream()
-                .map(q -> modelMapper.map(q, TeacherQualificationDTO.class))
-                .toList();
+        User teacher = userRepo.findById(teacherId)
+            .orElseThrow(() -> new ResourceNotFoundException("Teacher not found: " + teacherId));
+        return qualRepo.findByTeacher(teacher).stream()
+            .map(q -> mapper.map(q, TeacherQualificationDTO.class))
+            .toList();
     }
 
     @Override
     public List<TeacherQualificationDTO> getQualificationsByDegree(Degree degree) {
-        List<TeacherQualification> qualifications = qualificationRepo.findByDegree(degree);
-        return qualifications.stream()
-                .map(q -> modelMapper.map(q, TeacherQualificationDTO.class))
-                .toList();
+        return qualRepo.findByDegree(degree)  // if you convert string to enum earlier
+            .stream()
+            .map(q -> mapper.map(q, TeacherQualificationDTO.class))
+            .toList();
     }
 
     @Override
     public void deleteQualification(Long qualificationId) {
-        TeacherQualification qualification = qualificationRepo.findById(qualificationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Qualification not found with id: " + qualificationId));
-        qualificationRepo.delete(qualification);
+        TeacherQualification qual = qualRepo.findById(qualificationId)
+            .orElseThrow(() -> new ResourceNotFoundException("Qualification not found: " + qualificationId));
+        qualRepo.delete(qual);
     }
 }

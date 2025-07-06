@@ -20,7 +20,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
     @Override
     public void logAction(Long userId, ActivityAction action, String details) {
         ActivityLog log = new ActivityLog();
-        log.setUserId(userId);
+        log.setId(userId);
         log.setAction(action);
         log.setDetails(details);
         log.setCreatedAt(LocalDateTime.now());

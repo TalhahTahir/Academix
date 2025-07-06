@@ -1,4 +1,10 @@
+// ContentServiceImpl.java
 package com.talha.academix.services.impl;
+
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.ContentDTO;
 import com.talha.academix.exception.ResourceNotFoundException;
@@ -7,69 +13,65 @@ import com.talha.academix.model.Course;
 import com.talha.academix.repository.ContentRepo;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.services.ContentService;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class ContentServiceImpl implements ContentService {
 
     private final ContentRepo contentRepo;
-    private final ModelMapper modelMapper;
-
     private final CourseRepo courseRepo;
+    private final ModelMapper mapper;
 
     @Override
     public ContentDTO addContent(ContentDTO dto) {
-        Content content = modelMapper.map(dto, Content.class);
+        Course course = courseRepo.findById(dto.getCourseID())
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + dto.getCourseID()));
+
+        Content content = new Content();
+        content.setCourse(course);
+        content.setDescription(dto.getDescription());
+        content.setImage(dto.getImage());
         content = contentRepo.save(content);
-        return modelMapper.map(content, ContentDTO.class);
+
+        return mapper.map(content, ContentDTO.class);
     }
 
     @Override
     public ContentDTO updateContent(Long contentId, ContentDTO dto) {
         Content existing = contentRepo.findById(contentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Content not found with id: " + contentId));
-        // update fields
+            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
+
+        // only description and image are mutable
         existing.setDescription(dto.getDescription());
         existing.setImage(dto.getImage());
-        existing.setCourseID(dto.getCourseID());
         existing = contentRepo.save(existing);
-        return modelMapper.map(existing, ContentDTO.class);
+
+        return mapper.map(existing, ContentDTO.class);
     }
 
     @Override
     public ContentDTO getContentById(Long contentId) {
         Content content = contentRepo.findById(contentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Content not found with id: " + contentId));
-        return modelMapper.map(content, ContentDTO.class);
+            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
+        return mapper.map(content, ContentDTO.class);
     }
 
     @Override
     public List<ContentDTO> getContentByCourse(Long courseId) {
-        List<Content> contents = contentRepo.findByCourseID(courseId);
-        return contents.stream()
-                .map(c -> modelMapper.map(c, ContentDTO.class))
-                .toList();
+        Course course = courseRepo.findById(courseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
+        List<Content> list = contentRepo.findByCourse(course);
+        return list.stream()
+            .map(c -> mapper.map(c, ContentDTO.class))
+            .toList();
     }
 
     @Override
     public void deleteContent(Long contentId) {
         Content content = contentRepo.findById(contentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Content not found with id: " + contentId));
+            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
         contentRepo.delete(content);
-    }
-
-    @Override
-    public boolean verifyTeacher(Long teacherId, Long courseId) {
-        Course course = courseRepo.verifyTeacher(teacherId, courseId);
-        if (course != null) {
-            return true;
-        } else
-            return false;
-
     }
 }
