@@ -18,6 +18,7 @@ import com.talha.academix.repository.OptionRepo;
 import com.talha.academix.repository.QuestionRepo;
 import com.talha.academix.services.AttemptAnswerService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -31,22 +32,34 @@ public class AttemptAnswerServiceImpl implements AttemptAnswerService {
     private final ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public AttemptAnswerDTO submitAnswer(Long attemptId, Long questionId, Long selectedOptionId) {
         Attempt attempt = attemptRepo.findById(attemptId)
             .orElseThrow(() -> new ResourceNotFoundException("Attempt not found with id: " + attemptId));
+    
         Question question = questionRepo.findById(questionId)
             .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
+    
+        if (!question.getExam().getId().equals(attempt.getExam().getId())) {
+            throw new IllegalArgumentException("This question does not belong to the exam for this attempt.");
+        }
+    
         Option option = optionRepo.findById(selectedOptionId)
             .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + selectedOptionId));
-
+    
+        if (!option.getQuestion().getId().equals(questionId)) {
+            throw new IllegalArgumentException("This option does not belong to the provided question.");
+        }
+    
         AttemptAnswer answer = new AttemptAnswer();
         answer.setAttempt(attempt);
         answer.setQuestion(question);
         answer.setSelectedOption(option);
         answer = attemptAnswerRepo.save(answer);
-
+    
         return modelMapper.map(answer, AttemptAnswerDTO.class);
     }
+    
 
     @Override
     public List<AttemptAnswerDTO> getAnswersByAttempt(Long attemptId) {
@@ -56,15 +69,5 @@ public class AttemptAnswerServiceImpl implements AttemptAnswerService {
             .collect(Collectors.toList());
     }
 
-    @Override
-    public AttemptAnswerDTO addAnswer(Long attemptId, AttemptAnswerDTO dto) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addAnswer'");
-    }
 
-    @Override
-    public void deleteAnswer(Long answerId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteAnswer'");
-    }
 }

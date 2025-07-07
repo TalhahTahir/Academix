@@ -5,9 +5,6 @@ import java.util.List;
 import com.talha.academix.dto.AttemptAnswerDTO;
 
 public interface AttemptAnswerService {
-    AttemptAnswerDTO addAnswer(Long attemptId, AttemptAnswerDTO dto);
     List<AttemptAnswerDTO> getAnswersByAttempt(Long attemptId);
-    void deleteAnswer(Long answerId);
-
     public AttemptAnswerDTO submitAnswer(Long attemptId, Long questionId, Long selectedOptionId);
 }

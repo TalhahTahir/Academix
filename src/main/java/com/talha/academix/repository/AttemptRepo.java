@@ -9,5 +9,7 @@ import com.talha.academix.model.Attempt;
 public interface AttemptRepo extends JpaRepository<Attempt, Long>{
 
     List<Attempt> findByStudentId(Long studentId);
+
+    public List<Attempt> findByExamId(Long examId);
     
 }

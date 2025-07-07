@@ -8,5 +8,4 @@ public interface CertificateService {
     CertificateDTO awardCertificate(Long enrollmentId);
     List<CertificateDTO> getCertificatesByStudent(Long studentId);
     CertificateDTO getCertificateById(Long certificateId);
-    void revokeCertificate(Long certificateId);
 }

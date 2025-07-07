@@ -27,14 +27,22 @@ public class OptionServiceImpl implements OptionService {
     @Override
     public OptionDTO addOption(Long questionId, OptionDTO dto) {
         Question question = questionRepo.findById(questionId)
-            .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
+    
+        if (dto.isCorrect()) {
+            long count = optionRepo.countByQuestionIdAndIsCorrectTrue(questionId);
+            if (count > 0) {
+                throw new IllegalArgumentException("Only one option can be marked as correct per question.");
+            }
+        }
+    
         Option option = modelMapper.map(dto, Option.class);
         option.setQuestion(question);
         option = optionRepo.save(option);
-
+    
         return modelMapper.map(option, OptionDTO.class);
     }
+    
 
     @Override
     public List<OptionDTO> getOptionsByQuestion(Long questionId) {

@@ -5,7 +5,6 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import com.talha.academix.dto.CourseDTO;
 import com.talha.academix.dto.ExamDTO;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
@@ -26,20 +25,31 @@ public class ExamServiceImpl implements ExamService {
     private final ModelMapper modelMapper;
 
     @Override
-    public ExamDTO addExam(ExamDTO dto) {
-        Exam exam = modelMapper.map(dto, Exam.class);
-        exam = examRepo.save(exam);
-        return modelMapper.map(exam, ExamDTO.class);
-        }
+    public ExamDTO createExam(Long teacherId, ExamDTO dto) {
 
-     @Override
+       Course course = courseRepo.findById(dto.getCourseId())
+       .orElseThrow(()-> new ResourceNotFoundException("Course not found with id: " + dto.getCourseId()));
+
+       if(!course.getTeacher().equals(teacherId)){
+           throw new RoleMismatchException("Unauthorized Teacher");
+       }
+
+       Exam exam = modelMapper.map(dto, Exam.class);
+       exam.setCourse(course);
+       exam = examRepo.save(exam);
+
+       return modelMapper.map(exam, ExamDTO.class);
+    }
+
+    @Override
     public ExamDTO updateExam(Long examId, ExamDTO dto) {
-       Exam existing = examRepo.findById(examId)
-       .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id " + examId));
-       existing.setCourseId(dto.getCourseId());
-       existing.setQuestions(dto.getQuestions());
-       existing = examRepo.save(existing);
-       return modelMapper.map(existing, ExamDTO.class);
+        Exam existing = examRepo.findById(examId)
+            .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
+
+        existing.setTitle(dto.getTitle());
+        examRepo.save(existing);
+
+        return modelMapper.map(existing, ExamDTO.class);
     }
 
     @Override
@@ -62,39 +72,5 @@ public class ExamServiceImpl implements ExamService {
         Exam exam = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
         examRepo.delete(exam);
-    }
-
-
-
-    @Override
-    public void deleteExamByTeacher(Long teacherId, Long examId) {
-        
-        Long courseId = courseRepo.findContentIdByExamId(examId);
-        TeacherAuth(teacherId, courseId);
-
-        Exam exam = examRepo.findById(examId)
-                .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
-        examRepo.delete(exam);
-    }
-
-     public boolean TeacherAuth(Long teacherId, Long contentId) {
-        Course course = courseRepo.findByContentID(contentId);
-        if (course.getTeacherid() != teacherId) {
-            throw new RoleMismatchException("Unauthorized Teacher");
-        }
-        return true;
-    }
-
-     @Override
-     public ExamDTO createExamByTeacher(Long teacherId, ExamDTO dto) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createExamByTeacher'");
-     }
-
-     @Override
-     public ExamDTO updateExamByTeacher(Long teacherId, Long examId, ExamDTO dto) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateExamByTeacher'");
-     }
-    
+    }    
 }

@@ -1,11 +1,14 @@
 package com.talha.academix.repository;
 
-import com.talha.academix.model.Exam;
-import com.talha.academix.model.Course;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+import com.talha.academix.model.Course;
+import com.talha.academix.model.Exam;
 
 public interface ExamRepo extends JpaRepository<Exam, Long> {
     List<Exam> findByCourse(Course course);
+
+    public List<Exam> findByCourseId(Long courseId);
 }
