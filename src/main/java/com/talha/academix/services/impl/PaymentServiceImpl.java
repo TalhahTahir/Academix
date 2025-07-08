@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.talha.academix.dto.PaymentDTO;
+import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.enums.PaymentType;
 import com.talha.academix.exception.PaymentFailedException;
 import com.talha.academix.exception.ResourceNotFoundException;
@@ -20,6 +21,7 @@ import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.PaymentRepo;
 import com.talha.academix.repository.UserRepo;
 import com.talha.academix.repository.WalletRepo;
+import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.PaymentGatewayService;
 import com.talha.academix.services.PaymentService;
 
@@ -34,6 +36,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final CourseRepo courseRepo;
     private final WalletRepo walletRepo;
     private final PaymentGatewayService gateway;
+    private ActivityLogService activityLogService;
     private final ModelMapper mapper;
 
     @Override
@@ -59,6 +62,12 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setAccount(wallet.getAccount());
         payment.setPaymentType(PaymentType.INCOMING);
         payment.setDate(new Date());
+
+        activityLogService.logAction(
+         userId,
+         ActivityAction.PAYMENT,
+         "User " + userId + " paid " + payment.getAmount() + " for Course " + courseId
+        );
 
         payment = paymentRepo.save(payment);
         return mapper.map(payment, PaymentDTO.class);

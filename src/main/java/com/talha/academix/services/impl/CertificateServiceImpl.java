@@ -7,15 +7,16 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.CertificateDTO;
+import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Certificate;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.Enrollment;
 import com.talha.academix.model.User;
 import com.talha.academix.repository.CertificateRepo;
-import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.EnrollmentRepo;
 import com.talha.academix.repository.UserRepo;
+import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.CertificateService;
 
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class CertificateServiceImpl implements CertificateService {
     private final CertificateRepo certificateRepo;
     private final EnrollmentRepo enrollmentRepo;
     private final UserRepo userRepo;
-    private final CourseRepo courseRepo;
+    private final ActivityLogService activityLogService;
     private final ModelMapper modelMapper;
 
     @Override
@@ -55,6 +56,12 @@ public class CertificateServiceImpl implements CertificateService {
         certificate.setDate(new Date());
 
         certificateRepo.save(certificate);
+
+        activityLogService.logAction(
+                student.getUserid(),
+                ActivityAction.CERTIFICATE_AWARDED,
+                "Certificate " + certificate.getCertificateId() + " awarded to Student " + student.getUserid() +
+                        " for Course " + course.getCourseid());
 
         return modelMapper.map(certificate, CertificateDTO.class);
     }
