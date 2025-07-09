@@ -5,9 +5,9 @@ import java.util.List;
 import com.talha.academix.dto.ContentDTO;
 
 public interface ContentService {
-    ContentDTO addContent(ContentDTO dto);
-    ContentDTO updateContent(Long contentId, ContentDTO dto);
+    ContentDTO addContent(Long userid, ContentDTO dto);
+    ContentDTO updateContent(Long userid, Long contentId, ContentDTO dto);
     ContentDTO getContentById(Long contentId);
     List<ContentDTO> getContentByCourse(Long courseId);
-    void deleteContent(Long contentId);
+    void deleteContent(Long userid, Long contentId);
 }

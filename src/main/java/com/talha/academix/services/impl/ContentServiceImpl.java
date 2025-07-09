@@ -9,12 +9,14 @@ import org.springframework.stereotype.Service;
 import com.talha.academix.dto.ContentDTO;
 import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.model.Content;
 import com.talha.academix.model.Course;
 import com.talha.academix.repository.ContentRepo;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.ContentService;
+import com.talha.academix.services.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,72 +24,88 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ContentServiceImpl implements ContentService {
 
-    private final ContentRepo contentRepo;
-    private final CourseRepo courseRepo;
-    private final ActivityLogService activityLogService;
-    private final ModelMapper mapper;
+        private final ContentRepo contentRepo;
+        private final CourseRepo courseRepo;
+        private final ActivityLogService activityLogService;
+        private final UserService userService;
+        private final ModelMapper mapper;
 
-    @Override
-    public ContentDTO addContent(ContentDTO dto) {
-        Course course = courseRepo.findById(dto.getCourseID())
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + dto.getCourseID()));
+        @Override
+        public ContentDTO addContent(Long userid, ContentDTO dto) {
 
-        Content content = new Content();
-        content.setCourse(course);
-        content.setDescription(dto.getDescription());
-        content.setImage(dto.getImage());
-        content = contentRepo.save(content);
+                if (userService.adminValidation(userid)) {
+                        Course course = courseRepo.findById(dto.getCourseID())
+                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                                        "Course not found: " + dto.getCourseID()));
 
-        // after saving content:
-        activityLogService.logAction(
-                content.getCourse().getTeacher().getUserid(),
-                ActivityAction.CONTENT_UPLOAD,
-                "Content " + content.getContentID() + " uploaded/updated for Course "
-                        + content.getCourse().getCourseid());
+                        Content content = new Content();
+                        content.setCourse(course);
+                        content.setDescription(dto.getDescription());
+                        content.setImage(dto.getImage());
+                        content = contentRepo.save(content);
 
-        return mapper.map(content, ContentDTO.class);
-    }
+                        // after saving content:
+                        activityLogService.logAction(
+                                        content.getCourse().getTeacher().getUserid(),
+                                        ActivityAction.CONTENT_UPLOAD,
+                                        "Content " + content.getContentID() + " uploaded for Course "
+                                                        + content.getCourse().getCoursename());
 
-    @Override
-    public ContentDTO updateContent(Long contentId, ContentDTO dto) {
-        Content existing = contentRepo.findById(contentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
+                        return mapper.map(content, ContentDTO.class);
+                } else
+                        throw new RoleMismatchException("Only Admin can add Content");
+        }
 
-        // only description and image are mutable
-        existing.setDescription(dto.getDescription());
-        existing.setImage(dto.getImage());
-        existing = contentRepo.save(existing);
+        @Override
+        public ContentDTO updateContent(Long userid, Long contentId, ContentDTO dto) {
 
-        // after saving content:
-        activityLogService.logAction(
-             existing.getCourse().getTeacher().getUserid(),
-             ActivityAction.CONTENT_UPLOAD,
-             "Content " + existing.getContentID() + " uploaded/updated for Course " + existing.getCourse().getCourseid());
+                if (userService.adminValidation(userid)) {
+                        Content existing = contentRepo.findById(contentId)
+                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                                        "Content not found: " + contentId));
 
-        return mapper.map(existing, ContentDTO.class);
-    }
+                        // only description and image are mutable
+                        existing.setDescription(dto.getDescription());
+                        existing.setImage(dto.getImage());
+                        existing = contentRepo.save(existing);
 
-    @Override
-    public ContentDTO getContentById(Long contentId) {
-        Content content = contentRepo.findById(contentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
-        return mapper.map(content, ContentDTO.class);
-    }
+                        // after saving content:
+                        activityLogService.logAction(
+                                        existing.getCourse().getTeacher().getUserid(),
+                                        ActivityAction.CONTENT_UPLOAD,
+                                        "Content " + existing.getContentID() + " uploaded/updated for Course "
+                                                        + existing.getCourse().getCourseid());
 
-    @Override
-    public List<ContentDTO> getContentByCourse(Long courseId) {
-        Course course = courseRepo.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
-        List<Content> list = contentRepo.findByCourse(course);
-        return list.stream()
-                .map(c -> mapper.map(c, ContentDTO.class))
-                .toList();
-    }
+                        return mapper.map(existing, ContentDTO.class);
+                } else
+                        throw new RoleMismatchException("Only Admin can update content");
 
-    @Override
-    public void deleteContent(Long contentId) {
-        Content content = contentRepo.findById(contentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
-        contentRepo.delete(content);
-    }
+        }
+
+        @Override
+        public ContentDTO getContentById(Long contentId) {
+                Content content = contentRepo.findById(contentId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
+                return mapper.map(content, ContentDTO.class);
+        }
+
+        @Override
+        public List<ContentDTO> getContentByCourse(Long courseId) {
+                Course course = courseRepo.findById(courseId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
+                List<Content> list = contentRepo.findByCourse(course);
+                return list.stream()
+                                .map(c -> mapper.map(c, ContentDTO.class))
+                                .toList();
+        }
+
+        @Override
+        public void deleteContent(Long userid, Long contentId) {
+                if(userService.adminValidation(userid)){
+                Content content = contentRepo.findById(contentId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
+                contentRepo.delete(content);
+                }
+                else throw new RoleMismatchException("Only Admin can delete content");
+        }
 }

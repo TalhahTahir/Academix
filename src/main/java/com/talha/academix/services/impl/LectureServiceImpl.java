@@ -25,7 +25,7 @@ public class LectureServiceImpl implements LectureService {
     private final ModelMapper mapper;
 
     @Override
-    public LectureDTO addLecture(LectureDTO dto) {
+    public LectureDTO addLecture(Long userid, LectureDTO dto) {
         Content content = contentRepo.findById(dto.getContentId())
             .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
 
@@ -40,7 +40,7 @@ public class LectureServiceImpl implements LectureService {
     }
 
     @Override
-    public LectureDTO updateLecture(Long lectureId, LectureDTO dto) {
+    public LectureDTO updateLecture(Long userid, Long lectureId, LectureDTO dto) {
         Lecture existing = lectureRepo.findById(lectureId)
             .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
 
@@ -75,7 +75,7 @@ public class LectureServiceImpl implements LectureService {
     }
 
     @Override
-    public void deleteLecture(Long lectureId) {
+    public void deleteLecture(Long userid, Long lectureId) {
         Lecture lecture = lectureRepo.findById(lectureId)
             .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
         lectureRepo.delete(lecture);

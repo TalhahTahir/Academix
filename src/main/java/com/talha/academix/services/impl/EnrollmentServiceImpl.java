@@ -96,10 +96,4 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
         enrollmentRepo.delete(enrollment);
     }
-
-    @Override
-    public EnrollmentDTO createEnrollment(Long studentId, Long courseId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createEnrollment'");
-    }
 }
