@@ -8,6 +8,6 @@ public interface ExamService {
     ExamDTO createExam(Long teacherId, ExamDTO dto);
     ExamDTO getExamById(Long examId);
     List<ExamDTO> getExamsByCourse(Long courseId);
-    ExamDTO updateExam(Long examId, ExamDTO dto);
-    void deleteExam(Long examId);
+    ExamDTO updateExam(Long userid, Long examId, ExamDTO dto);
+    void deleteExam(Long userid, Long examId);
 }

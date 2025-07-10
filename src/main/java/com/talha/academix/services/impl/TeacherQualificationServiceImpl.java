@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.TeacherQualificationDTO;
 import com.talha.academix.enums.Degree;
+import com.talha.academix.enums.Role;
+import com.talha.academix.exception.ForbiddenException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.TeacherQualification;
 import com.talha.academix.model.User;
@@ -28,6 +30,9 @@ public class TeacherQualificationServiceImpl implements TeacherQualificationServ
     public TeacherQualificationDTO addQualification(TeacherQualificationDTO dto) {
         User teacher = userRepo.findById(dto.getTeacherId())
             .orElseThrow(() -> new ResourceNotFoundException("Teacher not found: " + dto.getTeacherId()));
+            if(!teacher.getRole().equals(Role.TEACHER)){
+                throw new ForbiddenException("Only teacher can add qualification");
+            }
         TeacherQualification qual = mapper.map(dto, TeacherQualification.class);
         qual.setTeacher(teacher);
         qual = qualRepo.save(qual);

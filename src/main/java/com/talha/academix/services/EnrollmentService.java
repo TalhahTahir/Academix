@@ -9,5 +9,6 @@ public interface EnrollmentService {
     List<EnrollmentDTO> getEnrollmentsByStudent(Long studentId);
     List<EnrollmentDTO> getEnrollmentsByCourse(Long courseId);
     void withdrawEnrollment(Long enrollmentId);
+    EnrollmentDTO enrollmentValidation(Long courseid, Long userid);
 
 }

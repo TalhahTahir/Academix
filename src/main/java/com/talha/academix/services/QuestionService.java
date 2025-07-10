@@ -5,8 +5,8 @@ import java.util.List;
 import com.talha.academix.dto.QuestionDTO;
 
 public interface QuestionService {
-    QuestionDTO addQuestion(Long examId, QuestionDTO dto);
+    QuestionDTO addQuestion(Long userid, Long examId, QuestionDTO dto);
     List<QuestionDTO> getQuestionsByExam(Long examId);
-    QuestionDTO updateQuestion(Long questionId, QuestionDTO dto);
-    void deleteQuestion(Long questionId);
+    QuestionDTO updateQuestion(Long userid, Long questionId, QuestionDTO dto);
+    void deleteQuestion(Long userid, Long questionId);
 }

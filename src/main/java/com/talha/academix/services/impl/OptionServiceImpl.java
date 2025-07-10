@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.OptionDTO;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.model.Option;
 import com.talha.academix.model.Question;
 import com.talha.academix.repository.OptionRepo;
 import com.talha.academix.repository.QuestionRepo;
+import com.talha.academix.services.CourseService;
 import com.talha.academix.services.OptionService;
 
 import lombok.RequiredArgsConstructor;
@@ -22,13 +24,17 @@ public class OptionServiceImpl implements OptionService {
 
     private final OptionRepo optionRepo;
     private final QuestionRepo questionRepo;
+    private final CourseService courseService;
     private final ModelMapper modelMapper;
 
     @Override
-    public OptionDTO addOption(Long questionId, OptionDTO dto) {
+    public OptionDTO addOption(Long userid, Long questionId, OptionDTO dto) {
+
         Question question = questionRepo.findById(questionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
     
+        if(courseService.teacherValidation(userid, question.getExam().getCourse().getCourseid())){
+
         if (dto.isCorrect()) {
             long count = optionRepo.countByQuestionIdAndIsCorrectTrue(questionId);
             if (count > 0) {
@@ -42,6 +48,8 @@ public class OptionServiceImpl implements OptionService {
     
         return modelMapper.map(option, OptionDTO.class);
     }
+    else throw new RoleMismatchException("Only teacher can add options");
+    }
     
 
     @Override
@@ -53,21 +61,29 @@ public class OptionServiceImpl implements OptionService {
     }
 
     @Override
-    public OptionDTO updateOption(Long optionId, OptionDTO dto) {
+    public OptionDTO updateOption(Long userid, Long optionId, OptionDTO dto) {
         Option option = optionRepo.findById(optionId)
             .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + optionId));
         
-        option.setText(dto.getText());
-        option.setCorrect(dto.isCorrect());
-        option = optionRepo.save(option);
-
-        return modelMapper.map(option, OptionDTO.class);
+        if(courseService.teacherValidation(userid, option.getQuestion().getExam().getCourse().getCourseid())){
+            option.setText(dto.getText());
+            option.setCorrect(dto.isCorrect());
+            option = optionRepo.save(option);
+    
+            return modelMapper.map(option, OptionDTO.class);
+        }
+        else throw new RoleMismatchException("Only teacher can update options");
     }
 
     @Override
-    public void deleteOption(Long optionId) {
+    public void deleteOption(Long userid, Long optionId) {
+
         Option option = optionRepo.findById(optionId)
             .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + optionId));
+
+        if(courseService.teacherValidation(userid, option.getQuestion().getExam().getCourse().getCourseid())){
         optionRepo.delete(option);
     }
+    else throw new RoleMismatchException("Only teacher can delete options");
+}
 }

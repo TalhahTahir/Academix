@@ -45,7 +45,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Course course = courseRepo.findById(courseId)
             .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-        if (enrollmentRepo.existsByStudentAndCourse(student, course)) {
+        if (enrollmentValidation(student.getUserid(), course.getCourseid()) != null) {
             throw new AlreadyEnrolledException("Student is already enrolled in this course");
         }
 
@@ -96,4 +96,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
         enrollmentRepo.delete(enrollment);
     }
+
+@Override
+public EnrollmentDTO enrollmentValidation(Long courseid, Long userid){
+    Enrollment enrollment = enrollmentRepo.existsByStudentAndCourse(userid, courseid);
+    return mapper.map(enrollment, EnrollmentDTO.class);
+}
+
 }

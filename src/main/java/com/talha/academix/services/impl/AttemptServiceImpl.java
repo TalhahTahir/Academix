@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.AttemptDTO;
 import com.talha.academix.enums.ActivityAction;
+import com.talha.academix.exception.ForbiddenException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Attempt;
 import com.talha.academix.model.AttemptAnswer;
@@ -20,6 +21,7 @@ import com.talha.academix.repository.EnrollmentRepo;
 import com.talha.academix.repository.ExamRepo;
 import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.AttemptService;
+import com.talha.academix.services.EnrollmentService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,25 +35,29 @@ public class AttemptServiceImpl implements AttemptService {
     private final AttemptAnswerRepo attemptAnswerRepo;
     private final EnrollmentRepo enrollmentRepo;
     private final ActivityLogService activityLogService;
+    private final EnrollmentService enrollmentService;
     private final ModelMapper modelMapper;
 
     @Override
     public AttemptDTO startAttempt(Long examId, Long studentId) {
+        
         Exam exam = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
+                if(enrollmentService.enrollmentValidation(exam.getCourse().getCourseid(), studentId)!=null){
+                    Attempt attempt = new Attempt();
+                    attempt.setExam(exam);
+                    attempt.setStudentId(studentId);
+                    attempt.setStartedAt(LocalDateTime.now());
+                    attempt = attemptRepo.save(attempt);
+            
+                    activityLogService.logAction(
+                            studentId,
+                            ActivityAction.EXAM_ATTEMPT,
+                            "Student " + studentId + " started attempt " + attempt.getId() + " for Exam " + examId);
+            
+                    return modelMapper.map(attempt, AttemptDTO.class);
+                } else throw new ForbiddenException("Student is not enrolled");
 
-        Attempt attempt = new Attempt();
-        attempt.setExam(exam);
-        attempt.setStudentId(studentId);
-        attempt.setStartedAt(LocalDateTime.now());
-        attempt = attemptRepo.save(attempt);
-
-        activityLogService.logAction(
-                studentId,
-                ActivityAction.EXAM_ATTEMPT,
-                "Student " + studentId + " started attempt " + attempt.getId() + " for Exam " + examId);
-
-        return modelMapper.map(attempt, AttemptDTO.class);
     }
 
     @Override
