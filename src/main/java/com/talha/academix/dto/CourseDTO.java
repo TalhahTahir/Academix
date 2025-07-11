@@ -14,6 +14,7 @@ public class CourseDTO {
     private String coursename;
     private String duration;
     private Integer fees;
+    private Integer salary;
     private CourseCatagory catagory;
     private Long teacherid;
     // Representing collections by IDs or omitted

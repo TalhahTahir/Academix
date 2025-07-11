@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.AttemptDTO;
+import com.talha.academix.dto.EnrollmentDTO;
 import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.exception.ForbiddenException;
 import com.talha.academix.exception.ResourceNotFoundException;
@@ -43,7 +44,8 @@ public class AttemptServiceImpl implements AttemptService {
         
         Exam exam = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
-                if(enrollmentService.enrollmentValidation(exam.getCourse().getCourseid(), studentId)!=null){
+                EnrollmentDTO stdEnrollment = enrollmentService.enrollmentValidation(exam.getCourse().getCourseid(), studentId);
+                if(stdEnrollment.getCompletionPercentage() == 100){
                     Attempt attempt = new Attempt();
                     attempt.setExam(exam);
                     attempt.setStudentId(studentId);
@@ -56,7 +58,7 @@ public class AttemptServiceImpl implements AttemptService {
                             "Student " + studentId + " started attempt " + attempt.getId() + " for Exam " + examId);
             
                     return modelMapper.map(attempt, AttemptDTO.class);
-                } else throw new ForbiddenException("Student is not enrolled");
+                } else throw new ForbiddenException("You cannot start an attempt for this exam as your enrollment is not complete.");
 
     }
 

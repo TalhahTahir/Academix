@@ -34,7 +34,10 @@ public class Course {
     private String duration;
     @NotEmpty
     private Integer fees;
-
+    
+    @NotEmpty
+    private Integer salary;
+    
     private CourseCatagory catagory;
 
     @ManyToOne(fetch=FetchType.LAZY)

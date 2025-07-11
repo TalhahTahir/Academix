@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.talha.academix.dto.PaymentDTO;
 import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.enums.PaymentType;
+import com.talha.academix.enums.Role;
 import com.talha.academix.exception.PaymentFailedException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Course;
@@ -43,13 +44,24 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public PaymentDTO processPayment(Long userId, Long courseId) {
         User user = userRepo.findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
         Course course = courseRepo.findById(courseId)
-            .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
         Wallet wallet = walletRepo.findByUser(user)
-            .orElseThrow(() -> new ResourceNotFoundException("Wallet not set up for user: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not set up for user: " + userId));
 
-        boolean approved = gateway.charge(wallet.getMedium(), wallet.getAccount(), course.getFees());
+        Integer amount = 0;
+        PaymentType type = null;
+        if (user.getRole().equals(Role.STUDENT)) {
+            type = PaymentType.INCOMING;
+            amount = course.getFees();
+        } else if (user.getRole().equals(Role.TEACHER)) {
+            type = PaymentType.OUTGOING;
+            amount = course.getSalary();
+        } else {
+            throw new IllegalArgumentException("Invalid user role for payment processing: " + user.getRole());
+        }
+        boolean approved = gateway.charge(wallet.getMedium(), wallet.getAccount(), amount, type);
         if (!approved) {
             throw new PaymentFailedException("External payment declined for user " + userId);
         }
@@ -57,17 +69,16 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = new Payment();
         payment.setUser(user);
         payment.setCourse(course);
-        payment.setAmount(course.getFees());
+        payment.setAmount(amount);
         payment.setMedium(wallet.getMedium());
         payment.setAccount(wallet.getAccount());
-        payment.setPaymentType(PaymentType.INCOMING);
+        payment.setPaymentType(type);
         payment.setDate(new Date());
 
         activityLogService.logAction(
-         userId,
-         ActivityAction.PAYMENT,
-         "User " + userId + " paid " + payment.getAmount() + " for Course " + courseId
-        );
+                userId,
+                ActivityAction.PAYMENT,
+                "User " + userId + " paid " + payment.getAmount() + " for Course " + courseId);
 
         payment = paymentRepo.save(payment);
         return mapper.map(payment, PaymentDTO.class);
@@ -76,40 +87,40 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentDTO getPaymentById(Long paymentId) {
         Payment payment = paymentRepo.findById(paymentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + paymentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + paymentId));
         return mapper.map(payment, PaymentDTO.class);
     }
 
     @Override
     public List<PaymentDTO> getPaymentsByUser(Long userId) {
         User user = userRepo.findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
         return paymentRepo.findByUser(user).stream()
-            .map(p -> mapper.map(p, PaymentDTO.class))
-            .toList();
+                .map(p -> mapper.map(p, PaymentDTO.class))
+                .toList();
     }
 
     @Override
     public List<PaymentDTO> getPaymentsByCourse(Long courseId) {
         Course course = courseRepo.findById(courseId)
-            .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
         return paymentRepo.findByCourse(course).stream()
-            .map(p -> mapper.map(p, PaymentDTO.class))
-            .toList();
+                .map(p -> mapper.map(p, PaymentDTO.class))
+                .toList();
     }
 
     @Override
     public List<PaymentDTO> getPaymentsByType(PaymentType type) {
         return paymentRepo.findByPaymentType(type).stream()
-            .map(p -> mapper.map(p, PaymentDTO.class))
-            .toList();
+                .map(p -> mapper.map(p, PaymentDTO.class))
+                .toList();
     }
 
     @Override
     public List<PaymentDTO> getPaymentsBetween(Date start, Date end) {
         return paymentRepo.findByDateBetween(start, end).stream()
-            .map(p -> mapper.map(p, PaymentDTO.class))
-            .toList();
+                .map(p -> mapper.map(p, PaymentDTO.class))
+                .toList();
     }
 
     @Override

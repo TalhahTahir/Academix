@@ -73,6 +73,7 @@ public class CourseServiceImpl implements CourseService {
         existing.setCoursename(dto.getCoursename());
         existing.setDuration(dto.getDuration());
         existing.setFees(dto.getFees());
+        existing.setSalary(dto.getSalary());
         existing.setCatagory(dto.getCatagory());
         existing = courseRepo.save(existing);
         return mapper.map(existing, CourseDTO.class);
