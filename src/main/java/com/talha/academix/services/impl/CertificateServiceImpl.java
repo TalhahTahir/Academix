@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.CertificateDTO;
 import com.talha.academix.enums.ActivityAction;
+import com.talha.academix.enums.EnrollmentStatus;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Certificate;
 import com.talha.academix.model.Course;
@@ -36,12 +37,8 @@ public class CertificateServiceImpl implements CertificateService {
         Enrollment enrollment = enrollmentRepo.findById(enrollmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + enrollmentId));
 
-        if (enrollment.getCompletionPercentage() < 100) {
-            throw new IllegalStateException("Course not fully completed.");
-        }
-
-        if (enrollment.getMarks() < 50) {
-            throw new IllegalStateException("Exam not passed. At least 50 marks required.");
+        if(!enrollment.getStatus().equals(EnrollmentStatus.COMPLETED)){
+            throw new IllegalStateException("Enrollment status must be COMPLETED to award certificate.");
         }
 
         Course course = enrollment.getCourse();
