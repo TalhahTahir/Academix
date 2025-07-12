@@ -11,4 +11,6 @@ public interface EnrollmentService {
     void withdrawEnrollment(Long enrollmentId);
     EnrollmentDTO enrollmentValidation(Long courseid, Long userid);
 
+    EnrollmentDTO updateEnrollment(EnrollmentDTO enrollment);
+
 }

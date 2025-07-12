@@ -103,4 +103,49 @@ public EnrollmentDTO enrollmentValidation(Long courseid, Long userid){
     return mapper.map(enrollment, EnrollmentDTO.class);
 }
 
+@Override
+public EnrollmentDTO updateEnrollment(EnrollmentDTO enrollmentDTO) {
+    // 1. Fetch existing enrollment
+    Enrollment enrollment = enrollmentRepo.findById(enrollmentDTO.getEnrollmentID())
+            .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
+
+    // 2. Update associations if IDs provided
+    if (enrollmentDTO.getStudentID() != null) {
+        User student = userRepo.findById(enrollmentDTO.getStudentID())
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        enrollment.setStudent(student);
+    }
+
+    if (enrollmentDTO.getCourseID() != null) {
+        Course course = courseRepo.findById(enrollmentDTO.getCourseID())
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        enrollment.setCourse(course);
+    }
+
+    // 3. Update simple fields
+    enrollment.setEnrollmentDate(enrollmentDTO.getEnrollmentDate());
+    enrollment.setCompletionPercentage(enrollmentDTO.getCompletionPercentage());
+    enrollment.setMarks(enrollmentDTO.getMarks());
+
+    if (enrollmentDTO.getStatus() != null) {
+        enrollment.setStatus((enrollmentDTO.getStatus()));
+    }
+
+    // 4. Save back to DB
+    Enrollment updated = enrollmentRepo.save(enrollment);
+
+    // 5. Map back to DTO (manual for now, or use MapStruct)
+    EnrollmentDTO updatedDTO = new EnrollmentDTO();
+    updatedDTO.setEnrollmentID(updated.getEnrollmentID());
+    updatedDTO.setStudentID(updated.getStudent().getUserid());
+    updatedDTO.setCourseID(updated.getCourse().getCourseid());
+    updatedDTO.setEnrollmentDate(updated.getEnrollmentDate());
+    updatedDTO.setStatus(updated.getStatus());
+    updatedDTO.setCompletionPercentage(updated.getCompletionPercentage());
+    updatedDTO.setMarks(updated.getMarks());
+
+    return updatedDTO;
+}
+
+
 }

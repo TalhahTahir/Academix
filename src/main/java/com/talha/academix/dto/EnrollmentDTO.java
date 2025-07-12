@@ -18,5 +18,5 @@ public class EnrollmentDTO {
     private Date enrollmentDate;
     private EnrollmentStatus status;
     private double completionPercentage;
-    private float marks;
+    private double marks;
 }

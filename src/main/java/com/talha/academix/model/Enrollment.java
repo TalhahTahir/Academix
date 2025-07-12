@@ -43,5 +43,5 @@ public class Enrollment {
 
     private double completionPercentage;
     
-    private float marks; 
+    private double marks; 
 }

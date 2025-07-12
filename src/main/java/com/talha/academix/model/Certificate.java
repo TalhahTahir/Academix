@@ -29,7 +29,7 @@ public class Certificate {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    private float marks;
+    private double marks;
 
     private Date date;
 }

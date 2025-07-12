@@ -63,22 +63,6 @@ public class AttemptServiceImpl implements AttemptService {
     }
 
     @Override
-    public List<AttemptDTO> getAttemptsByStudent(Long studentId) {
-        return attemptRepo.findByStudentId(studentId)
-                .stream()
-                .map(a -> modelMapper.map(a, AttemptDTO.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void completeAttempt(Long attemptId) {
-        Attempt attempt = attemptRepo.findById(attemptId)
-                .orElseThrow(() -> new ResourceNotFoundException("Attempt not found with id: " + attemptId));
-        attempt.setCompletedAt(LocalDateTime.now());
-        attemptRepo.save(attempt);
-    }
-
-    @Override
     @Transactional
     public AttemptDTO submitAttempt(Long attemptId, AttemptDTO dto) {
         // Fetch attempt by ID
@@ -143,6 +127,22 @@ public class AttemptServiceImpl implements AttemptService {
         return attempts.stream()
                 .map(a -> modelMapper.map(a, AttemptDTO.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AttemptDTO> getAttemptsByStudent(Long studentId) {
+        return attemptRepo.findByStudentId(studentId)
+                .stream()
+                .map(a -> modelMapper.map(a, AttemptDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void completeAttempt(Long attemptId) {
+        Attempt attempt = attemptRepo.findById(attemptId)
+                .orElseThrow(() -> new ResourceNotFoundException("Attempt not found with id: " + attemptId));
+        attempt.setCompletedAt(LocalDateTime.now());
+        attemptRepo.save(attempt);
     }
 
 }
