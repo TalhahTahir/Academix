@@ -10,5 +10,7 @@ import com.talha.academix.model.TeacherPayoutRequest;
 public interface TeacherPayoutRequestRepo extends JpaRepository<TeacherPayoutRequest, Long> {
     List<TeacherPayoutRequest> findByStatus(RequestStatus status);
     List<TeacherPayoutRequest> findByTeacherId(Long teacherId);
+
+    public long countByStatus(RequestStatus requestStatus);
 }
 
