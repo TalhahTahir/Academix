@@ -20,6 +20,7 @@ public class PaymentDTO {
     private PaymentMedium medium;
     private PaymentType paymentType;
     private String account;
-
+    private String gatewayTransactionId; // Stripe's PaymentIntent ID
+    private String gatewayStatus;        // 'succeeded', 'requires_action', etc.    
     private Date date;
 }

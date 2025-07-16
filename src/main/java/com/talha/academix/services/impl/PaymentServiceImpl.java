@@ -16,6 +16,7 @@ import com.talha.academix.exception.PaymentFailedException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.Payment;
+import com.talha.academix.model.PaymentResponse;
 import com.talha.academix.model.User;
 import com.talha.academix.model.Wallet;
 import com.talha.academix.repository.CourseRepo;
@@ -61,9 +62,9 @@ public class PaymentServiceImpl implements PaymentService {
         } else {
             throw new IllegalArgumentException("Invalid user role for payment processing: " + user.getRole());
         }
-        boolean approved = gateway.charge(wallet.getMedium(), wallet.getAccount(), amount, type);
-        if (!approved) {
-            throw new PaymentFailedException("External payment declined for user " + userId);
+        PaymentResponse response = gateway.charge(wallet.getMedium(), wallet.getAccount(), amount, type);
+        if (!response.isSuccess()) {
+            throw new PaymentFailedException("Payment failed: " + response.getStatusMessage());
         }
 
         Payment payment = new Payment();
@@ -73,6 +74,8 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setMedium(wallet.getMedium());
         payment.setAccount(wallet.getAccount());
         payment.setPaymentType(type);
+        payment.setGatewayTransactionId(response.getPaymentIntentId());
+        payment.setGatewayStatus(response.getStatusMessage());
         payment.setDate(new Date());
 
         activityLogService.logAction(
