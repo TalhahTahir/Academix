@@ -8,7 +8,7 @@ import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.talha.academix.enums.PaymentMedium;
 import com.talha.academix.enums.PaymentType;
-import com.talha.academix.model.PaymentResponse;
+import com.talha.academix.payment.model.PaymentResponse;
 import com.talha.academix.services.PaymentGatewayService;
 
 @Service
