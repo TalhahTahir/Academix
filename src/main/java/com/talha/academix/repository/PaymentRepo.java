@@ -2,6 +2,7 @@ package com.talha.academix.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -16,4 +17,7 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
     List<Payment> findByPaymentType(PaymentType type);
 
     List<Payment> findByDateBetween(Date start, Date end);
+
+    Optional<Payment> findByGatewayTransactionId(String intentId);
+
 }

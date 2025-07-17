@@ -13,6 +13,8 @@ public interface PaymentService {
     List<PaymentDTO> getPaymentsByCourse(Long courseId);
     List<PaymentDTO> getPaymentsByType(PaymentType type);
     List<PaymentDTO> getPaymentsBetween(Date start, Date end);
+    void markAsPaid(String paymentIntentId);
+
 
     PaymentDTO addPayment(PaymentDTO dto);
 }

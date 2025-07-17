@@ -25,6 +25,7 @@ import com.talha.academix.repository.UserRepo;
 import com.talha.academix.repository.WalletRepo;
 import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.PaymentGatewayService;
+import com.talha.academix.services.EnrollmentService;
 import com.talha.academix.services.PaymentService;
 
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final WalletRepo walletRepo;
     private final PaymentGatewayService gateway;
     private ActivityLogService activityLogService;
+    private EnrollmentService enrollmentService;
     private final ModelMapper mapper;
 
     @Override
@@ -87,6 +89,29 @@ public class PaymentServiceImpl implements PaymentService {
         return mapper.map(payment, PaymentDTO.class);
     }
 
+    @Override
+    @Transactional
+    public void markAsPaid(String intentId) {
+        Payment p = paymentRepo.findByGatewayTransactionId(intentId)
+            .orElseThrow(() -> new ResourceNotFoundException("Payment not found for intent ID: " + intentId));
+        if (!"succeeded".equals(p.getGatewayStatus())) {
+            p.setGatewayStatus("succeeded");
+            paymentRepo.save(p);
+            activityLogService.logAction(
+                p.getUser().getUserid(),
+                ActivityAction.PAYMENT,
+                "Payment confirmed for intent " + intentId
+            );
+            // trigger enrollment or salary payout if not done
+            if (p.getPaymentType() == PaymentType.INCOMING) {
+                enrollmentService.finalizeEnrollment(p.getUser(), p.getCourse());
+            }
+            // else for outgoing, payrollService.finalizePayout(...)
+        }
+    }
+    
+
+    
     @Override
     public PaymentDTO getPaymentById(Long paymentId) {
         Payment payment = paymentRepo.findById(paymentId)

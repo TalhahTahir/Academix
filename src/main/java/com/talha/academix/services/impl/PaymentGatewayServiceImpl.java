@@ -31,7 +31,6 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
                 return new PaymentResponse(false, null, "Unsupported payment medium: " + medium, null);
         }
     }
-    
 
     public PaymentResponse chargeViaStripe(String paymentMethodId, int amount) {
         try {
