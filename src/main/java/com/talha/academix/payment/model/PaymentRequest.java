@@ -1,4 +1,4 @@
-package com.talha.academix.model;
+package com.talha.academix.payment.model;
 
 import com.talha.academix.enums.PaymentMedium;
 import com.talha.academix.enums.PaymentType;
