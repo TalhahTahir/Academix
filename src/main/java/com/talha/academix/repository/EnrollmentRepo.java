@@ -19,4 +19,6 @@ public interface EnrollmentRepo extends JpaRepository<Enrollment, Long> {
     Enrollment findByStudentIDAndCourseID(Long studentId, Long courseid);
 
     public long countByCompletionPercentageGreaterThan(int i);
+
+   boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
 }

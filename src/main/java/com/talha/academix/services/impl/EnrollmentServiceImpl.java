@@ -40,118 +40,129 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     @Transactional
     public EnrollmentDTO enrollStudent(Long studentId, Long courseId) {
-        User student = userRepo.findById(studentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-        Course course = courseRepo.findById(courseId)
-            .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        // 1. Charge the student (or trigger transfer for teacher)
+        PaymentDTO payment = paymentService.processPayment(studentId, courseId);
 
-        if (enrollmentValidation(student.getUserid(), course.getCourseid()) != null) {
-            throw new AlreadyEnrolledException("Student is already enrolled in this course");
+        // 2. If payment requires action, bubble a special exception
+        if (Boolean.TRUE.equals(payment.getRequiresAction())) {
+            throw new PaymentFailedException(
+                    "Further authentication required",
+                    payment.getClientSecret());
         }
 
-        PaymentDTO paid = paymentService.processPayment(studentId, courseId);
-        if (paid == null) {
-            throw new PaymentFailedException("Payment failed");
-        }
-
-        Enrollment enrollment = new Enrollment();
-        enrollment.setStudent(student);
-        enrollment.setCourse(course);
-        enrollment.setEnrollmentDate(new Date());
-        enrollment.setStatus(EnrollmentStatus.IN_PROGRESS);
-        enrollment.setCompletionPercentage(0);
-        enrollment = enrollmentRepo.save(enrollment);
-
-        activityLogService.logAction(
-            studentId, ActivityAction.ENROLLMENT,
-            "Student " + studentId + " enrolled in Course " + courseId
-        );
-
-        return mapper.map(enrollment, EnrollmentDTO.class);
+        // 3. If payment succeeded, create the enrollment
+        return finalizeEnrollment(studentId, courseId);
     }
 
     @Override
     public List<EnrollmentDTO> getEnrollmentsByStudent(Long studentId) {
         User student = userRepo.findById(studentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         List<Enrollment> list = enrollmentRepo.findByStudent(student);
         return list.stream()
-            .map(e -> mapper.map(e, EnrollmentDTO.class))
-            .toList();
+                .map(e -> mapper.map(e, EnrollmentDTO.class))
+                .toList();
     }
 
     @Override
     public List<EnrollmentDTO> getEnrollmentsByCourse(Long courseId) {
         Course course = courseRepo.findById(courseId)
-            .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
         List<Enrollment> list = enrollmentRepo.findByCourse(course);
         return list.stream()
-            .map(e -> mapper.map(e, EnrollmentDTO.class))
-            .toList();
+                .map(e -> mapper.map(e, EnrollmentDTO.class))
+                .toList();
     }
 
     @Override
     public void withdrawEnrollment(Long enrollmentId) {
         Enrollment enrollment = enrollmentRepo.findById(enrollmentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
         enrollmentRepo.delete(enrollment);
     }
 
-@Override
-public EnrollmentDTO enrollmentValidation(Long courseid, Long userid){
-    Enrollment enrollment = enrollmentRepo.existsByStudentAndCourse(userid, courseid);
-    return mapper.map(enrollment, EnrollmentDTO.class);
-}
-
-@Override
-public EnrollmentDTO updateEnrollment(EnrollmentDTO enrollmentDTO) {
-    // 1. Fetch existing enrollment
-    Enrollment enrollment = enrollmentRepo.findById(enrollmentDTO.getEnrollmentID())
-            .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
-
-    // 2. Update associations if IDs provided
-    if (enrollmentDTO.getStudentID() != null) {
-        User student = userRepo.findById(enrollmentDTO.getStudentID())
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-        enrollment.setStudent(student);
+    @Override
+    public EnrollmentDTO enrollmentValidation(Long courseid, Long userid) {
+        Enrollment enrollment = enrollmentRepo.existsByStudentAndCourse(userid, courseid);
+        return mapper.map(enrollment, EnrollmentDTO.class);
     }
 
-    if (enrollmentDTO.getCourseID() != null) {
-        Course course = courseRepo.findById(enrollmentDTO.getCourseID())
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
-        enrollment.setCourse(course);
+    @Override
+    public EnrollmentDTO updateEnrollment(EnrollmentDTO enrollmentDTO) {
+        // 1. Fetch existing enrollment
+        Enrollment enrollment = enrollmentRepo.findById(enrollmentDTO.getEnrollmentID())
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
+
+        // 2. Update associations if IDs provided
+        if (enrollmentDTO.getStudentID() != null) {
+            User student = userRepo.findById(enrollmentDTO.getStudentID())
+                    .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+            enrollment.setStudent(student);
+        }
+
+        if (enrollmentDTO.getCourseID() != null) {
+            Course course = courseRepo.findById(enrollmentDTO.getCourseID())
+                    .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+            enrollment.setCourse(course);
+        }
+
+        // 3. Update simple fields
+        enrollment.setEnrollmentDate(enrollmentDTO.getEnrollmentDate());
+        enrollment.setCompletionPercentage(enrollmentDTO.getCompletionPercentage());
+        enrollment.setMarks(enrollmentDTO.getMarks());
+
+        if (enrollmentDTO.getStatus() != null) {
+            enrollment.setStatus((enrollmentDTO.getStatus()));
+        }
+
+        // 4. Save back to DB
+        Enrollment updated = enrollmentRepo.save(enrollment);
+
+        // 5. Map back to DTO (manual for now, or use MapStruct)
+        EnrollmentDTO updatedDTO = new EnrollmentDTO();
+        updatedDTO.setEnrollmentID(updated.getEnrollmentID());
+        updatedDTO.setStudentID(updated.getStudent().getUserid());
+        updatedDTO.setCourseID(updated.getCourse().getCourseid());
+        updatedDTO.setEnrollmentDate(updated.getEnrollmentDate());
+        updatedDTO.setStatus(updated.getStatus());
+        updatedDTO.setCompletionPercentage(updated.getCompletionPercentage());
+        updatedDTO.setMarks(updated.getMarks());
+
+        return updatedDTO;
     }
 
-    // 3. Update simple fields
-    enrollment.setEnrollmentDate(enrollmentDTO.getEnrollmentDate());
-    enrollment.setCompletionPercentage(enrollmentDTO.getCompletionPercentage());
-    enrollment.setMarks(enrollmentDTO.getMarks());
+    @Override
+    @Transactional
+    public EnrollmentDTO finalizeEnrollment(Long studentId, Long courseId) {
+        // 1. Prevent double‑enroll
+        if (enrollmentRepo.existsByStudentIdAndCourseId(studentId, courseId)) {
+            throw new AlreadyEnrolledException(
+                    "Student " + studentId + " already enrolled in course " + courseId);
+        }
 
-    if (enrollmentDTO.getStatus() != null) {
-        enrollment.setStatus((enrollmentDTO.getStatus()));
+        // 2. Load required entities
+        User student = userRepo.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
+
+        // 3. Build and save the Enrollment
+        Enrollment e = new Enrollment();
+        e.setStudent(student);
+        e.setCourse(course);
+        e.setEnrollmentDate(new Date());
+        e.setStatus(EnrollmentStatus.IN_PROGRESS);
+        e.setCompletionPercentage(0);
+        Enrollment saved = enrollmentRepo.save(e);
+
+        // 4. Log the action
+        activityLogService.logAction(
+                studentId,
+                ActivityAction.ENROLLMENT,
+                "Student " + studentId + " enrolled in Course " + courseId);
+
+        // 5. Map to DTO and return
+        return mapper.map(saved, EnrollmentDTO.class);
     }
-
-    // 4. Save back to DB
-    Enrollment updated = enrollmentRepo.save(enrollment);
-
-    // 5. Map back to DTO (manual for now, or use MapStruct)
-    EnrollmentDTO updatedDTO = new EnrollmentDTO();
-    updatedDTO.setEnrollmentID(updated.getEnrollmentID());
-    updatedDTO.setStudentID(updated.getStudent().getUserid());
-    updatedDTO.setCourseID(updated.getCourse().getCourseid());
-    updatedDTO.setEnrollmentDate(updated.getEnrollmentDate());
-    updatedDTO.setStatus(updated.getStatus());
-    updatedDTO.setCompletionPercentage(updated.getCompletionPercentage());
-    updatedDTO.setMarks(updated.getMarks());
-
-    return updatedDTO;
-}
-
-@Override
-public void finalizeEnrollment(Long userid, Long courseid) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'finalizeEnrollment'");
-}
-
 
 }

@@ -131,7 +131,9 @@ public class PaymentServiceImpl implements PaymentService {
 
             // trigger enrollment or salary payout
             if (p.getPaymentType() == PaymentType.INCOMING) {
-                enrollmentService.finalizeEnrollment(p.getUser().getUserid(), p.getCourse().getCourseid());
+                enrollmentService.finalizeEnrollment(
+                        p.getUser().getUserid(),
+                        p.getCourse().getCourseid());
             } else {
                 // for teacher payouts, you might call payoutService.finalizePayout(...)
             }
