@@ -147,5 +147,11 @@ public EnrollmentDTO updateEnrollment(EnrollmentDTO enrollmentDTO) {
     return updatedDTO;
 }
 
+@Override
+public void finalizeEnrollment(Long userid, Long courseid) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'finalizeEnrollment'");
+}
+
 
 }

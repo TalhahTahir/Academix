@@ -95,16 +95,15 @@ public class PaymentServiceImpl implements PaymentService {
             // fully settled immediately
             markAsPaid(resp.getTransactionId());
         } else if (resp.isRequiresAction()) {
-            // front‑end must handle clientSecret (e.g. 3DS challenge)
-            // and then call confirmPayment(...) or wait for webhook
+            // frontend must handle the 3DS challenge with this clientSecret
         } else {
-            // permanent failure
             throw new PaymentFailedException("Payment failed: " + resp.getStatusMessage());
         }
 
-        // 7. Return current PaymentDTO (for requiresAction, clientSecret is in dto)
+        // 7. Map back to DTO including new fields
         PaymentDTO dto = mapper.map(payment, PaymentDTO.class);
         dto.setClientSecret(resp.getClientSecret());
+        dto.setRequiresAction(resp.isRequiresAction());
         return dto;
     }
 
