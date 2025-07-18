@@ -14,6 +14,7 @@ public interface PaymentService {
     List<PaymentDTO> getPaymentsByType(PaymentType type);
     List<PaymentDTO> getPaymentsBetween(Date start, Date end);
     void markAsPaid(String paymentIntentId);
+    void confirmPayment(String transactionId);
 
 
     PaymentDTO addPayment(PaymentDTO dto);

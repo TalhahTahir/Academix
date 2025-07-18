@@ -13,4 +13,6 @@ public interface EnrollmentService {
 
     EnrollmentDTO updateEnrollment(EnrollmentDTO enrollment);
 
+    public void finalizeEnrollment(Long userid, Long courseid);
+
 }
