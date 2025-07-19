@@ -2,7 +2,7 @@ package com.talha.academix.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import com.talha.academix.enums.ActivityAction;
 
@@ -25,5 +25,5 @@ public class ActivityLog {
 
     private String details;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }

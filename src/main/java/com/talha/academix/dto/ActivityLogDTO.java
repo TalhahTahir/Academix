@@ -1,6 +1,6 @@
 package com.talha.academix.dto;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import com.talha.academix.enums.ActivityAction;
 
@@ -12,5 +12,5 @@ public class ActivityLogDTO {
     private Long userId;
     private ActivityAction action;
     private String details;
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 }

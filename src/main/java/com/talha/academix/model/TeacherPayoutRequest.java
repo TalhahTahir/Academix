@@ -1,6 +1,6 @@
 package com.talha.academix.model;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import com.talha.academix.enums.RequestStatus;
 
@@ -40,8 +40,8 @@ public class TeacherPayoutRequest {
     @Enumerated(EnumType.STRING)
     private RequestStatus status = RequestStatus.PENDING;
 
-    private LocalDateTime requestedAt;
-    private LocalDateTime processedAt;
+    private Instant requestedAt;
+    private Instant processedAt;
 
     private String adminRemarks;
 }

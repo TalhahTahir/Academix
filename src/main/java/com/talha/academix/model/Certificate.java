@@ -1,6 +1,6 @@
 package com.talha.academix.model;
 
-import java.util.Date;
+import java.time.Instant;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,5 +31,5 @@ public class Certificate {
 
     private double marks;
 
-    private Date date;
+    private Instant date;
 }

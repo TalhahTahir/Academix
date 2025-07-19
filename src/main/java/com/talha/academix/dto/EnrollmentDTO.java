@@ -1,10 +1,10 @@
 package com.talha.academix.dto;
 
+import java.time.ZonedDateTime;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
-import java.util.Date;
 
 import com.talha.academix.enums.EnrollmentStatus;
 
@@ -15,7 +15,7 @@ public class EnrollmentDTO {
     private Long enrollmentID;
     private Long studentID;
     private Long courseID;
-    private Date enrollmentDate;
+    private ZonedDateTime enrollmentDate;
     private EnrollmentStatus status;
     private double completionPercentage;
     private double marks;

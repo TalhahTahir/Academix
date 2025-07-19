@@ -1,6 +1,6 @@
 package com.talha.academix.model;
 
-import java.util.Date;
+import java.time.Instant;
 
 import com.talha.academix.enums.PaymentMedium;
 import com.talha.academix.enums.PaymentType;
@@ -57,6 +57,6 @@ public class Payment {
     private String gatewayStatus; // 'succeeded', 'requires_action', etc.
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date date;
+    private Instant date;
 
 }

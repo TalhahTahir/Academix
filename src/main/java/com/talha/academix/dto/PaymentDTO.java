@@ -1,6 +1,6 @@
 package com.talha.academix.dto;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 import com.talha.academix.enums.PaymentMedium;
 import com.talha.academix.enums.PaymentType;
@@ -22,7 +22,7 @@ public class PaymentDTO {
     private String account;
     private String gatewayTransactionId;
     private String gatewayStatus;
-    private Date date;
+    private ZonedDateTime date;
     private String clientSecret;
     private Boolean requiresAction;
 }

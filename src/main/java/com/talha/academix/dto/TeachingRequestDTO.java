@@ -1,6 +1,6 @@
 package com.talha.academix.dto;
 
-import java.util.Date;
+import java.time.Instant;
 
 import com.talha.academix.enums.RequestStatus;
 
@@ -17,5 +17,5 @@ public class TeachingRequestDTO {
     private Long teacherId;
     private Long courseId;
     private RequestStatus status;
-    private Date date;
+    private Instant date;
 }

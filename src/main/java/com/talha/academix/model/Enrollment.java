@@ -1,6 +1,7 @@
 package com.talha.academix.model;
 
-import java.util.Date;
+import java.time.Instant;
+
 
 import com.talha.academix.enums.EnrollmentStatus;
 
@@ -35,8 +36,7 @@ public class Enrollment {
     @JoinColumn(name="Course_id", nullable=false)
     private Course course;
 
-
-    private Date enrollmentDate;
+    private Instant enrollmentDate;
 
     @Enumerated(EnumType.STRING)
     private EnrollmentStatus status; //enum(completed / in progress)

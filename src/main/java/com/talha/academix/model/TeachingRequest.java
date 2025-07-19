@@ -1,6 +1,6 @@
 package com.talha.academix.model;
 
-import java.util.Date;
+import java.time.Instant;
 
 import com.talha.academix.enums.RequestStatus;
 
@@ -40,5 +40,5 @@ public class TeachingRequest {
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
 
-    private Date date;
+    private Instant date;
 }

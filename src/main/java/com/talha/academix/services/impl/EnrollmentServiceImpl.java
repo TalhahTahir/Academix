@@ -83,7 +83,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public EnrollmentDTO enrollmentValidation(Long courseid, Long userid) {
-        Enrollment enrollment = enrollmentRepo.existsByStudentAndCourse(userid, courseid);
+        Enrollment enrollment = enrollmentRepo.findByStudentIDAndCourseID(userid, courseid);
         return mapper.map(enrollment, EnrollmentDTO.class);
     }
 

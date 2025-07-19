@@ -1,6 +1,6 @@
 package com.talha.academix.model;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,5 +34,5 @@ public class DocumentProgress {
 
     private Boolean completed = false;
 
-    private LocalDateTime completedAt;
+    private Instant completedAt;
 }

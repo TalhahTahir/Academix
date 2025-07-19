@@ -1,6 +1,6 @@
 package com.talha.academix.model;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +24,8 @@ public class Attempt {
 
     private Long studentId; // or a @ManyToOne to User
 
-    private LocalDateTime startedAt;
-    private LocalDateTime completedAt;
+    private Instant startedAt;
+    private Instant completedAt;
 
     @OneToMany(mappedBy = "attempt", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AttemptAnswer> answers = new ArrayList<>();

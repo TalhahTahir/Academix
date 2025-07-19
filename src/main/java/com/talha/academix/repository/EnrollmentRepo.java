@@ -12,13 +12,12 @@ import com.talha.academix.model.User;
 
 public interface EnrollmentRepo extends JpaRepository<Enrollment, Long> {
     Optional<Enrollment> findByStudentAndCourse(User student, Course course);
-    Enrollment existsByStudentAndCourse(Long studentid, Long courseid);
     List<Enrollment> findByStudent(User student);
     List<Enrollment> findByCourse(Course course);
     List<Enrollment> findByStatus(EnrollmentStatus status);
     Enrollment findByStudentIDAndCourseID(Long studentId, Long courseid);
 
-    public long countByCompletionPercentageGreaterThan(int i);
+    long countByCompletionPercentageGreaterThan(int i);
 
    boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
 }
