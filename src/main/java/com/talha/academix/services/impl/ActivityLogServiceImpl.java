@@ -1,6 +1,6 @@
 package com.talha.academix.services.impl;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -48,7 +48,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         log.setId(userId);
         log.setAction(action);
         log.setDetails(details);
-        log.setCreatedAt(LocalDateTime.now());
+        log.setCreatedAt(Instant.now());
         activityLogRepo.save(log);
     }
 

@@ -80,7 +80,7 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setPaymentType(type);
         payment.setGatewayTransactionId(resp.getTransactionId());
         payment.setGatewayStatus(resp.getStatusMessage());
-        payment.setDate(new Date());
+        payment.setDate(new Date().toInstant());
         payment = paymentRepo.save(payment);
 
         // 5. Log the initiation

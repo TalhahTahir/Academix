@@ -50,7 +50,7 @@ public class CertificateServiceImpl implements CertificateService {
         certificate.setTeacher(teacher);
         certificate.setCourse(course);
         certificate.setMarks(enrollment.getMarks());
-        certificate.setDate(new Date());
+        certificate.setDate(new Date().toInstant());
 
         certificateRepo.save(certificate);
 

@@ -1,6 +1,7 @@
 // EnrollmentServiceImpl.java
 package com.talha.academix.services.impl;
 
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -107,7 +108,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         }
 
         // 3. Update simple fields
-        enrollment.setEnrollmentDate(enrollmentDTO.getEnrollmentDate());
+        enrollment.setEnrollmentDate(enrollmentDTO.getEnrollmentDate().toInstant());
+
         enrollment.setCompletionPercentage(enrollmentDTO.getCompletionPercentage());
         enrollment.setMarks(enrollmentDTO.getMarks());
 
@@ -123,7 +125,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         updatedDTO.setEnrollmentID(updated.getEnrollmentID());
         updatedDTO.setStudentID(updated.getStudent().getUserid());
         updatedDTO.setCourseID(updated.getCourse().getCourseid());
-        updatedDTO.setEnrollmentDate(updated.getEnrollmentDate());
+        updatedDTO.setEnrollmentDate(
+                updated.getEnrollmentDate().atZone(ZoneId.systemDefault()));
+
         updatedDTO.setStatus(updated.getStatus());
         updatedDTO.setCompletionPercentage(updated.getCompletionPercentage());
         updatedDTO.setMarks(updated.getMarks());
@@ -150,7 +154,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment e = new Enrollment();
         e.setStudent(student);
         e.setCourse(course);
-        e.setEnrollmentDate(new Date());
+        e.setEnrollmentDate(new Date().toInstant());
         e.setStatus(EnrollmentStatus.IN_PROGRESS);
         e.setCompletionPercentage(0);
         Enrollment saved = enrollmentRepo.save(e);

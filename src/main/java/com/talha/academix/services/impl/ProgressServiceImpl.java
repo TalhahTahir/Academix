@@ -1,6 +1,6 @@
 package com.talha.academix.services.impl;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.springframework.stereotype.Service;
 
@@ -46,7 +46,7 @@ public class ProgressServiceImpl implements ProgressService {
 
         if (!Boolean.TRUE.equals(progress.getCompleted())) {
             progress.setCompleted(true);
-            progress.setCompletedAt(LocalDateTime.now());
+            progress.setCompletedAt(Instant.now());
             lectureProgressRepo.save(progress);
         }
 
@@ -67,7 +67,7 @@ public class ProgressServiceImpl implements ProgressService {
 
         if (!Boolean.TRUE.equals(progress.getCompleted())) {
             progress.setCompleted(true);
-            progress.setCompletedAt(LocalDateTime.now());
+            progress.setCompletedAt(Instant.now());
             documentProgressRepo.save(progress);
         }
 

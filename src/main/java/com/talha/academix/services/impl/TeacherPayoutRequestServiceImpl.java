@@ -1,6 +1,6 @@
 package com.talha.academix.services.impl;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -49,7 +49,7 @@ public class TeacherPayoutRequestServiceImpl implements TeacherPayoutRequestServ
         TeacherPayoutRequest request = new TeacherPayoutRequest();
         request.setTeacher(teacher);
         request.setCourse(course);
-        request.setRequestedAt(LocalDateTime.now());
+        request.setRequestedAt(Instant.now());
         request.setStatus(RequestStatus.PENDING);
 
         payoutRequestRepo.save(request);
@@ -85,7 +85,7 @@ public class TeacherPayoutRequestServiceImpl implements TeacherPayoutRequestServ
         paymentService.processPayment(request.getTeacher().getUserid(), request.getCourse().getCourseid());
 
         request.setStatus(RequestStatus.APPROVED);
-        request.setProcessedAt(LocalDateTime.now());
+        request.setProcessedAt(Instant.now());
         request.setAdminRemarks(adminRemarks);
 
         payoutRequestRepo.save(request);
@@ -103,7 +103,7 @@ public class TeacherPayoutRequestServiceImpl implements TeacherPayoutRequestServ
         }
 
         request.setStatus(RequestStatus.REJECTED);
-        request.setProcessedAt(LocalDateTime.now());
+        request.setProcessedAt(Instant.now());
         request.setAdminRemarks(adminRemarks);
 
         payoutRequestRepo.save(request);

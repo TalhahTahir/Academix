@@ -1,6 +1,6 @@
 package com.talha.academix.services.impl;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,7 +49,7 @@ public class AttemptServiceImpl implements AttemptService {
                     Attempt attempt = new Attempt();
                     attempt.setExam(exam);
                     attempt.setStudentId(studentId);
-                    attempt.setStartedAt(LocalDateTime.now());
+                    attempt.setStartedAt(Instant.now());
                     attempt = attemptRepo.save(attempt);
             
                     activityLogService.logAction(
@@ -90,7 +90,7 @@ public class AttemptServiceImpl implements AttemptService {
         float percentage = ((float) correctAnswers / totalQuestions) * 100;
 
         // Mark attempt as completed
-        attempt.setCompletedAt(LocalDateTime.now());
+        attempt.setCompletedAt(Instant.now());
         attemptRepo.save(attempt);
 
         // Update Enrollment with marks
@@ -141,7 +141,7 @@ public class AttemptServiceImpl implements AttemptService {
     public void completeAttempt(Long attemptId) {
         Attempt attempt = attemptRepo.findById(attemptId)
                 .orElseThrow(() -> new ResourceNotFoundException("Attempt not found with id: " + attemptId));
-        attempt.setCompletedAt(LocalDateTime.now());
+        attempt.setCompletedAt(Instant.now());
         attemptRepo.save(attempt);
     }
 

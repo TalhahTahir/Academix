@@ -1,6 +1,6 @@
 package com.talha.academix.dto;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import com.talha.academix.enums.RequestStatus;
 
@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TeacherPayoutRequestDTO {
     
-        private Long id;
+    private Long id;
     private Long teacherId;
     private Long courseId;
     private RequestStatus status;
-    private LocalDateTime requestedAt;
-    private LocalDateTime processedAt;
+    private ZonedDateTime requestedAt;
+    private ZonedDateTime processedAt;
     private String adminRemarks;
 }
