@@ -15,5 +15,7 @@ public class PaymentRequest {
     private String account;
     private PaymentType type;
     private PaymentMedium medium;
+    private String token;     // Used for tokenized payments (payment_method_id, payer_id, etc.)
+    private Long walletId;    // Reference to user's wallet (for selecting existing method)
 }
 
