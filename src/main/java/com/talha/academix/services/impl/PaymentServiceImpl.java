@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.talha.academix.dto.PaymentDTO;
+import com.talha.academix.dto.WalletDTO;
 import com.talha.academix.enums.ActivityAction;
+import com.talha.academix.enums.PaymentMedium;
 import com.talha.academix.enums.PaymentType;
 import com.talha.academix.enums.Role;
 import com.talha.academix.exception.PaymentFailedException;
@@ -41,6 +43,8 @@ public class PaymentServiceImpl implements PaymentService {
     private final ActivityLogService activityLogService;
     private final EnrollmentService enrollmentService;
     private final ModelMapper mapper;
+
+    
 
     @Override
     @Transactional
@@ -184,5 +188,25 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = mapper.map(dto, Payment.class);
         payment = paymentRepo.save(payment);
         return mapper.map(payment, PaymentDTO.class);
+    }
+
+    @Override
+    public WalletDTO saveTokenizedWallet(Long userId, PaymentMedium medium, String account, String token, String brand,
+            String accountReference) {
+        // Find the wallet for user and medium
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+        Wallet wallet = walletRepo.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not set up for user: " + userId));
+
+        // Only update token/brand/accountReference if token cell is empty (first-time tokenization)
+        if (wallet.getToken() == null || wallet.getToken().isBlank()) {
+            wallet.setToken(token);
+            wallet.setBrand(brand);
+            wallet.setAccountReference(accountReference);
+            wallet.setUpdatedAt(java.time.Instant.now());
+            walletRepo.save(wallet);
+        }
+        return mapper.map(wallet, WalletDTO.class);
     }
 }
