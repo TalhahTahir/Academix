@@ -28,17 +28,22 @@ public class WalletServiceImpl implements WalletService {
     public WalletDTO addOrUpdateWallet(WalletDTO dto) {
         User user = userRepo.findById(dto.getUserID())
             .orElseThrow(() -> new ResourceNotFoundException("User not found: " + dto.getUserID()));
-
+    
         Wallet wallet = walletRepo.findByUser(user)
             .orElseGet(() -> {
                 Wallet w = new Wallet();
                 w.setUser(user);
                 return w;
             });
-
+    
         wallet.setMedium(dto.getMedium());
         wallet.setAccount(dto.getAccount());
-
+        wallet.setToken(dto.getToken()); // NEW: store the gateway token
+        wallet.setBrand(dto.getBrand()); // NEW: store brand (e.g., "Visa", "PayPal")
+        wallet.setAccountReference(dto.getAccountReference()); // NEW: masked UI value
+        wallet.setCreatedAt(dto.getCreatedAt());
+        wallet.setUpdatedAt(dto.getUpdatedAt());
+    
         wallet = walletRepo.save(wallet);
         return mapper.map(wallet, WalletDTO.class);
     }
