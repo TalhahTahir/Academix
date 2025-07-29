@@ -71,7 +71,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         // 3. Build a unified request and invoke the gateway
-        PaymentRequest req = new PaymentRequest((long) amount, wallet.getAccount(), type, wallet.getMedium());
+        PaymentRequest req = new PaymentRequest((long) amount, wallet.getAccount(), type, wallet.getMedium(), wallet.getToken(), wallet.getWalletID());
         PaymentResponse resp = orchestrator.orchestrate(req);
 
         // 4. Persist initial Payment record
