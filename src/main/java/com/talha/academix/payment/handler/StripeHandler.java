@@ -39,10 +39,13 @@ public class StripeHandler implements PaymentHandler {
     public PaymentResponse initiate(PaymentRequest req) {
         Stripe.apiKey = stripeKey;
         try {
+            // If token exists, use it for PaymentIntent; else use raw account (card) for first time
+            String paymentMethod = req.getToken() != null ? req.getToken() : req.getAccount();
+
             PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                     .setAmount(req.getAmount())
                     .setCurrency("usd")
-                    .setPaymentMethod(req.getAccount())
+                    .setPaymentMethod(paymentMethod)
                     .setConfirmationMethod(PaymentIntentCreateParams.ConfirmationMethod.MANUAL)
                     .setConfirm(true)
                     .build();
@@ -53,6 +56,32 @@ public class StripeHandler implements PaymentHandler {
             String id = intent.getId();
             boolean success = "succeeded".equals(status);
             boolean requiresAction = "requires_action".equals(status);
+
+            // Tokenization block (if first time, save the payment_method_id as token)
+            if (req.getToken() == null && success) {
+                String paymentMethodId = intent.getPaymentMethod();
+                // Stripe charge details (for brand and last4)
+                String brand = null;
+                String last4 = null;
+                if (intent.getLatestCharge() != null) {
+                    var charge = com.stripe.model.Charge.retrieve(intent.getLatestCharge());
+                    if (charge.getPaymentMethodDetails() != null && charge.getPaymentMethodDetails().getCard() != null) {
+                        brand = charge.getPaymentMethodDetails().getCard().getBrand();
+                        last4 = charge.getPaymentMethodDetails().getCard().getLast4();
+                    }
+                }
+                String accountReference = last4 != null ? "**** " + last4 : null;
+
+                // Save the token in Wallet
+                paymentService.saveTokenizedWallet(
+                        req.getWalletId(), // userId or walletId (pass userId if you have, or adjust signature)
+                        PaymentMedium.STRIPE,
+                        req.getAccount(),
+                        paymentMethodId,
+                        brand,
+                        accountReference
+                );
+            }
 
             return new PaymentResponse(
                     success,
