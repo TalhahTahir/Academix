@@ -84,15 +84,32 @@ public class PaypalHandler implements PaymentHandler {
 
             String orderId = order.id();
 
-            // You may want to persist the orderId and associate it with your Payment entity
+ // After approval/capture, you would get payer info from the webhook/callback.
+        // For demonstration, let's assume we have it here:
+        String payerId = null;
+        String brand = "PayPal";
+        String accountReference = request.getAccount(); // Or a masked version
 
-            return new PaymentResponse(
-                false, // Not succeeded until captured
-                approvalLink, // clientSecret is approval link
-                order.status(),
-                orderId,
-                true // requiresAction, user must approve
+        // If this is the first time, save the payerId as token
+        if (request.getToken() == null && payerId != null) {
+            paymentService.saveTokenizedWallet(
+                request.getWalletId(), // Pass userId/walletId as per your design
+                PaymentMedium.PAYPAL,
+                request.getAccount(),
+                payerId,
+                brand,
+                accountReference
             );
+        }
+
+        return new PaymentResponse(
+            false, // Not succeeded until captured
+            approvalLink, // clientSecret is approval link
+            order.status(),
+            orderId,
+            true // requiresAction, user must approve
+        );
+
         } catch (Exception e) {
             return new PaymentResponse(false, null, e.getMessage(), null, false);
         }
