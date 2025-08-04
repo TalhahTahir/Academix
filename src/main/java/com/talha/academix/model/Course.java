@@ -3,6 +3,7 @@ package com.talha.academix.model;
 import java.util.List;
 
 import com.talha.academix.enums.CourseCatagory;
+import com.talha.academix.enums.CourseState;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -35,14 +36,13 @@ public class Course {
     @NotEmpty
     private Integer fees;
     
-    @NotEmpty
-    private Integer salary;
-    
     private CourseCatagory catagory;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable=false)
     private User teacher;
+
+    private CourseState State;
 
     @OneToMany(mappedBy = "course", cascade=CascadeType.ALL, orphanRemoval=true)
     private List<Exam> exams;
