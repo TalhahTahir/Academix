@@ -7,7 +7,7 @@ import com.talha.academix.enums.CourseCatagory;
 
 public interface CourseService {
     CourseDTO createCourse(CourseDTO dto);
-    CourseDTO createCourseByAdmin(Long userid, CourseDTO dto);
+    CourseDTO createCourseByTeacher(Long userid, CourseDTO dto);
 
     CourseDTO getCourseById(Long courseId);
     List<CourseDTO> getCourseByCatagory(CourseCatagory catagory);

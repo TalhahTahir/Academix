@@ -78,4 +78,13 @@ public class UserServiceImpl implements UserService {
         } else
             return false;
     }
+
+    @Override
+    public boolean teacherValidation(Long userid) {
+
+        if(getUserById(userid).getRole().equals(Role.TEACHER)) {
+            return true;
+        } else
+            return false;
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.CourseDTO;
 import com.talha.academix.enums.CourseCatagory;
+import com.talha.academix.enums.CourseState;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.model.Course;
@@ -26,21 +27,22 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseDTO createCourse(CourseDTO dto) {
-        if (courseRepo.findCourseByCoursename(dto.getCoursename()) == null) {
+        if (courseRepo.findCourseByCoursenameAndTeacherid(dto.getCoursename(), dto.getTeacherid()) == null) {
             Course course = mapper.map(dto, Course.class);
+            course.setState(CourseState.DRAFT);
             course = courseRepo.save(course);
             return mapper.map(course, CourseDTO.class);
         } else
-            throw new IllegalArgumentException("Already have course: " + dto.getCoursename());
+            throw new IllegalArgumentException("Teacher already have a course with name: " + dto.getCoursename());
 
     }
 
     @Override
-    public CourseDTO createCourseByAdmin(Long userid, CourseDTO dto) {
-        if (userService.adminValidation(userid)) {
+    public CourseDTO createCourseByTeacher(Long userid, CourseDTO dto) {
+        if (userService.teacherValidation(userid)) {
             return createCourse(dto);
         } else
-            throw new RoleMismatchException("Only Admin can create course");
+            throw new RoleMismatchException("Only Teacher can create course");
     }
 
     @Override
@@ -73,7 +75,6 @@ public class CourseServiceImpl implements CourseService {
         existing.setCoursename(dto.getCoursename());
         existing.setDuration(dto.getDuration());
         existing.setFees(dto.getFees());
-        existing.setSalary(dto.getSalary());
         existing.setCatagory(dto.getCatagory());
         existing = courseRepo.save(existing);
         return mapper.map(existing, CourseDTO.class);

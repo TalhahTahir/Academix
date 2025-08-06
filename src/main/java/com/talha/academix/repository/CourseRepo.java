@@ -15,4 +15,6 @@ public interface CourseRepo extends JpaRepository<Course, Long> {
     public List<Course> findAllByCatagory(CourseCatagory catagory);
 
     public CourseDTO findByCourseIdAndTeacherId(Long userid, Long courseId);
+
+    public Object findCourseByCoursenameAndTeacherid(String coursename, Long teacherid);
 }

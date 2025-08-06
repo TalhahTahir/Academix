@@ -13,4 +13,5 @@ public interface UserService {
     void deleteUser(Long userId);
 
     boolean adminValidation(Long userid);
+    boolean teacherValidation(Long userid);
 }

@@ -2,8 +2,10 @@ package com.talha.academix.enums;
 
 public enum CourseState {
     DRAFT,
-    PENDING_APPROVAL,
+    REJECT,
     APPROVED,
     IN_DEVELOPMENT,
-    LAUNCHED
+    LAUNCHED,
+    DISABLED
 }
+// amplement by event driven methods, automation
