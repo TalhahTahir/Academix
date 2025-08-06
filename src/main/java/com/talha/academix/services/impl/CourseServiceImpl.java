@@ -69,6 +69,22 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public List<CourseDTO> getAllCoursesByTeacher(Long teacherId){
+        List<Course> courses = courseRepo.findAllByTeacherid(teacherId);
+        return courses.stream()
+        .map(course -> mapper.map(course, CourseDTO.class))
+        .toList();
+    }
+
+    @Override
+    public List<CourseDTO> getAllCoursesByState(CourseState state) {
+        List<Course> courses = courseRepo.findAllBystate(state);
+        return courses.stream()
+                .map(course -> mapper.map(course, CourseDTO.class))
+                .toList();
+    }
+
+    @Override
     public CourseDTO updateCourse(Long courseId, CourseDTO dto) {
         Course existing = courseRepo.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
@@ -110,4 +126,5 @@ public class CourseServiceImpl implements CourseService {
         } else
             return false;
     }
+
 }

@@ -42,7 +42,7 @@ public class Course {
     @JoinColumn(name = "teacher_id", nullable=false)
     private User teacher;
 
-    private CourseState State;
+    private CourseState state;
 
     @OneToMany(mappedBy = "course", cascade=CascadeType.ALL, orphanRemoval=true)
     private List<Exam> exams;

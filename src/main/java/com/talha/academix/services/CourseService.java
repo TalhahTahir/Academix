@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.talha.academix.dto.CourseDTO;
 import com.talha.academix.enums.CourseCatagory;
+import com.talha.academix.enums.CourseState;
 
 public interface CourseService {
     CourseDTO createCourse(CourseDTO dto);
@@ -12,6 +13,8 @@ public interface CourseService {
     CourseDTO getCourseById(Long courseId);
     List<CourseDTO> getCourseByCatagory(CourseCatagory catagory);
     List<CourseDTO> getAllCourses();
+    List<CourseDTO> getAllCoursesByTeacher(Long teacherId);
+    List<CourseDTO> getAllCoursesByState(CourseState state);
 
     CourseDTO updateCourse(Long courseId, CourseDTO dto);
     CourseDTO updateCourseByAdmin(Long userid, Long courseId, CourseDTO dto);
