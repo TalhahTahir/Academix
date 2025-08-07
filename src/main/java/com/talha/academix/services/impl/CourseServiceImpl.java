@@ -150,17 +150,57 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
-        if (!userService.adminValidation(admin.getUserid())){
+        if (!userService.adminValidation(admin.getUserid())) {
             throw new RoleMismatchException("Only Admin can approve course");
         }
 
-        if(course.getState() == CourseState.DRAFT || course.getState() == CourseState.MODIFIED) {
+        if (course.getState() == CourseState.DRAFT || course.getState() == CourseState.MODIFIED) {
             course.setState(CourseState.APPROVED);
             courseRepo.save(course);
             return true;
         } else {
-            throw new IllegalArgumentException("Only courses in DRAFT state can be approved");
+            throw new IllegalArgumentException("Only DRAFTED or MODIFIED courses can be approved");
         }
-        
+    }
+
+    @Override
+    public Boolean courseModification(User Teacher, Long courseId) {
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        Boolean owned = teacherOwnership(Teacher.getUserid(), courseId);
+
+        if (owned && (course.getState() == CourseState.DISABLED || course.getState() == CourseState.IN_DEVELOPMENT
+                || course.getState() == CourseState.REJECTED)) {
+
+            course.setState(CourseState.MODIFIED);
+            courseRepo.save(course);
+            return true;
+        }
+
+        else
+            throw new IllegalArgumentException("Only courses in DRAFT, MODIFIED or REJECTED state can be modified");
+    }
+
+    @Override
+    public Boolean courseDevelopment(User Teacher, Long courseId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'courseDevelopment'");
+    }
+
+    @Override
+    public Boolean courseLaunch(User Teacher, Long courseId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'courseLaunch'");
+    }
+
+    private boolean teacherOwnership(Long userid, Long courseId) {
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+        if (course.getTeacher().getUserid().equals(userid)) {
+            return true;
+        } else {
+            throw new RoleMismatchException("Only the Teacher who owned the course can modify it");
+        }
     }
 }

@@ -12,19 +12,25 @@ public interface CourseService {
 
     CourseDTO createCourseByTeacher(Long userid, CourseDTO dto);
 
-    CourseDTO getCourseById(Long courseId);
-
-    List<CourseDTO> getCourseByCatagory(CourseCatagory catagory);
-
-    List<CourseDTO> getAllCourses();
-
-    List<CourseDTO> getAllCoursesByTeacher(Long teacherId);
-
-    List<CourseDTO> getAllCoursesByState(CourseState state);
-
     Boolean courseRejection(User admin, Long courseId);
 
+    Boolean courseModification(User Teacher, Long courseId);
+    
     Boolean courseApproval(User admin, Long courseId);
+    
+    Boolean courseDevelopment(User Teacher, Long courseId);
+
+    Boolean courseLaunch(User Teacher, Long courseId);
+
+    CourseDTO getCourseById(Long courseId);
+    
+    List<CourseDTO> getCourseByCatagory(CourseCatagory catagory);
+    
+    List<CourseDTO> getAllCourses();
+    
+    List<CourseDTO> getAllCoursesByTeacher(Long teacherId);
+    
+    List<CourseDTO> getAllCoursesByState(CourseState state);
 
     CourseDTO updateCourse(Long courseId, CourseDTO dto);
 
