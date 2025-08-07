@@ -144,4 +144,23 @@ public class CourseServiceImpl implements CourseService {
         courseRepo.save(course);
         return true;
     }
+
+    @Override
+    public Boolean courseApproval(User admin, Long courseId) {
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        if (!userService.adminValidation(admin.getUserid())){
+            throw new RoleMismatchException("Only Admin can approve course");
+        }
+
+        if(course.getState() == CourseState.DRAFT || course.getState() == CourseState.MODIFIED) {
+            course.setState(CourseState.APPROVED);
+            courseRepo.save(course);
+            return true;
+        } else {
+            throw new IllegalArgumentException("Only courses in DRAFT state can be approved");
+        }
+        
+    }
 }

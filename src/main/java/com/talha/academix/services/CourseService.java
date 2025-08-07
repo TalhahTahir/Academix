@@ -24,6 +24,8 @@ public interface CourseService {
 
     Boolean courseRejection(User admin, Long courseId);
 
+    Boolean courseApproval(User admin, Long courseId);
+
     CourseDTO updateCourse(Long courseId, CourseDTO dto);
 
     CourseDTO updateCourseByAdmin(Long userid, Long courseId, CourseDTO dto);
