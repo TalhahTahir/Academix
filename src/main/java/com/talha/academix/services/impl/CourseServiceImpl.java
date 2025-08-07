@@ -184,8 +184,18 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Boolean courseDevelopment(User Teacher, Long courseId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'courseDevelopment'");
+        Course course = courseRepo.findById(courseId)
+        .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        Boolean owned = teacherOwnership(Teacher.getUserid(), courseId);
+        
+        if (owned && course.getState() == CourseState.APPROVED) {
+            course.setState(CourseState.IN_DEVELOPMENT);
+            courseRepo.save(course);
+            return true;
+        } else {
+            throw new IllegalArgumentException("Only approved courses can be moved to IN_DEVELOPMENT state");
+        }
     }
 
     @Override
