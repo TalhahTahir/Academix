@@ -11,6 +11,7 @@ import com.talha.academix.enums.CourseState;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.model.Course;
+import com.talha.academix.model.User;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.services.CourseService;
 import com.talha.academix.services.UserService;
@@ -69,11 +70,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseDTO> getAllCoursesByTeacher(Long teacherId){
+    public List<CourseDTO> getAllCoursesByTeacher(Long teacherId) {
         List<Course> courses = courseRepo.findAllByTeacherid(teacherId);
         return courses.stream()
-        .map(course -> mapper.map(course, CourseDTO.class))
-        .toList();
+                .map(course -> mapper.map(course, CourseDTO.class))
+                .toList();
     }
 
     @Override
@@ -127,4 +128,20 @@ public class CourseServiceImpl implements CourseService {
             return false;
     }
 
+    @Override
+    public Boolean courseRejection(User admin, Long courseId) {
+
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        if (!userService.adminValidation(admin.getUserid())) {
+            throw new RoleMismatchException("Only Admin can reject course");
+        }
+        if (course.getState() != CourseState.DRAFT) {
+            throw new IllegalArgumentException("Only courses in DRAFT state can be rejected");
+        }
+        course.setState(CourseState.REJECTED);
+        courseRepo.save(course);
+        return true;
+    }
 }

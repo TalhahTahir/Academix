@@ -2,7 +2,7 @@ package com.talha.academix.enums;
 
 public enum CourseState {
     DRAFT,
-    REJECT,
+    REJECTED,
     APPROVED,
     IN_DEVELOPMENT,
     LAUNCHED,
