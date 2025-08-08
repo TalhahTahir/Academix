@@ -22,6 +22,8 @@ public interface CourseService {
 
     Boolean courseLaunch(User Teacher, Long courseId);
 
+    CourseDTO courseDisable(User admin, Long courseId);
+
     CourseDTO getCourseById(Long courseId);
     
     List<CourseDTO> getCourseByCatagory(CourseCatagory catagory);

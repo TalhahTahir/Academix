@@ -223,6 +223,22 @@ public class CourseServiceImpl implements CourseService {
         }
     }
 
+    @Override
+    public CourseDTO courseDisable(User admin, Long courseId) {
+        if (!userService.adminValidation(admin.getUserid())){
+            throw new RoleMismatchException("Only Admin can disable course");
+        }
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        if (course.getState() == CourseState.LAUNCHED) {
+            course.setState(CourseState.DISABLED);
+            courseRepo.save(course);
+            return mapper.map(course, CourseDTO.class);
+        } else {
+            throw new IllegalArgumentException("Only launched courses can be disabled");
+        }
+    }
 
     private boolean teacherOwnership(Long userid, Long courseId) {
         Course course = courseRepo.findById(courseId)
