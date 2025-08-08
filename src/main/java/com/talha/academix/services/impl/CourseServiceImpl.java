@@ -93,6 +93,7 @@ public class CourseServiceImpl implements CourseService {
         existing.setDuration(dto.getDuration());
         existing.setFees(dto.getFees());
         existing.setCatagory(dto.getCatagory());
+        existing.setState(CourseState.MODIFIED);
         existing = courseRepo.save(existing);
         return mapper.map(existing, CourseDTO.class);
     }
@@ -110,6 +111,17 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
         courseRepo.delete(course);
+    }
+
+    @Override
+    public void deleteCourseByTeacher(Long userid, Long courseId) {
+        Boolean owned = teacherOwnership(userid, courseId);
+        if (owned) {
+            Course course = courseRepo.findById(courseId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+                deleteCourse(courseId);
+        } else
+            throw new RoleMismatchException("Only Teacher can delete course");
     }
 
     @Override
@@ -164,7 +176,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Boolean courseModification(User Teacher, Long courseId) {
+    public CourseDTO courseModification(User Teacher, Long courseId, CourseDTO dto) {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
@@ -173,9 +185,8 @@ public class CourseServiceImpl implements CourseService {
         if (owned && (course.getState() == CourseState.DISABLED || course.getState() == CourseState.IN_DEVELOPMENT
                 || course.getState() == CourseState.REJECTED)) {
 
-            course.setState(CourseState.MODIFIED);
-            courseRepo.save(course);
-            return true;
+            CourseDTO updated = updateCourse(courseId, dto);
+            return updated;
         }
 
         else
@@ -211,7 +222,7 @@ public class CourseServiceImpl implements CourseService {
             throw new IllegalArgumentException("Only courses in IN_DEVELOPMENT state can be launched");
         }
     }
-    
+
 
     private boolean teacherOwnership(Long userid, Long courseId) {
         Course course = courseRepo.findById(courseId)

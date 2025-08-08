@@ -14,7 +14,7 @@ public interface CourseService {
 
     Boolean courseRejection(User admin, Long courseId);
 
-    Boolean courseModification(User Teacher, Long courseId);
+    CourseDTO courseModification(User Teacher, Long courseId, CourseDTO dto);
     
     Boolean courseApproval(User admin, Long courseId);
     
@@ -37,6 +37,8 @@ public interface CourseService {
     CourseDTO updateCourseByAdmin(Long userid, Long courseId, CourseDTO dto);
 
     void deleteCourse(Long courseId);
+
+    void deleteCourseByTeacher(Long userid, Long courseId);
 
     void deleteCourseByAdmin(Long userid, Long courseId);
 
