@@ -6,6 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.CourseDTO;
+import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.enums.CourseCatagory;
 import com.talha.academix.enums.CourseState;
 import com.talha.academix.exception.ResourceNotFoundException;
@@ -13,6 +14,7 @@ import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.User;
 import com.talha.academix.repository.CourseRepo;
+import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.CourseService;
 import com.talha.academix.services.UserService;
 
@@ -25,6 +27,7 @@ public class CourseServiceImpl implements CourseService {
     private final CourseRepo courseRepo;
     private final ModelMapper mapper;
     private final UserService userService;
+    private final ActivityLogService activityLogService;
 
     @Override
     public CourseDTO createCourse(CourseDTO dto) {
@@ -32,6 +35,9 @@ public class CourseServiceImpl implements CourseService {
             Course course = mapper.map(dto, Course.class);
             course.setState(CourseState.DRAFT);
             course = courseRepo.save(course);
+
+            activityLogService.logAction(dto.getTeacherid(), ActivityAction.COURSE_DRAFTED, null);
+
             return mapper.map(course, CourseDTO.class);
         } else
             throw new IllegalArgumentException("Teacher already have a course with name: " + dto.getCoursename());
@@ -119,7 +125,8 @@ public class CourseServiceImpl implements CourseService {
         if (owned) {
             Course course = courseRepo.findById(courseId)
                     .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
-                deleteCourse(courseId);
+            deleteCourse(courseId);
+            activityLogService.logAction(userid, ActivityAction.COURSE_DELETION, null);
         } else
             throw new RoleMismatchException("Only Teacher can delete course");
     }
@@ -154,6 +161,11 @@ public class CourseServiceImpl implements CourseService {
         }
         course.setState(CourseState.REJECTED);
         courseRepo.save(course);
+        activityLogService.logAction(
+                admin.getUserid(),
+                ActivityAction.COURSE_REJECTED,
+                course.getCoursename() + " of " + course.getTeacher().getUsername() + " has been rejected. ID = "
+                        + courseId);
         return true;
     }
 
@@ -169,6 +181,12 @@ public class CourseServiceImpl implements CourseService {
         if (course.getState() == CourseState.DRAFT || course.getState() == CourseState.MODIFIED) {
             course.setState(CourseState.APPROVED);
             courseRepo.save(course);
+
+            activityLogService.logAction(
+                    admin.getUserid(),
+                    ActivityAction.COURSE_APPROVED,
+                    course.getCoursename() + " of " + course.getTeacher().getUsername() + " has been approved. ID = "
+                            + courseId);
             return true;
         } else {
             throw new IllegalArgumentException("Only DRAFTED or MODIFIED courses can be approved");
@@ -176,16 +194,18 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseDTO courseModification(User Teacher, Long courseId, CourseDTO dto) {
+    public CourseDTO courseModification(User teacher, Long courseId, CourseDTO dto) {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
-        Boolean owned = teacherOwnership(Teacher.getUserid(), courseId);
+        Boolean owned = teacherOwnership(teacher.getUserid(), courseId);
 
         if (owned && (course.getState() == CourseState.DISABLED || course.getState() == CourseState.IN_DEVELOPMENT
                 || course.getState() == CourseState.REJECTED)) {
 
             CourseDTO updated = updateCourse(courseId, dto);
+
+            activityLogService.logAction(teacher.getUserid(), ActivityAction.COURSE_MODIFIED, null);
             return updated;
         }
 
@@ -203,6 +223,8 @@ public class CourseServiceImpl implements CourseService {
         if (owned && course.getState() == CourseState.APPROVED) {
             course.setState(CourseState.IN_DEVELOPMENT);
             courseRepo.save(course);
+
+            activityLogService.logAction(Teacher.getUserid(), ActivityAction.COURSE_IN_DEVELOPMENT, null);
             return true;
         } else {
             throw new IllegalArgumentException("Only approved courses can be moved to IN_DEVELOPMENT state");
@@ -217,6 +239,8 @@ public class CourseServiceImpl implements CourseService {
         if (owned && course.getState() == CourseState.IN_DEVELOPMENT) {
             course.setState(CourseState.LAUNCHED);
             courseRepo.save(course);
+
+            activityLogService.logAction(Teacher.getUserid(), ActivityAction.COURSE_LAUNCHED, null);
             return true;
         } else {
             throw new IllegalArgumentException("Only courses in IN_DEVELOPMENT state can be launched");
@@ -225,7 +249,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseDTO courseDisable(User admin, Long courseId) {
-        if (!userService.adminValidation(admin.getUserid())){
+        if (!userService.adminValidation(admin.getUserid())) {
             throw new RoleMismatchException("Only Admin can disable course");
         }
         Course course = courseRepo.findById(courseId)
@@ -234,6 +258,12 @@ public class CourseServiceImpl implements CourseService {
         if (course.getState() == CourseState.LAUNCHED) {
             course.setState(CourseState.DISABLED);
             courseRepo.save(course);
+
+            activityLogService.logAction(
+                admin.getUserid(),
+                ActivityAction.COURSE_DISABLED,
+                course.getCoursename() + " of " + course.getTeacher().getUsername() + " has been disabled. ID = "
+                + courseId);
             return mapper.map(course, CourseDTO.class);
         } else {
             throw new IllegalArgumentException("Only launched courses can be disabled");
