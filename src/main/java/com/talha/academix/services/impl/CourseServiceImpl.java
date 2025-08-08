@@ -185,10 +185,10 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Boolean courseDevelopment(User Teacher, Long courseId) {
         Course course = courseRepo.findById(courseId)
-        .orElseThrow(() -> new RuntimeException("Course not found"));
+                .orElseThrow(() -> new RuntimeException("Course not found"));
 
         Boolean owned = teacherOwnership(Teacher.getUserid(), courseId);
-        
+
         if (owned && course.getState() == CourseState.APPROVED) {
             course.setState(CourseState.IN_DEVELOPMENT);
             courseRepo.save(course);
@@ -200,9 +200,18 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Boolean courseLaunch(User Teacher, Long courseId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'courseLaunch'");
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        Boolean owned = teacherOwnership(Teacher.getUserid(), courseId);
+        if (owned && course.getState() == CourseState.IN_DEVELOPMENT) {
+            course.setState(CourseState.LAUNCHED);
+            courseRepo.save(course);
+            return true;
+        } else {
+            throw new IllegalArgumentException("Only courses in IN_DEVELOPMENT state can be launched");
+        }
     }
+    
 
     private boolean teacherOwnership(Long userid, Long courseId) {
         Course course = courseRepo.findById(courseId)
