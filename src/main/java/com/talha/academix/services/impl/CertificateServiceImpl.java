@@ -11,7 +11,6 @@ import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.enums.EnrollmentStatus;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Certificate;
-import com.talha.academix.model.Course;
 import com.talha.academix.model.Enrollment;
 import com.talha.academix.model.User;
 import com.talha.academix.repository.CertificateRepo;
@@ -41,24 +40,20 @@ public class CertificateServiceImpl implements CertificateService {
             throw new IllegalStateException("Enrollment status must be COMPLETED to award certificate.");
         }
 
-        Course course = enrollment.getCourse();
-        User student = enrollment.getStudent();
-        User teacher = course.getTeacher();
-
         Certificate certificate = new Certificate();
-        certificate.setStudent(student);
-        certificate.setTeacher(teacher);
-        certificate.setCourse(course);
+        certificate.setStudent(enrollment.getStudent());
+        certificate.setTeacher(enrollment.getCourse().getTeacher());
+        certificate.setCourse(enrollment.getCourse());
         certificate.setMarks(enrollment.getMarks());
         certificate.setDate(new Date().toInstant());
 
         certificateRepo.save(certificate);
 
         activityLogService.logAction(
-                student.getUserid(),
+                enrollment.getStudent().getUserid(),
                 ActivityAction.CERTIFICATE_AWARDED,
-                "Certificate " + certificate.getCertificateId() + " awarded to Student " + student.getUserid() +
-                        " for Course " + course.getCourseid());
+                "Certificate " + certificate.getCertificateId() + " awarded to Student " + enrollment.getStudent().getUserid() +
+                        " for Course " + enrollment.getCourse().getCourseid());
 
         return modelMapper.map(certificate, CertificateDTO.class);
     }
