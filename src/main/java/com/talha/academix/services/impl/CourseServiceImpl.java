@@ -268,21 +268,13 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public boolean teacherValidation(Long userid, Long courseId) {
-        if (courseRepo.findByCourseIdAndTeacherId(userid, courseId) != null) {
-            return true;
-        } else
-            return false;
-    }
-
-    @Override
     public boolean teacherOwnership(Long userid, Long courseId) {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
         if (course.getTeacher().getUserid().equals(userid)) {
             return true;
         } else {
-            throw new RoleMismatchException("Only the Teacher who owned the course can modify it");
+            throw new RoleMismatchException("Teacher"+ course.getTeacher().getUsername() +" not owned the course" + course.getCoursename());
         }
     }
 }

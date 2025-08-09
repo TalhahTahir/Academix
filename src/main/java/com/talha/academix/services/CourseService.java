@@ -44,8 +44,6 @@ public interface CourseService {
 
     void deleteCourseByAdmin(Long userid, Long courseId);
 
-    boolean teacherValidation(Long userid, Long courseId);
-
     boolean teacherOwnership(Long userid, Long courseId);
 
 }
