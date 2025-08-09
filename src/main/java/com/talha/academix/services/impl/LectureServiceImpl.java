@@ -33,7 +33,7 @@ public class LectureServiceImpl implements LectureService {
         Content content = contentRepo.findById(dto.getContentId())
         .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
 
-        if(courseService.teacherValidation(userid, content.getCourse().getCourseid())){
+        if(courseService.teacherOwnership(userid, content.getCourse().getCourseid())){
 
             Lecture lecture = new Lecture();
             lecture.setContent(content);
@@ -53,7 +53,7 @@ public class LectureServiceImpl implements LectureService {
         Content content = contentRepo.findById(dto.getContentId())
         .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
 
-        if(courseService.teacherValidation(userid, content.getCourse().getCourseid())){
+        if(courseService.teacherOwnership(userid, content.getCourse().getCourseid())){
 
         Lecture existing = lectureRepo.findById(lectureId)
         .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
@@ -100,7 +100,7 @@ public class LectureServiceImpl implements LectureService {
         Content content = contentRepo.findById(lecture.getContent().getContentID())
             .orElseThrow(() -> new ResourceNotFoundException("COntent not found"));
 
-        if(courseService.teacherValidation(userid, content.getCourse().getCourseid())){
+        if(courseService.teacherOwnership(userid, content.getCourse().getCourseid())){
         lectureRepo.delete(lecture);
         }
         else throw new RoleMismatchException("Only Teacher can delete lecture");
