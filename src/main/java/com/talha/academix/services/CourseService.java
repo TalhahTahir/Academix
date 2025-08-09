@@ -46,4 +46,6 @@ public interface CourseService {
 
     boolean teacherValidation(Long userid, Long courseId);
 
+    boolean teacherOwnership(Long userid, Long courseId);
+
 }

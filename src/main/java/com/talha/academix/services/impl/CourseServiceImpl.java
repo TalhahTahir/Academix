@@ -275,7 +275,8 @@ public class CourseServiceImpl implements CourseService {
             return false;
     }
 
-    private boolean teacherOwnership(Long userid, Long courseId) {
+    @Override
+    public boolean teacherOwnership(Long userid, Long courseId) {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
         if (course.getTeacher().getUserid().equals(userid)) {

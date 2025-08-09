@@ -1,6 +1,7 @@
 package com.talha.academix.dto;
 
 import com.talha.academix.enums.CourseCatagory;
+import com.talha.academix.enums.CourseState;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +15,7 @@ public class CourseDTO {
     private String coursename;
     private String duration;
     private Integer fees;
-    private Integer salary;
+    private CourseState state;
     private CourseCatagory catagory;
     private Long teacherid;
     // Representing collections by IDs or omitted
