@@ -18,7 +18,6 @@ import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.ContentService;
 import com.talha.academix.services.CourseService;
-import com.talha.academix.services.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +29,6 @@ public class ContentServiceImpl implements ContentService {
         private final CourseRepo courseRepo;
         private final CourseService courseService;
         private final ActivityLogService activityLogService;
-        private final UserService userService;
         private final ModelMapper mapper;
         Boolean owned;
 

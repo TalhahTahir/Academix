@@ -56,6 +56,13 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
+    public EnrollmentDTO getEnrollmentById(Long id){
+        Enrollment enrollment = enrollmentRepo.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
+        return mapper.map(enrollment, EnrollmentDTO.class);
+    }
+
+    @Override
     public List<EnrollmentDTO> getEnrollmentsByStudent(Long studentId) {
         User student = userRepo.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
@@ -167,6 +174,20 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         // 5. Map to DTO and return
         return mapper.map(saved, EnrollmentDTO.class);
+    }
+
+    @Override
+    public Enrollment getEnrollmentEntity(Long enrollmentId) {
+        Enrollment enrollment = enrollmentRepo.findById(enrollmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + enrollmentId));
+        return enrollment;
+    }
+
+    @Override
+    public void updateCompletionPercentage(Long enrollmentId, double percentage) {
+        Enrollment enrollment = getEnrollmentEntity(enrollmentId);
+        enrollment.setCompletionPercentage(percentage);
+        enrollmentRepo.save(enrollment);
     }
 
 }
