@@ -42,7 +42,7 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public ExamDTO createExam(Long teacherId, ExamDTO dto) {
 
-        if (courseService.teacherValidation(teacherId, dto.getCourseId())) {
+        if (courseService.teacherOwnership(teacherId, dto.getCourseId())) {
 
             Exam exam = modelMapper.map(dto, Exam.class);
             exam.setCourse(courseRepo.findById(dto.getCourseId())
@@ -59,7 +59,7 @@ public class ExamServiceImpl implements ExamService {
         Exam existing = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
 
-        if (courseService.teacherValidation(userid, existing.getCourse().getCourseid())) {
+        if (courseService.teacherOwnership(userid, existing.getCourse().getCourseid())) {
             existing.setTitle(dto.getTitle());
             examRepo.save(existing);
 
@@ -89,7 +89,7 @@ public class ExamServiceImpl implements ExamService {
         Exam exam = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
 
-        if (courseService.teacherValidation(userid, exam.getCourse().getCourseid())) {
+        if (courseService.teacherOwnership(userid, exam.getCourse().getCourseid())) {
             examRepo.delete(exam);
         } else {
             throw new RoleMismatchException("Only teacher can delete exam");
