@@ -56,9 +56,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public EnrollmentDTO getEnrollmentById(Long id){
+    public EnrollmentDTO getEnrollmentById(Long id) {
         Enrollment enrollment = enrollmentRepo.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
         return mapper.map(enrollment, EnrollmentDTO.class);
     }
 
