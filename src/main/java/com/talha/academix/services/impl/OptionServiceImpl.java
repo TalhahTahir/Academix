@@ -33,7 +33,7 @@ public class OptionServiceImpl implements OptionService {
         Question question = questionRepo.findById(questionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
     
-        if(courseService.teacherValidation(userid, question.getExam().getCourse().getCourseid())){
+        if(courseService.teacherOwnership(userid, question.getExam().getCourse().getCourseid())){
 
         if (dto.isCorrect()) {
             long count = optionRepo.countByQuestionIdAndIsCorrectTrue(questionId);
@@ -65,7 +65,7 @@ public class OptionServiceImpl implements OptionService {
         Option option = optionRepo.findById(optionId)
             .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + optionId));
         
-        if(courseService.teacherValidation(userid, option.getQuestion().getExam().getCourse().getCourseid())){
+        if(courseService.teacherOwnership(userid, option.getQuestion().getExam().getCourse().getCourseid())){
             option.setText(dto.getText());
             option.setCorrect(dto.isCorrect());
             option = optionRepo.save(option);
@@ -81,7 +81,7 @@ public class OptionServiceImpl implements OptionService {
         Option option = optionRepo.findById(optionId)
             .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + optionId));
 
-        if(courseService.teacherValidation(userid, option.getQuestion().getExam().getCourse().getCourseid())){
+        if(courseService.teacherOwnership(userid, option.getQuestion().getExam().getCourse().getCourseid())){
         optionRepo.delete(option);
     }
     else throw new RoleMismatchException("Only teacher can delete options");
