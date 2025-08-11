@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.talha.academix.dto.AttemptDTO;
 import com.talha.academix.dto.EnrollmentDTO;
 import com.talha.academix.enums.ActivityAction;
+import com.talha.academix.exception.AlreadyExistException;
+import com.talha.academix.exception.BlankAnswerException;
 import com.talha.academix.exception.ForbiddenException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Attempt;
@@ -71,14 +73,14 @@ public class AttemptServiceImpl implements AttemptService {
 
         // Ensure attempt isn't already submitted
         if (attempt.getCompletedAt() != null) {
-            throw new IllegalStateException("This attempt is already submitted.");
+            throw new AlreadyExistException("This attempt is already submitted.");
         }
 
         // Load all answers linked to this attempt
         List<AttemptAnswer> answers = attemptAnswerRepo.findByAttemptId(attemptId);
 
         if (answers.isEmpty()) {
-            throw new IllegalStateException("Cannot submit an attempt without answers.");
+            throw new  BlankAnswerException("Cannot submit an attempt without answers.");
         }
 
         // Calculate marks
