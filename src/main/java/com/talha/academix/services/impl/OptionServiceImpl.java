@@ -7,6 +7,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.OptionDTO;
+import com.talha.academix.exception.InvalidAttemptException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.model.Option;
@@ -37,8 +38,8 @@ public class OptionServiceImpl implements OptionService {
 
         if (dto.isCorrect()) {
             long count = optionRepo.countByQuestionIdAndIsCorrectTrue(questionId);
-            if (count > 0) {
-                throw new IllegalArgumentException("Only one option can be marked as correct per question.");
+            if (count > 1) {
+                throw new InvalidAttemptException("Only one option can be marked as correct per question.");
             }
         }
     
