@@ -10,6 +10,7 @@ import com.talha.academix.dto.CertificateDTO;
 import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.enums.EnrollmentStatus;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.exception.UncompleteEnrollmentException;
 import com.talha.academix.model.Certificate;
 import com.talha.academix.model.Enrollment;
 import com.talha.academix.model.User;
@@ -37,7 +38,7 @@ public class CertificateServiceImpl implements CertificateService {
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + enrollmentId));
 
         if(!enrollment.getStatus().equals(EnrollmentStatus.COMPLETED)){
-            throw new IllegalStateException("Enrollment status must be COMPLETED to award certificate.");
+            throw new UncompleteEnrollmentException("Enrollment status must be COMPLETED to award certificate.");
         }
 
         Certificate certificate = new Certificate();
