@@ -10,6 +10,7 @@ import com.talha.academix.dto.AttemptDTO;
 import com.talha.academix.dto.EnrollmentDTO;
 import com.talha.academix.dto.ExamDTO;
 import com.talha.academix.enums.ActivityAction;
+import com.talha.academix.exception.BlankAnswerException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.model.Attempt;
@@ -113,7 +114,7 @@ public class ExamServiceImpl implements ExamService {
     
         List<AttemptAnswer> answers = attempt.getAnswers();
         if (answers.isEmpty()) {
-            throw new IllegalStateException("Cannot check an attempt without answers.");
+            throw new BlankAnswerException("Cannot check an attempt without answers.");
         }
     
         int marksCount = 0;
