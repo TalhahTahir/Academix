@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.AttemptAnswerDTO;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.exception.UnmatchedExamException;
 import com.talha.academix.model.Attempt;
 import com.talha.academix.model.AttemptAnswer;
 import com.talha.academix.model.Option;
@@ -41,14 +42,14 @@ public class AttemptAnswerServiceImpl implements AttemptAnswerService {
             .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
     
         if (!question.getExam().getId().equals(attempt.getExam().getId())) {
-            throw new IllegalArgumentException("This question does not belong to the exam for this attempt.");
+            throw new UnmatchedExamException("This question does not belong to the exam for this attempt.");
         }
     
         Option option = optionRepo.findById(selectedOptionId)
             .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + selectedOptionId));
     
         if (!option.getQuestion().getId().equals(questionId)) {
-            throw new IllegalArgumentException("This option does not belong to the provided question.");
+            throw new UnmatchedExamException("This option does not belong to the provided question.");
         }
     
         AttemptAnswer answer = new AttemptAnswer();
