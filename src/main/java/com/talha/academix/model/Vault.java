@@ -1,14 +1,16 @@
 package com.talha.academix.model;
 
+import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,24 +18,33 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
+@Table(name="vault")
 public class Vault {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="user_id", nullable=false, unique=true)
     private User user;
 
-    private Double balance; // Current balance in the vault
-    private Double totalearned;
-    private Double totalwithdrawn; // Total amount withdrawn from the vault
+    @Column(name="available_balance", nullable=false, precision=18, scale=2)
+    private BigDecimal availableBalance = BigDecimal.ZERO;
+
+    @Column(name="total_earned", nullable=false, precision=18, scale=2)
+    private BigDecimal totalEarned = BigDecimal.ZERO;
+
+    @Column(name="total_withdrawn", nullable=false, precision=18, scale=2)
+    private BigDecimal totalWithdrawn = BigDecimal.ZERO;
+
+    @Column(name="currency", length=3, nullable=false)
+    private String currency = "USD";
+
+    @Column(name="created_at", updatable=false)
     private Instant createdAt;
+
+    @Column(name="updated_at")
     private Instant updatedAt;
 
-    @OneToMany(mappedBy = "vault", fetch = FetchType.LAZY)
-    private List<Payment> payments;
-
-    @OneToMany(mappedBy = "vault", fetch = FetchType.LAZY)
-    private List<Wallet> withdrawals;
-
+    // no collections here (keep Vault small). Query vault_transaction by vault_id instead.
 }
