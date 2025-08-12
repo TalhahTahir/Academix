@@ -1,5 +1,7 @@
 package com.talha.academix.enums;
 
-public class TxStatus {
-    
+public enum  TxStatus {
+    PENDING,
+    COMPLETED,
+    FAILED,
 }
