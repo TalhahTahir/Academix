@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VaultTrtanscation {
+public class VaultTranscationDTO {
         private Long id;
     private Long vaultId;
     private BigDecimal amount;
