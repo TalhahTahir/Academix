@@ -46,5 +46,4 @@ public class Vault {
     @Column(name="updated_at")
     private Instant updatedAt;
 
-    // no collections here (keep Vault small). Query vault_transaction by vault_id instead.
 }
