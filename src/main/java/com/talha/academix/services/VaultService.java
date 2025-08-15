@@ -1,5 +1,7 @@
 package com.talha.academix.services;
 
+import java.math.BigDecimal;
+
 import com.talha.academix.dto.VaultDTO;
 
 public interface VaultService {
@@ -9,9 +11,11 @@ public interface VaultService {
     void deleteVault(Long vaultId);
     VaultDTO getVaultByUserId(Long userId);
 
-    Long getTotalEarned();
-    Long getTotalWithdrawn();
-    Long getAvailableBalance();
+    BigDecimal getTotalEarned();
+
+    BigDecimal getTotalWithdrawn();
+
+    BigDecimal getTotalAvailableBalance();
 
 
 
