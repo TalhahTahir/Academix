@@ -1,8 +1,10 @@
 package com.talha.academix.services.impl;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -52,29 +54,11 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
     }
 
     @Override
-    public long countTransactionsByVaultId(Long vaultId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'countTransactionsByVaultId'");
-    }
-
-    @Override
-    public BigDecimal getTotalTransactionAmountByVaultId(Long vaultId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTotalTransactionAmountByVaultId'");
-    }
-
-    @Override
     public List<VaultTransactionDTO> getTransactionsByVaultId(Long vaultId) {   
         List<VaultTransaction> txs = vaultTxRepo.findAllByVaultId(vaultId);
         return txs.stream()
             .map(tx -> mapper.map(tx, VaultTransactionDTO.class))
             .toList();
-    }
-
-    @Override
-    public Page<VaultTransactionDTO> listTransactionsByVaultId(Long vaultId, Pageable p) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'listTransactionsByVaultId'");
     }
 
     @Override
@@ -87,12 +71,6 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
     }
 
     @Override
-    public Page<VaultTransactionDTO> listAllTransactions(Pageable p) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'listAllTransactions'");
-    }
-
-    @Override
     public List<VaultTransactionDTO> getTransactionsByCourseId(Long courseId) {
 
         List<VaultTransaction> txs = vaultTxRepo.findAllByCourseId(courseId);
@@ -102,27 +80,65 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
     }
 
     @Override
-    public List<VaultTransactionDTO> getTransactionsForDay(LocalDate date) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTransactionsForDay'");
-    }
+public long countTransactionsByVaultId(Long vaultId) {
+    return vaultTxRepo.countByVaultId(vaultId);
+}
 
-    @Override
-    public List<VaultTransactionDTO> getTransactionsForWeek(LocalDate weekStart) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTransactionsForWeek'");
-    }
+@Override
+public BigDecimal getTotalTransactionAmountByVaultId(Long vaultId) {
+    return vaultTxRepo.sumAmountByVaultId(vaultId);
+}
 
-    @Override
-    public List<VaultTransactionDTO> getTransactionsForMonth(YearMonth month) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTransactionsForMonth'");
-    }
+@Override
+public Page<VaultTransactionDTO> listTransactionsByVaultId(Long vaultId, Pageable p) {
+    return vaultTxRepo.findAllByVaultId(vaultId, p)
+            .map(tx -> mapper.map(tx, VaultTransactionDTO.class));
+}
 
-    @Override
-    public List<VaultTransactionDTO> getTransactionsForYear(int year) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTransactionsForYear'");
-    }
+@Override
+public Page<VaultTransactionDTO> listAllTransactions(Pageable p) {
+    return vaultTxRepo.findAll(p)
+            .map(tx -> mapper.map(tx, VaultTransactionDTO.class));
+}
+
+@Override
+public List<VaultTransactionDTO> getTransactionsForDay(LocalDate date) {
+    Instant start = date.atStartOfDay(ZoneOffset.UTC).toInstant();
+    Instant end = date.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+
+    return vaultTxRepo.findAllByCreatedAtBetween(start, end)
+            .stream().map(tx -> mapper.map(tx, VaultTransactionDTO.class))
+            .toList();
+}
+
+@Override
+public List<VaultTransactionDTO> getTransactionsForWeek(LocalDate weekStart) {
+    Instant start = weekStart.atStartOfDay(ZoneOffset.UTC).toInstant();
+    Instant end = weekStart.plusWeeks(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+
+    return vaultTxRepo.findAllByCreatedAtBetween(start, end)
+            .stream().map(tx -> mapper.map(tx, VaultTransactionDTO.class))
+            .toList();
+}
+
+@Override
+public List<VaultTransactionDTO> getTransactionsForMonth(YearMonth month) {
+    Instant start = month.atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+    Instant end = month.plusMonths(1).atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+
+    return vaultTxRepo.findAllByCreatedAtBetween(start, end)
+            .stream().map(tx -> mapper.map(tx, VaultTransactionDTO.class))
+            .toList();
+}
+
+@Override
+public List<VaultTransactionDTO> getTransactionsForYear(int year) {
+    Instant start = LocalDate.of(year, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant();
+    Instant end = LocalDate.of(year + 1, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant();
+
+    return vaultTxRepo.findAllByCreatedAtBetween(start, end)
+            .stream().map(tx -> mapper.map(tx, VaultTransactionDTO.class))
+            .toList();
+}
 
 }
