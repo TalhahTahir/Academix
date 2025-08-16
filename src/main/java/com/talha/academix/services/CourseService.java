@@ -3,7 +3,7 @@ package com.talha.academix.services;
 import java.util.List;
 
 import com.talha.academix.dto.CourseDTO;
-import com.talha.academix.enums.CourseCatagory;
+import com.talha.academix.enums.CourseCategory;
 import com.talha.academix.enums.CourseState;
 import com.talha.academix.model.User;
 
@@ -12,21 +12,21 @@ public interface CourseService {
 
     CourseDTO createCourseByTeacher(Long userid, CourseDTO dto);
 
-    Boolean courseRejection(User admin, Long courseId);
+    Boolean courseRejection(Long adminId, Long courseId);
 
     CourseDTO courseModification(User Teacher, Long courseId, CourseDTO dto);
     
-    Boolean courseApproval(User admin, Long courseId);
+    Boolean courseApproval(Long adminId, Long courseId);
     
     Boolean courseDevelopment(User Teacher, Long courseId);
 
     Boolean courseLaunch(User Teacher, Long courseId);
 
-    CourseDTO courseDisable(User admin, Long courseId);
+    CourseDTO courseDisable(Long adminId, Long courseId);
 
     CourseDTO getCourseById(Long courseId);
     
-    List<CourseDTO> getCourseByCatagory(CourseCatagory catagory);
+    List<CourseDTO> getCourseByCategory(CourseCategory category);
     
     List<CourseDTO> getAllCourses();
     

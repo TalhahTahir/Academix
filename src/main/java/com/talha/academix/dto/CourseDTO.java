@@ -1,6 +1,8 @@
 package com.talha.academix.dto;
 
-import com.talha.academix.enums.CourseCatagory;
+import java.math.BigDecimal;
+
+import com.talha.academix.enums.CourseCategory;
 import com.talha.academix.enums.CourseState;
 
 import lombok.AllArgsConstructor;
@@ -14,9 +16,8 @@ public class CourseDTO {
     private Long courseid;
     private String coursename;
     private String duration;
-    private Integer fees;
+    private BigDecimal fees;
     private CourseState state;
-    private CourseCatagory catagory;
+    private CourseCategory category;
     private Long teacherid;
-    // Representing collections by IDs or omitted
 }

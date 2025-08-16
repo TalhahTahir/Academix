@@ -1,8 +1,9 @@
 package com.talha.academix.model;
 
+import java.math.BigDecimal;
 import java.util.List;
 
-import com.talha.academix.enums.CourseCatagory;
+import com.talha.academix.enums.CourseCategory;
 import com.talha.academix.enums.CourseState;
 
 import jakarta.persistence.CascadeType;
@@ -34,9 +35,9 @@ public class Course {
     @NotEmpty
     private String duration;
     @NotEmpty
-    private Integer fees;
+    private BigDecimal fees;
     
-    private CourseCatagory catagory;
+    private CourseCategory category;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable=false)
