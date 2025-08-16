@@ -17,12 +17,11 @@ public class VaultTransactionDTO {
         private Long id;
     private Long vaultId;
     private BigDecimal amount;
-    private VaultTxType type;
-    private TxStatus status;
-    private Long relatedPaymentId;
-    private Long relatedEnrollmentId;
-    private Long initiatedBy;
+    private VaultTxType type;           // ENROLLMENT_CREDIT | WITHDRAWAL_REQUEST | WITHDRAWAL_PAYOUT
+    private TxStatus status;            //     PENDING | COMPLETED | FAILED
+    private Long PaymentId;
+    private Long EnrollmentId;
+    private Long initiaterId;
     private BigDecimal balanceAfter;
-    private String notes;
     private Instant createdAt;
 }

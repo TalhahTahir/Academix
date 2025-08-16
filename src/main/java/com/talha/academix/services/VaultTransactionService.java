@@ -11,24 +11,31 @@ import org.springframework.data.domain.Pageable;
 import com.talha.academix.dto.VaultTransactionDTO;
 
 public interface VaultTransactionService {
-    
-VaultTransactionDTO createTransaction(VaultTransactionDTO dto);
-VaultTransactionDTO getTransactionById(Long transactionId);
 
-long countTransactionsByVaultId(Long vaultId);
-BigDecimal getTotalTransactionAmountByVaultId(Long vaultId);
+    VaultTransactionDTO createTransaction(VaultTransactionDTO dto);
 
-List<VaultTransactionDTO> getTransactionsByVaultId(Long vaultId);               // small sets only
-Page<VaultTransactionDTO> listTransactionsByVaultId(Long vaultId, Pageable p); // recommended for production
+    VaultTransactionDTO getTransactionById(Long transactionId);
 
-List<VaultTransactionDTO> getAllTransactions();
-Page<VaultTransactionDTO> listAllTransactions(Pageable p);                     // recommended
+    long countTransactionsByVaultId(Long vaultId);
 
-List<VaultTransactionDTO> getTransactionsByCourseId(Long courseId);
+    BigDecimal getTotalTransactionAmountByVaultId(Long vaultId);
 
-List<VaultTransactionDTO> getTransactionsForDay(LocalDate date);
-List<VaultTransactionDTO> getTransactionsForWeek(LocalDate weekStart);         // ISO week start
-List<VaultTransactionDTO> getTransactionsForMonth(YearMonth month);
-List<VaultTransactionDTO> getTransactionsForYear(int year);
+    List<VaultTransactionDTO> getTransactionsByVaultId(Long vaultId); // small sets only
+
+    Page<VaultTransactionDTO> listTransactionsByVaultId(Long vaultId, Pageable p); // recommended for production
+
+    List<VaultTransactionDTO> getAllTransactions();
+
+    Page<VaultTransactionDTO> listAllTransactions(Pageable p); // recommended
+
+    List<VaultTransactionDTO> getTransactionsByCourseId(Long courseId);
+
+    List<VaultTransactionDTO> getTransactionsForDay(LocalDate date);
+
+    List<VaultTransactionDTO> getTransactionsForWeek(LocalDate weekStart); // ISO week start
+
+    List<VaultTransactionDTO> getTransactionsForMonth(YearMonth month);
+
+    List<VaultTransactionDTO> getTransactionsForYear(int year);
 
 }

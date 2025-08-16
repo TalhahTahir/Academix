@@ -36,20 +36,17 @@ public class VaultTransaction {
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
-    private VaultTxType type; // ENROLLMENT_CREDIT, WITHDRAWAL_REQUEST, WITHDRAWAL_PAYOUT, ADJUSTMENT
+    private VaultTxType type; // ENROLLMENT_CREDIT | WITHDRAWAL_REQUEST | WITHDRAWAL_PAYOUT
 
     @Enumerated(EnumType.STRING)
-    private TxStatus status; // PENDING, COMPLETED, FAILED, REVERSED
+    private TxStatus status; // PENDING | COMPLETED | FAILED
 
-    private Long relatedPaymentId;
-    private Long relatedEnrollmentId;
-    private Long initiatedBy;
+    private Payment payment;
+    private Enrollment enrollment;
+    private User initiater;
 
     @Column(precision=18, scale=2)
     private BigDecimal balanceAfter;
-
-    @Column(columnDefinition="TEXT")
-    private String notes;
 
     private Instant createdAt;
 }
