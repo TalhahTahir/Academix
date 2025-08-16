@@ -41,9 +41,18 @@ public class VaultTransaction {
     @Enumerated(EnumType.STRING)
     private TxStatus status; // PENDING | COMPLETED | FAILED
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id", nullable = true)
     private Payment payment;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "enrollment_id", nullable = true)
     private Enrollment enrollment;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "initiated_by", nullable = true)
     private User initiater;
+    
 
     @Column(precision=18, scale=2)
     private BigDecimal balanceAfter;
