@@ -9,6 +9,7 @@ import com.talha.academix.dto.VaultDTO;
 import com.talha.academix.exception.AlreadyExistException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Vault;
+import com.talha.academix.repository.UserRepo;
 import com.talha.academix.repository.VaultRepo;
 import com.talha.academix.services.VaultService;
 
@@ -20,6 +21,7 @@ public class VaultServiceImpl implements VaultService {
 
     private final VaultRepo vaultRepo;
     private final ModelMapper mapper;
+    private final UserRepo userRepo;
 
     @Override
     public VaultDTO createVault(VaultDTO dto) {
@@ -28,6 +30,8 @@ public class VaultServiceImpl implements VaultService {
             throw new AlreadyExistException("Vault already exists for user with ID: " + dto.getUserId());
         }
         Vault vault = mapper.map(dto, Vault.class);
+        vault.setUser(userRepo.findById(dto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + dto.getUserId())));
         vault = vaultRepo.save(vault);
         return mapper.map(vault, VaultDTO.class);
     }
@@ -44,6 +48,8 @@ public class VaultServiceImpl implements VaultService {
         Vault exist = vaultRepo.findById(vaultId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vault not found with id : " + vaultId));
         mapper.map(dto, exist);
+        exist.setUser(userRepo.findById(dto.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + dto.getUserId())));
         exist = vaultRepo.save(exist);
         return mapper.map(exist, VaultDTO.class);
     }

@@ -15,7 +15,15 @@ import org.springframework.stereotype.Service;
 import com.talha.academix.dto.VaultTransactionDTO;
 import com.talha.academix.exception.PaymentFailedException;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.model.Enrollment;
+import com.talha.academix.model.Payment;
+import com.talha.academix.model.User;
+import com.talha.academix.model.Vault;
 import com.talha.academix.model.VaultTransaction;
+import com.talha.academix.repository.EnrollmentRepo;
+import com.talha.academix.repository.PaymentRepo;
+import com.talha.academix.repository.UserRepo;
+import com.talha.academix.repository.VaultRepo;
 import com.talha.academix.repository.VaultTransactionRepo;
 import com.talha.academix.services.VaultTransactionService;
 
@@ -27,13 +35,40 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
 
     private final ModelMapper mapper;
     private final VaultTransactionRepo vaultTxRepo;
+    private final VaultRepo vaultRepo;
+    private final EnrollmentRepo enrollmentRepo;
+    private final PaymentRepo paymentRepo;
+    private final UserRepo userRepo;
+    
 
     @Override
     public VaultTransactionDTO createTransaction(VaultTransactionDTO dto) {
         if (dto.getPaymentId() == null)
             throw new PaymentFailedException("Can't relate to any payment record");
 
-        VaultTransaction vaultTx = mapper.map(dto, VaultTransaction.class);
+        Vault vault = vaultRepo.findById(dto.getVaultId())
+                .orElseThrow(() -> new ResourceNotFoundException("Vault not found with id: " + dto.getVaultId()));
+
+        Enrollment enrollment = enrollmentRepo.findById(dto.getEnrollmentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + dto.getEnrollmentId()));
+
+        Payment payment = paymentRepo.findById(dto.getPaymentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + dto.getPaymentId()));
+
+        User initiater = userRepo.findById(dto.getInitiaterId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + dto.getInitiaterId()));
+                
+        VaultTransaction vaultTx = new VaultTransaction();
+        vaultTx.setAmount(dto.getAmount());
+        vaultTx.setType(dto.getType());
+        vaultTx.setStatus(dto.getStatus());
+        vaultTx.setBalanceAfter(dto.getBalanceAfter());
+        vaultTx.setCreatedAt(Instant.now());
+        vaultTx.setVault(vault);
+        vaultTx.setPayment(payment);
+        vaultTx.setEnrollment(enrollment);
+        vaultTx.setInitiater(initiater);
+
         vaultTx = vaultTxRepo.save(vaultTx);
         return mapper.map(vaultTx, VaultTransactionDTO.class);
         /*
