@@ -14,5 +14,4 @@ public class DashboardStatsDTO {
     private long totalTeachers;
     private long totalExams;
     private long activeEnrollments;
-    private long pendingSalaryRequests;
 }

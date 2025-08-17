@@ -8,5 +8,5 @@ import com.talha.academix.model.User;
 public interface UserRepo extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
-    public long countByRole(Role role);
+    long countByRole(Role role);
 }

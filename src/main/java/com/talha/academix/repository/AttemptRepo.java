@@ -10,6 +10,6 @@ public interface AttemptRepo extends JpaRepository<Attempt, Long>{
 
     List<Attempt> findByStudentId(Long studentId);
 
-    public List<Attempt> findByExamId(Long examId);
+    List<Attempt> findByExamId(Long examId);
     
 }

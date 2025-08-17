@@ -8,6 +8,6 @@ import com.talha.academix.model.Question;
 
 public interface  QuestionRepo extends JpaRepository<Question, Long> {
 
-    public List<Question> findByExamId(Long examId);
+    List<Question> findByExamId(Long examId);
     
 }

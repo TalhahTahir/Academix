@@ -10,5 +10,5 @@ import com.talha.academix.model.Exam;
 public interface ExamRepo extends JpaRepository<Exam, Long> {
     List<Exam> findByCourse(Course course);
 
-    public List<Exam> findByCourseId(Long courseId);
+    List<Exam> findByCourseId(Long courseId);
 }
