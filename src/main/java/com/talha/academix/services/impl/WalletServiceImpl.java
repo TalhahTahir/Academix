@@ -25,49 +25,53 @@ public class WalletServiceImpl implements WalletService {
     private final ModelMapper mapper;
 
     @Override
-    public WalletDTO addOrUpdateWallet(WalletDTO dto) {
+    public WalletDTO addWallet(WalletDTO dto) {
         User user = userRepo.findById(dto.getUserID())
-            .orElseThrow(() -> new ResourceNotFoundException("User not found: " + dto.getUserID()));
-    
-        Wallet wallet = walletRepo.findByUser(user)
-            .orElseGet(() -> {
-                Wallet w = new Wallet();
-                w.setUser(user);
-                return w;
-            });
-    
-        wallet.setMedium(dto.getMedium());
-        wallet.setAccount(dto.getAccount());
-        wallet.setToken(dto.getToken()); // NEW: store the gateway token
-        wallet.setBrand(dto.getBrand()); // NEW: store brand (e.g., "Visa", "PayPal")
-        wallet.setAccountReference(dto.getAccountReference()); // NEW: masked UI value
-        wallet.setCreatedAt(dto.getCreatedAt());
-        wallet.setUpdatedAt(dto.getUpdatedAt());
-    
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + dto.getUserID()));
+
+        Wallet wallet = mapper.map(dto, Wallet.class);
+        wallet.setUser(user);
+
         wallet = walletRepo.save(wallet);
         return mapper.map(wallet, WalletDTO.class);
     }
 
     @Override
+    public WalletDTO updateWallet(Long walletId, WalletDTO dto) {
+        Wallet existing = walletRepo.findById(walletId)
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found: " + walletId));
+
+        User user = userRepo.findById(dto.getUserID())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + dto.getUserID()));
+
+        mapper.getConfiguration().setSkipNullEnabled(true);
+        mapper.map(dto, existing);
+        existing.setWalletID(walletId); // Ensure ID is set for update
+        existing.setUser(user);
+        existing = walletRepo.save(existing);
+        return mapper.map(existing, WalletDTO.class);
+    }
+
+    @Override
     public WalletDTO getWalletById(Long walletId) {
         Wallet wallet = walletRepo.findById(walletId)
-            .orElseThrow(() -> new ResourceNotFoundException("Wallet not found: " + walletId));
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found: " + walletId));
         return mapper.map(wallet, WalletDTO.class);
     }
 
     @Override
     public List<WalletDTO> getWalletsByUser(Long userId) {
         User user = userRepo.findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
         return walletRepo.findByUser(user).stream()
-            .map(w -> mapper.map(w, WalletDTO.class))
-            .toList();
+                .map(w -> mapper.map(w, WalletDTO.class))
+                .toList();
     }
 
     @Override
     public void deleteWallet(Long walletId) {
         Wallet wallet = walletRepo.findById(walletId)
-            .orElseThrow(() -> new ResourceNotFoundException("Wallet not found: " + walletId));
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found: " + walletId));
         walletRepo.delete(wallet);
     }
 }
