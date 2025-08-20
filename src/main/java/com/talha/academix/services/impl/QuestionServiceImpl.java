@@ -25,7 +25,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepo questionRepo;
     private final ExamRepo examRepo;
     private CourseService courseService;
-    private final ModelMapper modelMapper;
+    private final ModelMapper mapper;
 
     @Override
     public QuestionDTO addQuestion(Long userid, Long examId, QuestionDTO dto) {
@@ -34,11 +34,11 @@ public class QuestionServiceImpl implements QuestionService {
             .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
 
             if(courseService.teacherOwnership(userid, exam.getCourse().getCourseid())){
-        Question question = modelMapper.map(dto, Question.class);
+        Question question = mapper.map(dto, Question.class);
         question.setExam(exam);
         question = questionRepo.save(question);
 
-        return modelMapper.map(question, QuestionDTO.class);
+        return mapper.map(question, QuestionDTO.class);
             }
             else throw new RoleMismatchException("Only teacher can add questions");
     }
@@ -47,7 +47,7 @@ public class QuestionServiceImpl implements QuestionService {
     public List<QuestionDTO> getQuestionsByExam(Long examId) {
         return questionRepo.findByExamId(examId)
             .stream()
-            .map(q -> modelMapper.map(q, QuestionDTO.class))
+            .map(q -> mapper.map(q, QuestionDTO.class))
             .collect(Collectors.toList());
     }
 
@@ -56,11 +56,19 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = questionRepo.findById(questionId)
             .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
 
+        Long examId = question.getExam().getId();
+        Exam exam = examRepo.findById(examId)
+            .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
+
         if (courseService.teacherOwnership(userid, question.getExam().getCourse().getCourseid())) {
-            question.setText(dto.getText());
+
+            mapper.getConfiguration().setSkipNullEnabled(true);
+            mapper.map(dto, question);
+            question.setId(questionId); // Ensure ID is set for update
+            question.setExam(exam); // Reassign exam to ensure it's not null
             question = questionRepo.save(question);
 
-            return modelMapper.map(question, QuestionDTO.class);
+            return mapper.map(question, QuestionDTO.class);
         } else {
             throw new RoleMismatchException("Only teacher can update question");
         }

@@ -37,19 +37,14 @@ public class VaultServiceImpl implements VaultService {
     }
 
     @Override
-    public VaultDTO getVaultById(Long vaultId) {
-        Vault vault = vaultRepo.findById(vaultId)
-                .orElseThrow(() -> new ResourceNotFoundException("Vault not found with id : " + vaultId));
-        return mapper.map(vault, VaultDTO.class);
-    }
-
-    @Override
     public VaultDTO updateVault(Long vaultId, VaultDTO dto) {
         Vault exist = vaultRepo.findById(vaultId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vault not found with id : " + vaultId));
+        mapper.getConfiguration().setSkipNullEnabled(true);
         mapper.map(dto, exist);
         exist.setUser(userRepo.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + dto.getUserId())));
+        exist.setId(vaultId);
         exist = vaultRepo.save(exist);
         return mapper.map(exist, VaultDTO.class);
     }
@@ -60,6 +55,13 @@ public class VaultServiceImpl implements VaultService {
         Vault vault = vaultRepo.findById(vaultId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vault not found with id : " + vaultId));
         vaultRepo.delete(vault);
+    }
+
+    @Override
+    public VaultDTO getVaultById(Long vaultId) {
+        Vault vault = vaultRepo.findById(vaultId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vault not found with id : " + vaultId));
+        return mapper.map(vault, VaultDTO.class);
     }
 
     @Override

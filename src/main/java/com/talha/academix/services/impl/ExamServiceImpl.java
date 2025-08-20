@@ -61,7 +61,13 @@ public class ExamServiceImpl implements ExamService {
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
 
         if (courseService.teacherOwnership(userid, existing.getCourse().getCourseid())) {
-            existing.setTitle(dto.getTitle());
+            
+            modelMapper.getConfiguration().setSkipNullEnabled(true);
+            modelMapper.map(dto, existing);
+
+            existing.setCourse(courseRepo.findById(dto.getCourseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Course not found")));
+
             examRepo.save(existing);
 
             return modelMapper.map(existing, ExamDTO.class);

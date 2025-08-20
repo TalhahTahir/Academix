@@ -262,10 +262,9 @@ public class CourseServiceImpl implements CourseService {
     public CourseDTO updateCourse(Long courseId, CourseDTO dto) {
         Course existing = courseRepo.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
-        existing.setCoursename(dto.getCoursename());
-        existing.setDuration(dto.getDuration());
-        existing.setFees(dto.getFees());
-        existing.setCategory(dto.getCategory());
+        
+        mapper.getConfiguration().setSkipNullEnabled(true);
+        mapper.map(dto, existing);
         existing.setState(CourseState.MODIFIED);
         existing = courseRepo.save(existing);
         return mapper.map(existing, CourseDTO.class);

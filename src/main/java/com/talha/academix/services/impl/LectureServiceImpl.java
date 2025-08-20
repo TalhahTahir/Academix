@@ -58,6 +58,8 @@ public class LectureServiceImpl implements LectureService {
         Lecture existing = lectureRepo.findById(lectureId)
         .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
 
+        mapper.getConfiguration().setSkipNullEnabled(true);
+        mapper.map(dto, existing);
         
         // if contentId changed, reassign content
         if (!existing.getContent().getContentID().equals(content.getContentID())) {
@@ -65,10 +67,7 @@ public class LectureServiceImpl implements LectureService {
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
             existing.setContent(newcontent);
         }
-
-        existing.setTitle(dto.getTitle());
-        existing.setVideoUrl(dto.getVideoUrl());
-        existing.setDuration(dto.getDuration());
+        
         existing = lectureRepo.save(existing);
 
         return mapper.map(existing, LectureDTO.class);}

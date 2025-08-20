@@ -50,15 +50,17 @@ public class DocumentServiceImpl implements DocumentService {
         Document existing = documentRepo.findById(documentId)
             .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
 
-        if (!existing.getContent().getContentID().equals(dto.getContentId())) {
-            Content content = contentRepo.findById(dto.getContentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
-            existing.setContent(content);
-        }
-
         if (courseService.teacherOwnership(userid, existing.getContent().getCourse().getCourseid())) {
-            existing.setTitle(dto.getTitle());
-            existing.setFilePath(dto.getFilePath());
+
+            mapper.getConfiguration().setSkipNullEnabled(true);
+            mapper.map(dto, existing);
+            
+            if (!existing.getContent().getContentID().equals(dto.getContentId())) {
+                Content content = contentRepo.findById(dto.getContentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
+                existing.setContent(content);
+            }
+        
             existing = documentRepo.save(existing);
 
             return mapper.map(existing, DocumentDTO.class);

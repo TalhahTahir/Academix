@@ -26,7 +26,7 @@ public class OptionServiceImpl implements OptionService {
     private final OptionRepo optionRepo;
     private final QuestionRepo questionRepo;
     private final CourseService courseService;
-    private final ModelMapper modelMapper;
+    private final ModelMapper mapper;
 
     @Override
     public OptionDTO addOption(Long userid, Long questionId, OptionDTO dto) {
@@ -43,11 +43,11 @@ public class OptionServiceImpl implements OptionService {
             }
         }
     
-        Option option = modelMapper.map(dto, Option.class);
+        Option option = mapper.map(dto, Option.class);
         option.setQuestion(question);
         option = optionRepo.save(option);
     
-        return modelMapper.map(option, OptionDTO.class);
+        return mapper.map(option, OptionDTO.class);
     }
     else throw new RoleMismatchException("Only teacher can add options");
     }
@@ -57,7 +57,7 @@ public class OptionServiceImpl implements OptionService {
     public List<OptionDTO> getOptionsByQuestion(Long questionId) {
         return optionRepo.findByQuestionId(questionId)
             .stream()
-            .map(o -> modelMapper.map(o, OptionDTO.class))
+            .map(o -> mapper.map(o, OptionDTO.class))
             .collect(Collectors.toList());
     }
 
@@ -65,13 +65,19 @@ public class OptionServiceImpl implements OptionService {
     public OptionDTO updateOption(Long userid, Long optionId, OptionDTO dto) {
         Option option = optionRepo.findById(optionId)
             .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + optionId));
+
+        Long questionId = option.getQuestion().getId();
+        Question question = questionRepo.findById(questionId)
+            .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
         
         if(courseService.teacherOwnership(userid, option.getQuestion().getExam().getCourse().getCourseid())){
-            option.setText(dto.getText());
-            option.setCorrect(dto.isCorrect());
+
+            mapper.getConfiguration().setSkipNullEnabled(true);
+            mapper.map(dto, option);
+            option.setQuestion(question);
             option = optionRepo.save(option);
     
-            return modelMapper.map(option, OptionDTO.class);
+            return mapper.map(option, OptionDTO.class);
         }
         else throw new RoleMismatchException("Only teacher can update options");
     }

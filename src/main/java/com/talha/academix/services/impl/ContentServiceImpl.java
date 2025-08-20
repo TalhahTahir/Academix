@@ -73,9 +73,11 @@ public class ContentServiceImpl implements ContentService {
                                         .orElseThrow(() -> new ResourceNotFoundException(
                                                         "Content not found with id: " + contentId));
 
-                        // only description and image are mutable
-                        content.setDescription(dto.getDescription());
-                        content.setImage(dto.getImage());
+                        mapper.getConfiguration().setSkipNullEnabled(true);
+                        mapper.map(dto, content);
+                        content.setCourse(courseRepo.findById(dto.getCourseID())
+                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                                        "Course not found with id: " + dto.getCourseID())));
                         content = contentRepo.save(content);
 
                         // after saving content:

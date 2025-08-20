@@ -7,6 +7,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.WalletDTO;
+import com.talha.academix.exception.ForbiddenException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.User;
 import com.talha.academix.model.Wallet;
@@ -44,6 +45,9 @@ public class WalletServiceImpl implements WalletService {
         User user = userRepo.findById(dto.getUserID())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + dto.getUserID()));
 
+        if (!walletOwnership(walletId, dto.getUserID())) {
+            throw new ForbiddenException("Wallet does not belong to user with ID: " + dto.getUserID());
+        }
         mapper.getConfiguration().setSkipNullEnabled(true);
         mapper.map(dto, existing);
         existing.setWalletID(walletId); // Ensure ID is set for update
@@ -73,5 +77,11 @@ public class WalletServiceImpl implements WalletService {
         Wallet wallet = walletRepo.findById(walletId)
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet not found: " + walletId));
         walletRepo.delete(wallet);
+    }
+
+    boolean walletOwnership(Long walletId, Long userId) {
+        Wallet wallet = walletRepo.findById(walletId)
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found: " + walletId));
+        return wallet.getUser().getUserid().equals(userId);
     }
 }

@@ -56,15 +56,9 @@ public class UserServiceImpl implements UserService {
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + id));
 
-        user.setUsername(dto.getUsername());
-        user.setGender(dto.getGender());
-        user.setPassword(dto.getPassword());
-        user.setEmail(dto.getEmail());
-        user.setPhone(dto.getPhone());
-        user.setImage(dto.getImage());
-        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
-            user.setPassword(dto.getPassword());
-        }
+        mapper.getConfiguration().setSkipNullEnabled(true);
+        mapper.map(dto, user);
+        user.setUserid(id);
 
         User updatedUser = userRepo.save(user);
         return mapper.map(updatedUser, UserDTO.class);
