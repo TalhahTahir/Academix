@@ -11,8 +11,8 @@ change admin course declearation
 payment logic updation
 
 course with same name?
-
-####Payment:
+---
+###Payment:
 keep async flow:
 1. payment initiate
 2. gateway give response about money deduction or process success
