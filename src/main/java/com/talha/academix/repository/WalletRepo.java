@@ -8,5 +8,5 @@ import com.talha.academix.model.User;
 import com.talha.academix.model.Wallet;
 
 public interface WalletRepo extends JpaRepository<Wallet, Long> {
-    List<Wallet> findByUser(User user);
+    List<Wallet> findByUser(User user); 
 }
