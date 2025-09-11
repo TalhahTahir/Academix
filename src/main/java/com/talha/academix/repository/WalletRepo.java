@@ -1,11 +1,12 @@
 package com.talha.academix.repository;
 
-import com.talha.academix.model.Wallet;
-import com.talha.academix.model.User;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
+import com.talha.academix.model.User;
+import com.talha.academix.model.Wallet;
 
 public interface WalletRepo extends JpaRepository<Wallet, Long> {
-    Optional<Wallet> findByUser(User user);
+    List<Wallet> findByUser(User user);
 }
