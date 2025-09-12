@@ -1,12 +1,16 @@
 package com.talha.academix.controllers;
 
-import com.talha.academix.dto.PaymentDTO;
-import com.talha.academix.enums.PaymentType;
-import com.talha.academix.services.PaymentService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.talha.academix.dto.PaymentInitiateRequest;
+import com.talha.academix.dto.PaymentInitiateResponse;
+import com.talha.academix.services.PaymentService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -15,28 +19,10 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @PostMapping
-    public PaymentDTO addPayment(@RequestBody PaymentDTO dto) {
-        return paymentService.addPayment(dto);
-    }
-
-    @GetMapping("/{paymentId}")
-    public PaymentDTO getPaymentById(@PathVariable Long paymentId) {
-        return paymentService.getPaymentById(paymentId);
-    }
-
-    @GetMapping("/user/{userId}")
-    public List<PaymentDTO> getPaymentsByUser(@PathVariable Long userId) {
-        return paymentService.getPaymentsByUser(userId);
-    }
-
-    @GetMapping("/course/{courseId}")
-    public List<PaymentDTO> getPaymentsByCourse(@PathVariable Long courseId) {
-        return paymentService.getPaymentsByCourse(courseId);
-    }
-
-    @GetMapping("/type/{type}")
-    public List<PaymentDTO> getPaymentsByType(@PathVariable PaymentType type) {
-        return paymentService.getPaymentsByType(type);
+    @PostMapping("/initiate")
+    public ResponseEntity<PaymentInitiateResponse> initiate(@RequestBody PaymentInitiateRequest req) {
+        return ResponseEntity.ok(
+                paymentService.initiatePayment(req.getUserId(), req.getCourseId())
+        );
     }
 }

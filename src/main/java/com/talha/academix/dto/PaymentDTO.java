@@ -1,27 +1,31 @@
 package com.talha.academix.dto;
 
-import java.time.ZonedDateTime;
+import java.math.BigDecimal;
+import java.time.Instant;
 
+import com.talha.academix.enums.PaymentProvider;
+import com.talha.academix.enums.PaymentStatus;
 import com.talha.academix.enums.PaymentType;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class PaymentDTO {
-    private Long paymentID;
-    private Long userID;
-    private Long courseID;
-    private Integer amount;
+    private Long id;
+    private Long userId;
+    private Long courseId;
+    private BigDecimal amount;
+    private String currency;
     private PaymentType paymentType;
-    private String account;
-    private String gatewayTransactionId;
-    private String gatewayStatus;
-    private ZonedDateTime date;
-    private String clientSecret;
-    private Boolean requiresAction;
+    private PaymentProvider provider;
+    private PaymentStatus status;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private Instant succeededAt;
 }
-
