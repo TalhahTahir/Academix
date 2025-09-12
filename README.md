@@ -22,3 +22,11 @@ keep async flow:
 by this i dont think we need sync flow because using above strategy:
 user gets fast service(sync feature)
 Platform gets security, scalibility, cost-friendly service(async feature)
+
+---
+
+Payment Service has 2 phases:
+
+1. Phase 1: accept only card payments | no wallets | use stripe in backend | only Async
+
+2. Phase 2: accept cards, bank Transfers, Mobile Wallets | have wallets  
