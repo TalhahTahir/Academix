@@ -5,10 +5,8 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.talha.academix.dto.PaymentDTO;
-import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.enums.PaymentType;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Course;
@@ -42,36 +40,15 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Transactional
-    public void confirmPayment(String transactionId) {
-        // called by front‑end after challenge
-        markAsPaid(transactionId);
+    public void markAsPaid(String paymentIntentId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'markAsPaid'");
     }
 
     @Override
-    @Transactional
-    public void markAsPaid(String transactionId) {
-        Payment p = paymentRepo.findByGatewayTransactionId(transactionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found for txn: " + transactionId));
-
-        if (!"succeeded".equalsIgnoreCase(p.getGatewayStatus())) {
-            p.setGatewayStatus("succeeded");
-            paymentRepo.save(p);
-
-            activityLogService.logAction(
-                    p.getUser().getUserid(),
-                    ActivityAction.PAYMENT,
-                    "Payment confirmed (txn=" + transactionId + ")");
-
-            // trigger enrollment or salary payout
-            if (p.getPaymentType() == PaymentType.INCOMING) {
-                enrollmentService.finalizeEnrollment(
-                        p.getUser().getUserid(),
-                        p.getCourse().getCourseid());
-            } else {
-                // for teacher payouts, you might call payoutService.finalizePayout(...)
-            }
-        }
+    public void confirmPayment(String transactionId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'confirmPayment'");
     }
 
     @Override
