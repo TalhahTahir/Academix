@@ -2,7 +2,6 @@ package com.talha.academix.model;
 
 import java.time.Instant;
 
-import com.talha.academix.enums.PaymentMedium;
 import com.talha.academix.enums.PaymentType;
 
 import jakarta.persistence.Entity;
@@ -43,9 +42,6 @@ public class Payment {
 
     @NotNull
     private Integer amount;
-
-    @Enumerated(EnumType.STRING)
-    private PaymentMedium medium;
 
     @NotEmpty
     private String account;

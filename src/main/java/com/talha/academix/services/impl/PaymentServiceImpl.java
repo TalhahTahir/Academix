@@ -8,24 +8,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.talha.academix.dto.PaymentDTO;
-import com.talha.academix.dto.WalletDTO;
 import com.talha.academix.enums.ActivityAction;
-import com.talha.academix.enums.PaymentMedium;
 import com.talha.academix.enums.PaymentType;
-import com.talha.academix.enums.Role;
-import com.talha.academix.exception.PaymentFailedException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.Payment;
 import com.talha.academix.model.User;
-import com.talha.academix.model.Wallet;
-import com.talha.academix.payment.model.PaymentRequest;
-import com.talha.academix.payment.model.PaymentResponse;
-import com.talha.academix.payment.orchestrator.PaymentOrchestrator;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.PaymentRepo;
 import com.talha.academix.repository.UserRepo;
-import com.talha.academix.repository.WalletRepo;
 import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.EnrollmentService;
 import com.talha.academix.services.PaymentService;
@@ -38,8 +29,6 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepo paymentRepo;
     private final UserRepo userRepo;
     private final CourseRepo courseRepo;
-    private final WalletRepo walletRepo;
-    private final PaymentOrchestrator orchestrator;
     private final ActivityLogService activityLogService;
     private final EnrollmentService enrollmentService;
     private final ModelMapper mapper;
@@ -47,68 +36,9 @@ public class PaymentServiceImpl implements PaymentService {
     
 
     @Override
-    @Transactional
     public PaymentDTO processPayment(Long userId, Long courseId) {
-        // 1. Load domain objects
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
-        Course course = courseRepo.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
-        Wallet wallet = walletRepo.findByUser(user)
-                .orElseThrow(() -> new ResourceNotFoundException("Wallet not set up for user: " + userId));
-
-        // 2. Determine amount and type
-        int amount;
-        PaymentType type;
-        if (user.getRole() == Role.STUDENT) {
-            type = PaymentType.INCOMING;
-            amount = course.getFees();
-        } else if (user.getRole() == Role.TEACHER) {
-            type = PaymentType.OUTGOING;
-            amount = course.getSalary();
-        } else {
-            throw new IllegalArgumentException("Invalid role for payment: " + user.getRole());
-        }
-
-        // 3. Build a unified request and invoke the gateway
-        PaymentRequest req = new PaymentRequest((long) amount, wallet.getAccount(), type, wallet.getMedium(), wallet.getToken(), wallet.getWalletID());
-        PaymentResponse resp = orchestrator.orchestrate(req);
-
-        // 4. Persist initial Payment record
-        Payment payment = new Payment();
-        payment.setUser(user);
-        payment.setCourse(course);
-        payment.setAmount(amount);
-        payment.setMedium(wallet.getMedium());
-        payment.setAccount(wallet.getAccount());
-        payment.setPaymentType(type);
-        payment.setGatewayTransactionId(resp.getTransactionId());
-        payment.setGatewayStatus(resp.getStatusMessage());
-        payment.setDate(new Date().toInstant());
-        payment = paymentRepo.save(payment);
-
-        // 5. Log the initiation
-        activityLogService.logAction(
-                userId,
-                ActivityAction.PAYMENT,
-                String.format("%s initiated %s payment of %d for course %d (txn=%s)",
-                        user.getRole(), type, amount, courseId, resp.getTransactionId()));
-
-        // 6. Drive the continuation based on response
-        if (resp.isSuccess()) {
-            // fully settled immediately
-            markAsPaid(resp.getTransactionId());
-        } else if (resp.isRequiresAction()) {
-            // frontend must handle the 3DS challenge with this clientSecret
-        } else {
-            throw new PaymentFailedException("Payment failed: " + resp.getStatusMessage());
-        }
-
-        // 7. Map back to DTO including new fields
-        PaymentDTO dto = mapper.map(payment, PaymentDTO.class);
-        dto.setClientSecret(resp.getClientSecret());
-        dto.setRequiresAction(resp.isRequiresAction());
-        return dto;
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'processPayment'");
     }
 
     @Override
@@ -190,23 +120,4 @@ public class PaymentServiceImpl implements PaymentService {
         return mapper.map(payment, PaymentDTO.class);
     }
 
-    @Override
-    public WalletDTO saveTokenizedWallet(Long userId, PaymentMedium medium, String account, String token, String brand,
-            String accountReference) {
-        // Find the wallet for user and medium
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
-        Wallet wallet = walletRepo.findByUser(user)
-                .orElseThrow(() -> new ResourceNotFoundException("Wallet not set up for user: " + userId));
-
-        // Only update token/brand/accountReference if token cell is empty (first-time tokenization)
-        if (wallet.getToken() == null || wallet.getToken().isBlank()) {
-            wallet.setToken(token);
-            wallet.setBrand(brand);
-            wallet.setAccountReference(accountReference);
-            wallet.setUpdatedAt(java.time.Instant.now());
-            walletRepo.save(wallet);
-        }
-        return mapper.map(wallet, WalletDTO.class);
-    }
 }

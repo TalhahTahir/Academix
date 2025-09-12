@@ -2,7 +2,6 @@ package com.talha.academix.dto;
 
 import java.time.ZonedDateTime;
 
-import com.talha.academix.enums.PaymentMedium;
 import com.talha.academix.enums.PaymentType;
 
 import lombok.AllArgsConstructor;
@@ -17,7 +16,6 @@ public class PaymentDTO {
     private Long userID;
     private Long courseID;
     private Integer amount;
-    private PaymentMedium medium;
     private PaymentType paymentType;
     private String account;
     private String gatewayTransactionId;
