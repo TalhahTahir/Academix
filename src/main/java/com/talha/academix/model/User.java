@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.talha.academix.enums.Role;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -57,6 +56,4 @@ public class User {
  @OneToMany(mappedBy="user", fetch=FetchType.LAZY)
  private List<Payment> payments;
 
- @OneToMany(mappedBy= "user", cascade=CascadeType.ALL, fetch=FetchType.LAZY)
- private Wallet wallet;
 }
