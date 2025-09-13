@@ -3,7 +3,6 @@ package com.talha.academix.services;
 import java.time.Instant;
 import java.util.List;
 
-import com.stripe.model.Event;
 import com.talha.academix.dto.PaymentDTO;
 import com.talha.academix.dto.PaymentInitiateResponse;
 import com.talha.academix.enums.PaymentStatus;
@@ -21,8 +20,6 @@ public interface PaymentService {
     List<PaymentDTO> getPaymentsByType(PaymentType type);
 
     List<PaymentDTO> getPaymentsCreatedBetween(Instant start, Instant end);
-
-    void handleStripeEvent(Event event);
 
     void markFailed(Long paymentId, String reason);
 
