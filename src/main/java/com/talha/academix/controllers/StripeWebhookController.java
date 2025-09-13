@@ -14,7 +14,7 @@ import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
 import com.talha.academix.dto.StripeWebhookAck;
-import com.talha.academix.services.PaymentService;
+import com.talha.academix.services.StripePaymentEventService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StripeWebhookController {
 
-    private final PaymentService paymentService;
+    private final StripePaymentEventService stripePaymentEventService;
 
     @Value("${stripe.webhook-secret}")
     private String endpointSecret;
@@ -37,15 +37,18 @@ public class StripeWebhookController {
                                                    HttpServletRequest request) throws IOException {
 
         Event event;
+        boolean signatureValid = true;
         try {
             event = Webhook.constructEvent(payload, sigHeader, endpointSecret);
         } catch (SignatureVerificationException e) {
             log.warn("Invalid Stripe signature: {}", e.getMessage());
+            signatureValid = false;
+            // We can return 400 immediately OR still record the event with invalid signature.
             return ResponseEntity.badRequest()
                     .body(new StripeWebhookAck(null, "invalid-signature"));
         }
 
-        paymentService.handleStripeEvent(event);
+        stripePaymentEventService.processEvent(event, signatureValid);
         return ResponseEntity.ok(new StripeWebhookAck(event.getId(), "processed"));
     }
 }
