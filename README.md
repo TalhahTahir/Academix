@@ -30,3 +30,7 @@ Payment Service has 2 phases:
 1. Phase 1: accept only card payments | no wallets | use stripe in backend | only Async
 
 2. Phase 2: accept cards, bank Transfers, Mobile Wallets | have wallets  
+
+---
+TO-DO:
+1. PaymentServiceImpl is Handling work of other fields, split the work

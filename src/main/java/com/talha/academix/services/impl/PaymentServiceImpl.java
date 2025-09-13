@@ -241,9 +241,9 @@ public class PaymentServiceImpl implements PaymentService {
     private PaymentIntent retrieveIntent(Event event) {
         try {
             String intentId = event.getDataObjectDeserializer()
-                                  .getObject()
-                                  .map(obj -> ((PaymentIntent) obj).getId())
-                                  .orElseThrow(() -> new IllegalStateException("Unable to retrieve PaymentIntent ID"));
+                    .getObject()
+                    .map(obj -> ((PaymentIntent) obj).getId())
+                    .orElseThrow(() -> new IllegalStateException("Unable to retrieve PaymentIntent ID"));
             return PaymentIntent.retrieve(intentId);
         } catch (Exception e) {
             throw new RuntimeException("Failed to retrieve PaymentIntent", e);
@@ -263,7 +263,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (intent.getLatestChargeObject() != null) {
             detail.setLatestChargeId(intent.getLatestChargeObject().getId());
             if (intent.getLatestChargeObject().getPaymentMethodDetails() != null &&
-                intent.getLatestChargeObject().getPaymentMethodDetails().getCard() != null) {
+                    intent.getLatestChargeObject().getPaymentMethodDetails().getCard() != null) {
                 var card = intent.getLatestChargeObject().getPaymentMethodDetails().getCard();
                 detail.setCardBrand(card.getBrand());
                 detail.setCardLast4(card.getLast4());
@@ -290,7 +290,8 @@ public class PaymentServiceImpl implements PaymentService {
             case SUCCEEDED -> payment.setSucceededAt(Instant.now());
             case FAILED -> payment.setFailedAt(Instant.now());
             case CANCELED -> payment.setCanceledAt(Instant.now());
-            default -> {}
+            default -> {
+            }
         }
         paymentRepo.save(payment);
     }
@@ -336,7 +337,8 @@ public class PaymentServiceImpl implements PaymentService {
         Payment p = paymentRepo.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + paymentId));
         p.setStatus(status);
-        if (status == PaymentStatus.SUCCEEDED) p.setSucceededAt(Instant.now());
+        if (status == PaymentStatus.SUCCEEDED)
+            p.setSucceededAt(Instant.now());
         paymentRepo.save(p);
     }
 }
