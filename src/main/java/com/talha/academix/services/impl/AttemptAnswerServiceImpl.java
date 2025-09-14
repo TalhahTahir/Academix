@@ -11,8 +11,8 @@ import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.UnmatchedExamException;
 import com.talha.academix.model.Attempt;
 import com.talha.academix.model.AttemptAnswer;
-import com.talha.academix.model.Option;
 import com.talha.academix.model.Question;
+import com.talha.academix.model.QuestionOption;
 import com.talha.academix.repository.AttemptAnswerRepo;
 import com.talha.academix.repository.AttemptRepo;
 import com.talha.academix.repository.OptionRepo;
@@ -45,17 +45,17 @@ public class AttemptAnswerServiceImpl implements AttemptAnswerService {
             throw new UnmatchedExamException("This question does not belong to the exam for this attempt.");
         }
     
-        Option option = optionRepo.findById(selectedOptionId)
+        QuestionOption questionOption = optionRepo.findById(selectedOptionId)
             .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + selectedOptionId));
     
-        if (!option.getQuestion().getId().equals(questionId)) {
+        if (!questionOption.getQuestion().getId().equals(questionId)) {
             throw new UnmatchedExamException("This option does not belong to the provided question.");
         }
     
         AttemptAnswer answer = new AttemptAnswer();
         answer.setAttempt(attempt);
         answer.setQuestion(question);
-        answer.setSelectedOption(option);
+        answer.setSelectedOption(questionOption);
         answer = attemptAnswerRepo.save(answer);
     
         return modelMapper.map(answer, AttemptAnswerDTO.class);

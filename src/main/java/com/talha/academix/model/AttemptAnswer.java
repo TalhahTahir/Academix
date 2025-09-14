@@ -1,6 +1,11 @@
 package com.talha.academix.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +29,6 @@ public class AttemptAnswer {
 
     @ManyToOne
     @JoinColumn(name = "selected_option_id")
-    private Option selectedOption;
+    private QuestionOption selectedOption;
 }
 

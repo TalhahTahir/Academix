@@ -10,11 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.talha.academix.dto.EnrollmentDTO;
-import com.talha.academix.dto.PaymentDTO;
 import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.enums.EnrollmentStatus;
 import com.talha.academix.exception.AlreadyEnrolledException;
-import com.talha.academix.exception.PaymentFailedException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.Enrollment;
@@ -42,14 +40,14 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Transactional
     public EnrollmentDTO enrollStudent(Long studentId, Long courseId) {
         // 1. Charge the student (or trigger transfer for teacher)
-        PaymentDTO payment = paymentService.processPayment(studentId, courseId);
+        // PaymentDTO payment = paymentService.processPayment(studentId, courseId);
 
-        // 2. If payment requires action, bubble a special exception
-        if (Boolean.TRUE.equals(payment.getRequiresAction())) {
-            throw new PaymentFailedException(
-                    "Further authentication required",
-                    payment.getClientSecret());
-        }
+        // // 2. If payment requires action, bubble a special exception
+        // if (Boolean.TRUE.equals(payment.getRequiresAction())) {
+        //     throw new PaymentFailedException(
+        //             "Further authentication required",
+        //             payment.getClientSecret());
+        // }
 
         // 3. If payment succeeded, create the enrollment
         return finalizeEnrollment(studentId, courseId);

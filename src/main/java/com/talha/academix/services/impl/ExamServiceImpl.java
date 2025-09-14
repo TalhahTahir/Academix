@@ -16,8 +16,8 @@ import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.model.Attempt;
 import com.talha.academix.model.AttemptAnswer;
 import com.talha.academix.model.Exam;
-import com.talha.academix.model.Option;
 import com.talha.academix.model.Question;
+import com.talha.academix.model.QuestionOption;
 import com.talha.academix.repository.AttemptRepo;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.ExamRepo;
@@ -129,7 +129,7 @@ public class ExamServiceImpl implements ExamService {
             Question question = answer.getQuestion();
             Long correctOption = null; 
     
-            for (Option option : question.getOptions()) {
+            for (QuestionOption option : question.getOptions()) {
                 if (option.isCorrect()) {
                     correctOption = option.getId();
                     break; 

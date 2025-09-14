@@ -5,11 +5,11 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.talha.academix.model.Option;
+import com.talha.academix.model.QuestionOption;
 
-public interface OptionRepo extends JpaRepository<Option, Long> {
+public interface OptionRepo extends JpaRepository<QuestionOption, Long> {
 
-    List<Option> findByQuestionId(Long questionId);
+    List<QuestionOption> findByQuestionId(Long questionId);
 
     long countByQuestionIdAndIsCorrectTrue(Long questionId);
 

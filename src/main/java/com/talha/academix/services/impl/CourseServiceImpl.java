@@ -61,7 +61,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<CourseDTO> getAllCoursesByTeacher(Long teacherId) {
-        List<Course> courses = courseRepo.findAllByTeacherId(teacherId);
+        List<Course> courses = courseRepo.findAllByTeacherUserid(teacherId);
         return courses.stream()
                 .map(course -> mapper.map(course, CourseDTO.class))
                 .toList();

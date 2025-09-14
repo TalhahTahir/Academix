@@ -18,7 +18,7 @@ public interface CourseRepo extends JpaRepository<Course, Long> {
 
     boolean existsByCoursenameAndTeacherId(String coursename, Long teacherid);
 
-    List<Course> findAllByTeacherId(Long teacherId);
+    List<Course> findAllByTeacherUserid(Long userid);
 
     List<Course> findAllByState(CourseState state);
 }
