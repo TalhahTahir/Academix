@@ -66,7 +66,7 @@ public class VaultServiceImpl implements VaultService {
 
     @Override
     public VaultDTO getVaultByUserId(Long userId) {
-        Vault vault = vaultRepo.findByUserId(userId)
+        Vault vault = vaultRepo.findByUser_Userid(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vault not found for user with id : " + userId));
         return mapper.map(vault, VaultDTO.class);
     }

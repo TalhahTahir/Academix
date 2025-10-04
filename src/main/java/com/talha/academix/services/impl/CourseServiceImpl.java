@@ -61,7 +61,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<CourseDTO> getAllCoursesByTeacher(Long teacherId) {
-        List<Course> courses = courseRepo.findAllByTeacherUserid(teacherId);
+        List<Course> courses = courseRepo.findAllByTeacher_Userid(teacherId);
         return courses.stream()
                 .map(course -> mapper.map(course, CourseDTO.class))
                 .toList();
@@ -239,7 +239,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseDTO createCourse(CourseDTO dto) {
-        if (!courseRepo.existsByCoursenameAndTeacherId(dto.getCoursename(), dto.getTeacherid())) {
+        if (!courseRepo.existsByCoursenameAndTeacher_Userid(dto.getCoursename(), dto.getTeacherid())) {
             Course course = new Course();
             course.setCoursename(dto.getCoursename());
             course.setDuration(dto.getDuration());

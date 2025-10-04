@@ -13,10 +13,15 @@ import com.talha.academix.model.LectureProgress;
 import jakarta.persistence.LockModeType;
 
 public interface LectureProgressRepo extends JpaRepository<LectureProgress, Long> {
-    Optional<LectureProgress> findByEnrollmentIdAndLectureId(Long enrollmentId, Long lectureId);
-    List<LectureProgress> findByEnrollmentId(Long enrollmentId);
+    
+    @Query("SELECT lp FROM LectureProgress lp WHERE lp.enrollment.enrollmentID = :enrollmentId AND lp.lecture.lectureId = :lectureId")
+    Optional<LectureProgress> findByEnrollmentIdAndLectureId(@Param("enrollmentId") Long enrollmentId,
+                                                             @Param("lectureId") Long lectureId);
 
-     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT lp FROM LectureProgress lp WHERE lp.enrollment.enrollmentID = :enrollmentId")
+    List<LectureProgress> findByEnrollmentId(@Param("enrollmentId") Long enrollmentId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT lp FROM LectureProgress lp WHERE lp.enrollment.enrollmentID = :enrollmentId AND lp.lecture.lectureId = :lectureId")
     Optional<LectureProgress> findByEnrollmentIdAndLectureIdForUpdate(@Param("enrollmentId") Long enrollmentId,
                                                                      @Param("lectureId") Long lectureId);

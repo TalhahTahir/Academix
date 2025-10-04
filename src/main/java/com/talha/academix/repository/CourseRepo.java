@@ -3,6 +3,8 @@ package com.talha.academix.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.talha.academix.enums.CourseCategory;
 import com.talha.academix.enums.CourseState;
@@ -14,11 +16,13 @@ public interface CourseRepo extends JpaRepository<Course, Long> {
 
     List<Course> findAllByCategory(CourseCategory category);
 
-    Course findByCourseIdAndTeacherId(Long userid, Long courseId);
+    // Optional replacement if needed later (safe explicit JPQL)
+    @Query("SELECT c FROM Course c WHERE c.courseid = :courseId AND c.teacher.userid = :teacherId")
+    Course findByCourseidAndTeacherUserid(@Param("courseId") Long courseId, @Param("teacherId") Long teacherId);
 
-    boolean existsByCoursenameAndTeacherId(String coursename, Long teacherid);
+    boolean existsByCoursenameAndTeacher_Userid(String coursename, Long userid);
 
-    List<Course> findAllByTeacherUserid(Long userid);
+    List<Course> findAllByTeacher_Userid(Long userid);
 
     List<Course> findAllByState(CourseState state);
 }

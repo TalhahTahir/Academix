@@ -1,0 +1,169 @@
+academix
+|
+│   target
+│   ├── classes
+│   │   ├── com
+│   │   │   └── talha
+│   │   │       ├── academix
+│   │   │       │   ├── config
+│   │   │       │   │   ├── AppConfig.class
+│   │   │       │   │   ├── StripeConfig.class
+│   │   │       │   │   └── TimeConfig.class
+│   │   │       │   ├── controllers
+│   │   │       │   │   ├── CourseController.class
+│   │   │       │   │   ├── PaymentController.class
+│   │   │       │   │   ├── StripeWebhookController.class
+│   │   │       │   │   ├── TeacherQualificationController.class
+│   │   │       │   │   └── UserController.class
+│   │   │       │   ├── dto
+│   │   │       │   │   ├── ActivityLogDTO.class
+│   │   │       │   │   ├── AttemptAnswerDTO.class
+│   │   │       │   │   ├── AttemptDTO.class
+│   │   │       │   │   ├── CertificateDTO.class
+│   │   │       │   │   ├── ContentDTO.class
+│   │   │       │   │   ├── CourseDTO.class
+│   │   │       │   │   ├── CreateUserDTO.class
+│   │   │       │   │   ├── DashboardStatsDTO.class
+│   │   │       │   │   ├── DocumentDTO.class
+│   │   │       │   │   ├── EnrollmentDTO.class
+│   │   │       │   │   ├── ExamDTO.class
+│   │   │       │   │   ├── LectureDTO.class
+│   │   │       │   │   ├── LoginDTO.class
+│   │   │       │   │   ├── OptionDTO.class
+│   │   │       │   │   ├── PaymentDTO.class
+│   │   │       │   │   ├── PaymentDTO$PaymentDTOBuilder.class
+│   │   │       │   │   ├── PaymentInitiateRequest.class
+│   │   │       │   │   ├── PaymentInitiateResponse.class
+│   │   │       │   │   ├── PaymentInitiateResponse$PaymentInitiateResponseBuilder.class
+│   │   │       │   │   ├── QuestionDTO.class
+│   │   │       │   │   ├── StripeWebhookAck.class
+│   │   │       │   │   ├── TeacherQualificationDTO.class
+│   │   │       │   │   ├── UserDTO.class
+│   │   │       │   │   ├── VaultDTO.class
+│   │   │       │   │   └── VaultTransactionDTO.class
+│   │   │       │   ├── enums
+│   │   │       │   │   ├── ActivityAction.class
+│   │   │       │   │   ├── CourseCategory.class
+│   │   │       │   │   ├── CourseState.class
+│   │   │       │   │   ├── Degree.class
+│   │   │       │   │   ├── EnrollmentStatus.class
+│   │   │       │   │   ├── PaymentProvider.class
+│   │   │       │   │   ├── PaymentStatus.class
+│   │   │       │   │   ├── PaymentType.class
+│   │   │       │   │   ├── ProgressStatus.class
+│   │   │       │   │   ├── Role.class
+│   │   │       │   │   ├── TxStatus.class
+│   │   │       │   │   └── VaultTxType.class
+│   │   │       │   ├── exception
+│   │   │       │   │   ├── AlreadyEnrolledException.class
+│   │   │       │   │   ├── AlreadyExistException.class
+│   │   │       │   │   ├── BlankAnswerException.class
+│   │   │       │   │   ├── ForbiddenException.class
+│   │   │       │   │   ├── InvalidAttemptException.class
+│   │   │       │   │   ├── PaymentFailedException.class
+│   │   │       │   │   ├── ResourceNotFoundException.class
+│   │   │       │   │   ├── RoleMismatchException.class
+│   │   │       │   │   ├── UncompleteEnrollmentException.class
+│   │   │       │   │   └── UnmatchedExamException.class
+│   │   │       │   ├── model
+│   │   │       │   │   ├── ActivityLog.class
+│   │   │       │   │   ├── Attempt.class
+│   │   │       │   │   ├── AttemptAnswer.class
+│   │   │       │   │   ├── Certificate.class
+│   │   │       │   │   ├── Content.class
+│   │   │       │   │   ├── Course.class
+│   │   │       │   │   ├── Document.class
+│   │   │       │   │   ├── DocumentProgress.class
+│   │   │       │   │   ├── Enrollment.class
+│   │   │       │   │   ├── ERDiagram.md
+│   │   │       │   │   ├── Exam.class
+│   │   │       │   │   ├── Lecture.class
+│   │   │       │   │   ├── LectureProgress.class
+│   │   │       │   │   ├── Payment.class
+│   │   │       │   │   ├── Question.class
+│   │   │       │   │   ├── QuestionOption.class
+│   │   │       │   │   ├── StripePaymentDetail.class
+│   │   │       │   │   ├── StripePaymentEvent.class
+│   │   │       │   │   ├── StudentContentProgress.class
+│   │   │       │   │   ├── TeacherQualification.class
+│   │   │       │   │   ├── User.class
+│   │   │       │   │   ├── Vault.class
+│   │   │       │   │   └── VaultTransaction.class
+│   │   │       │   ├── repository
+│   │   │       │   │   ├── ActivityLogRepo.class
+│   │   │       │   │   ├── AttemptAnswerRepo.class
+│   │   │       │   │   ├── AttemptRepo.class
+│   │   │       │   │   ├── CertificateRepo.class
+│   │   │       │   │   ├── ContentRepo.class
+│   │   │       │   │   ├── CourseRepo.class
+│   │   │       │   │   ├── DocumentProgressRepo.class
+│   │   │       │   │   ├── DocumentRepo.class
+│   │   │       │   │   ├── EnrollmentRepo.class
+│   │   │       │   │   ├── ExamRepo.class
+│   │   │       │   │   ├── LectureProgressRepo.class
+│   │   │       │   │   ├── LectureRepo.class
+│   │   │       │   │   ├── OptionRepo.class
+│   │   │       │   │   ├── PaymentRepo.class
+│   │   │       │   │   ├── QuestionRepo.class
+│   │   │       │   │   ├── StripePaymentDetailRepo.class
+│   │   │       │   │   ├── StripePaymentEventRepo.class
+│   │   │       │   │   ├── StudentContentProgressRepo.class
+│   │   │       │   │   ├── TeacherQualificationRepo.class
+│   │   │       │   │   ├── UserRepo.class
+│   │   │       │   │   ├── VaultRepo.class
+│   │   │       │   │   └── VaultTransactionRepo.class
+│   │   │       │   ├── security
+│   │   │       │   ├── services
+│   │   │       │   │   ├── impl
+│   │   │       │   │   │   ├── ActivityLogServiceImpl.class
+│   │   │       │   │   │   ├── AttemptAnswerServiceImpl.class
+│   │   │       │   │   │   ├── AttemptServiceImpl.class
+│   │   │       │   │   │   ├── CertificateServiceImpl.class
+│   │   │       │   │   │   ├── ContentServiceImpl.class
+│   │   │       │   │   │   ├── CourseServiceImpl.class
+│   │   │       │   │   │   ├── DocumentServiceImpl.class
+│   │   │       │   │   │   ├── EnrollmentServiceImpl.class
+│   │   │       │   │   │   ├── ExamServiceImpl.class
+│   │   │       │   │   │   ├── LectureServiceImpl.class
+│   │   │       │   │   │   ├── OptionServiceImpl.class
+│   │   │       │   │   │   ├── PaymentServiceImpl.class
+│   │   │       │   │   │   ├── ProgressServiceImpl.class
+│   │   │       │   │   │   ├── QuestionServiceImpl.class
+│   │   │       │   │   │   ├── StripePaymentDetailServiceImpl.class
+│   │   │       │   │   │   ├── StripePaymentEventServiceImpl.class
+│   │   │       │   │   │   ├── TeacherQualificationServiceImpl.class
+│   │   │       │   │   │   ├── UserServiceImpl.class
+│   │   │       │   │   │   ├── VaultServiceImpl.class
+│   │   │       │   │   │   └── VaultTransactionServiceImpl.class
+│   │   │       │   │   ├── ActivityLogService.class
+│   │   │       │   │   ├── AdminDashboardService.class
+│   │   │       │   │   ├── AttemptAnswerService.class
+│   │   │       │   │   ├── AttemptService.class
+│   │   │       │   │   ├── CertificateService.class
+│   │   │       │   │   ├── ContentService.class
+│   │   │       │   │   ├── CourseService.class
+│   │   │       │   │   ├── DocumentService.class
+│   │   │       │   │   ├── EnrollmentService.class
+│   │   │       │   │   ├── ExamService.class
+│   │   │       │   │   ├── LectureService.class
+│   │   │       │   │   ├── OptionService.class
+│   │   │       │   │   ├── PaymentService.class
+│   │   │       │   │   ├── ProgressService.class
+│   │   │       │   │   ├── QuestionService.class
+│   │   │       │   │   ├── StripePaymentDetailService.class
+│   │   │       │   │   ├── StripePaymentEventService.class
+│   │   │       │   │   ├── TeacherQualificationService.class
+│   │   │       │   │   ├── UserService.class
+│   │   │       │   │   ├── VaultService.class
+│   │   │       │   │   └── VaultTransactionService.class
+│   │   │       │   └── AcademixApplication.class
+│   │   │       └── academix.zip
+│   │   └── application.properties
+│   .gitattributes
+│   .gitignore
+│   architecture.txt
+│   HELP.md
+│   mvnw
+│   mvnw.cmd
+│   pom.xml
+│   README.md

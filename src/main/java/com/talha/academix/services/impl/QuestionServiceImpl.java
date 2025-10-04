@@ -24,7 +24,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     private final QuestionRepo questionRepo;
     private final ExamRepo examRepo;
-    private CourseService courseService;
+    private final CourseService courseService; // made final so injected
     private final ModelMapper mapper;
 
     @Override

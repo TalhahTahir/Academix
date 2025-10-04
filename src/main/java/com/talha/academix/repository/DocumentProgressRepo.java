@@ -10,8 +10,12 @@ import org.springframework.data.repository.query.Param;
 import com.talha.academix.model.DocumentProgress;
 
 public interface DocumentProgressRepo extends JpaRepository<DocumentProgress, Long> {
-    Optional<DocumentProgress> findByEnrollmentIdAndDocumentId(Long enrollmentId, Long documentId);
-    List<DocumentProgress> findByEnrollmentId(Long enrollmentId);
+    
+    @Query("SELECT dp FROM DocumentProgress dp WHERE dp.enrollment.enrollmentID = :enrollmentId AND dp.document.documentId = :documentId")
+    Optional<DocumentProgress> findByEnrollmentIdAndDocumentId(@Param("enrollmentId") Long enrollmentId,
+                                                               @Param("documentId") Long documentId);
+    @Query("SELECT dp FROM DocumentProgress dp WHERE dp.enrollment.enrollmentID = :enrollmentId")
+    List<DocumentProgress> findByEnrollmentId(@Param("enrollmentId") Long enrollmentId);
 
     @Query("SELECT COUNT(dp) FROM DocumentProgress dp WHERE dp.enrollment.enrollmentID = :enrollmentId AND dp.completed = true AND dp.document.content.course.courseid = :courseId")
     long countCompletedByEnrollmentAndCourse(@Param("enrollmentId") Long enrollmentId, @Param("courseId") Long courseId);

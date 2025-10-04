@@ -12,7 +12,7 @@ import com.talha.academix.model.Vault;
 @Repository
 public interface VaultRepo extends JpaRepository<Vault, Long> {
 
-    Optional<Vault> findByUserId(Long userId);
+    Optional<Vault> findByUser_Userid(Long userid);
 
     @Query("SELECT COALESCE(SUM(v.totalEarned), 0) FROM Vault v")
     BigDecimal getTotalEarned();

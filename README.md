@@ -34,3 +34,14 @@ Payment Service has 2 phases:
 ---
 TO-DO:
 1. PaymentServiceImpl is Handling work of other fields, split the work
+---
+payment Flow:
+1. ek controller bnao processes initiatation k liye, jo data collect kry or payment methods ko call kry (payment controller)
+2. payment method me:
+    1.  input ki authenticity validate kro
+    2.  intent create kro
+    3.  payment intent bnao
+    4.  payment record save kro (jo bhi intent status aye)
+    5.  payment intent se id or client secret le kr return kro
+
+3. 

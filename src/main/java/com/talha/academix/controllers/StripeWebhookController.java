@@ -28,13 +28,19 @@ public class StripeWebhookController {
 
     private final StripePaymentEventService stripePaymentEventService;
 
-    @Value("${stripe.webhook-secret}")
+    @Value("${stripe.webhook-secret:}")
     private String endpointSecret;
 
     @PostMapping
     public ResponseEntity<StripeWebhookAck> handle(@RequestBody String payload,
                                                    @RequestHeader("Stripe-Signature") String sigHeader,
                                                    HttpServletRequest request) throws IOException {
+
+        if (endpointSecret == null || endpointSecret.isBlank()) {
+            log.error("Stripe webhook secret not configured (property stripe.webhook-secret).");
+            return ResponseEntity.internalServerError()
+                    .body(new StripeWebhookAck(null, "webhook-secret-missing"));
+        }
 
         Event event;
         boolean signatureValid = true;

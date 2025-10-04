@@ -89,7 +89,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public EnrollmentDTO enrollmentValidation(Long courseid, Long userid) {
-        Enrollment enrollment = enrollmentRepo.findByStudentIDAndCourseID(userid, courseid);
+        Enrollment enrollment = enrollmentRepo.findByStudent_UseridAndCourse_Courseid(userid, courseid);
         return mapper.map(enrollment, EnrollmentDTO.class);
     }
 
@@ -144,7 +144,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Transactional
     public EnrollmentDTO finalizeEnrollment(Long studentId, Long courseId) {
         // 1. Prevent double‑enroll
-        if (enrollmentRepo.existsByStudentIdAndCourseId(studentId, courseId)) {
+        if (enrollmentRepo.existsByStudent_UseridAndCourse_Courseid(studentId, courseId)) {
             throw new AlreadyEnrolledException(
                     "Student " + studentId + " already enrolled in course " + courseId);
         }

@@ -18,5 +18,5 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
     List<Payment> findByPaymentType(PaymentType type);
     List<Payment> findByStatus(PaymentStatus status);
     List<Payment> findByCreatedAtBetween(Instant start, Instant end);
-    Optional<Payment> findByIdAndUserId(Long id, Long userId);
+    Optional<Payment> findByIdAndUser_Userid(Long id, Long userId);
 }

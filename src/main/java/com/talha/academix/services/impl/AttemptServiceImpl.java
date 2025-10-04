@@ -18,10 +18,12 @@ import com.talha.academix.model.Attempt;
 import com.talha.academix.model.AttemptAnswer;
 import com.talha.academix.model.Enrollment;
 import com.talha.academix.model.Exam;
+import com.talha.academix.model.User;
 import com.talha.academix.repository.AttemptAnswerRepo;
 import com.talha.academix.repository.AttemptRepo;
 import com.talha.academix.repository.EnrollmentRepo;
 import com.talha.academix.repository.ExamRepo;
+import com.talha.academix.repository.UserRepo;
 import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.AttemptService;
 import com.talha.academix.services.EnrollmentService;
@@ -39,51 +41,51 @@ public class AttemptServiceImpl implements AttemptService {
     private final EnrollmentRepo enrollmentRepo;
     private final ActivityLogService activityLogService;
     private final EnrollmentService enrollmentService;
+    private final UserRepo userRepo; // added
     private final ModelMapper modelMapper;
 
     @Override
     public AttemptDTO startAttempt(Long examId, Long studentId) {
-        
         Exam exam = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
-                EnrollmentDTO stdEnrollment = enrollmentService.enrollmentValidation(exam.getCourse().getCourseid(), studentId);
-                if(stdEnrollment.getCompletionPercentage() == 100){
-                    Attempt attempt = new Attempt();
-                    attempt.setExam(exam);
-                    attempt.setStudentId(studentId);
-                    attempt.setStartedAt(Instant.now());
-                    attempt = attemptRepo.save(attempt);
-            
-                    activityLogService.logAction(
-                            studentId,
-                            ActivityAction.EXAM_ATTEMPT,
-                            "Student " + studentId + " started attempt " + attempt.getId() + " for Exam " + examId);
-            
-                    return modelMapper.map(attempt, AttemptDTO.class);
-                } else throw new ForbiddenException("You cannot start an attempt for this exam as your enrollment is not complete.");
+        EnrollmentDTO stdEnrollment = enrollmentService.enrollmentValidation(exam.getCourse().getCourseid(), studentId);
+        if (stdEnrollment.getCompletionPercentage() == 100) {
+            User student = userRepo.findById(studentId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
+            Attempt attempt = new Attempt();
+            attempt.setExam(exam);
+            attempt.setStudent(student); // refactored
+            attempt.setStartedAt(Instant.now());
+            attempt = attemptRepo.save(attempt);
 
+            activityLogService.logAction(
+                    studentId,
+                    ActivityAction.EXAM_ATTEMPT,
+                    "Student " + studentId + " started attempt " + attempt.getId() + " for Exam " + examId);
+
+            AttemptDTO dto = modelMapper.map(attempt, AttemptDTO.class);
+            dto.setStudentId(studentId); // manual mapping
+            return dto;
+        } else {
+            throw new ForbiddenException("You cannot start an attempt for this exam as your enrollment is not complete.");
+        }
     }
 
     @Override
     @Transactional
     public AttemptDTO submitAttempt(Long attemptId, AttemptDTO dto) {
-        // Fetch attempt by ID
         Attempt attempt = attemptRepo.findById(attemptId)
                 .orElseThrow(() -> new ResourceNotFoundException("Attempt not found with id: " + attemptId));
 
-        // Ensure attempt isn't already submitted
         if (attempt.getCompletedAt() != null) {
             throw new AlreadyExistException("This attempt is already submitted.");
         }
 
-        // Load all answers linked to this attempt
         List<AttemptAnswer> answers = attemptAnswerRepo.findByAttemptId(attemptId);
-
         if (answers.isEmpty()) {
-            throw new  BlankAnswerException("Cannot submit an attempt without answers.");
+            throw new BlankAnswerException("Cannot submit an attempt without answers.");
         }
 
-        // Calculate marks
         long totalQuestions = answers.size();
         long correctAnswers = answers.stream()
                 .filter(ans -> ans.getSelectedOption().isCorrect())
@@ -91,51 +93,56 @@ public class AttemptServiceImpl implements AttemptService {
 
         float percentage = ((float) correctAnswers / totalQuestions) * 100;
 
-        // Mark attempt as completed
         attempt.setCompletedAt(Instant.now());
         attemptRepo.save(attempt);
 
-        // Update Enrollment with marks
-        Enrollment enrollment = enrollmentRepo.findByStudentIDAndCourseID(
-                attempt.getStudentId(),
+        Enrollment enrollment = enrollmentRepo.findByStudent_UseridAndCourse_Courseid(
+                attempt.getStudent().getUserid(),
                 attempt.getExam().getCourse().getCourseid());
-
         if (enrollment == null) {
             throw new ResourceNotFoundException("Enrollment not found for student and course.");
         }
-
         enrollment.setMarks(percentage);
         enrollmentRepo.save(enrollment);
 
         activityLogService.logAction(
-                attempt.getStudentId(),
+                attempt.getStudent().getUserid(),
                 ActivityAction.EXAM_ATTEMPT,
-                "Student " + attempt.getStudentId() + " submitted attempt " + attempt.getId() + " with score " + percentage + "%");
+                "Student " + attempt.getStudent().getUserid() + " submitted attempt " + attempt.getId() + " with score " + percentage + "%");
 
-        return modelMapper.map(attempt, AttemptDTO.class);
+        AttemptDTO out = modelMapper.map(attempt, AttemptDTO.class);
+        out.setStudentId(attempt.getStudent().getUserid());
+        return out;
     }
 
     @Override
     public AttemptDTO getAttemptById(Long attemptId) {
         Attempt attempt = attemptRepo.findById(attemptId)
                 .orElseThrow(() -> new ResourceNotFoundException("Attempt not found with id: " + attemptId));
-
-        return modelMapper.map(attempt, AttemptDTO.class);
+        AttemptDTO dto = modelMapper.map(attempt, AttemptDTO.class);
+        dto.setStudentId(attempt.getStudent().getUserid());
+        return dto;
     }
 
     @Override
     public List<AttemptDTO> getAttemptsByExam(Long examId) {
-        List<Attempt> attempts = attemptRepo.findByExamId(examId);
-        return attempts.stream()
-                .map(a -> modelMapper.map(a, AttemptDTO.class))
+        return attemptRepo.findByExamId(examId).stream()
+                .map(a -> {
+                    AttemptDTO d = modelMapper.map(a, AttemptDTO.class);
+                    d.setStudentId(a.getStudent().getUserid());
+                    return d;
+                })
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<AttemptDTO> getAttemptsByStudent(Long studentId) {
-        return attemptRepo.findByStudentId(studentId)
-                .stream()
-                .map(a -> modelMapper.map(a, AttemptDTO.class))
+        return attemptRepo.findByStudentId(studentId).stream()
+                .map(a -> {
+                    AttemptDTO d = modelMapper.map(a, AttemptDTO.class);
+                    d.setStudentId(a.getStudent().getUserid());
+                    return d;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -146,5 +153,4 @@ public class AttemptServiceImpl implements AttemptService {
         attempt.setCompletedAt(Instant.now());
         attemptRepo.save(attempt);
     }
-
 }
