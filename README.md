@@ -44,4 +44,9 @@ payment Flow:
     4.  payment record save kro (jo bhi intent status aye)
     5.  payment intent se id or client secret le kr return kro
 
-3. 
+3. frontend se Stripe ka confirmCardPayment hit kro
+4. method result se UI update kro (payment Succeed / failed)
+5. Webhooks receive krne k liye Webhook Controller bnao jisme:
+    1.  Webhook client secret ho
+    2.  Stripe ke incomming se seccess / fail extract kro
+    3.  result k according Business Logic apply kro
