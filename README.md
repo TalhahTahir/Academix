@@ -12,7 +12,7 @@ payment logic updation
 
 course with same name?
 ---
-###Payment:
+### Payment:
 keep async flow:
 1. payment initiate
 2. gateway give response about money deduction or process success
@@ -25,17 +25,17 @@ Platform gets security, scalibility, cost-friendly service(async feature)
 
 ---
 
-Payment Service has 2 phases:
+### Payment Service has 2 phases:
 
-1. Phase 1: accept only card payments | no wallets | use stripe in backend | only Async
+1. *Phase 1*: accept only card payments | no wallets | use stripe in backend | only Async
 
-2. Phase 2: accept cards, bank Transfers, Mobile Wallets | have wallets  
+2. *Phase 2*: accept cards, bank Transfers, Mobile Wallets | have wallets  
 
 ---
-TO-DO:
+## TO-DO:
 1. PaymentServiceImpl is Handling work of other fields, split the work
 ---
-payment Flow:
+## payment Flow:
 1. ek controller bnao processes initiatation k liye, jo data collect kry or payment methods ko call kry (payment controller)
 2. payment method me:
     1.  input ki authenticity validate kro
