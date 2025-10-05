@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.AttemptDTO;
 import com.talha.academix.dto.EnrollmentDTO;
-import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.exception.AlreadyExistException;
 import com.talha.academix.exception.BlankAnswerException;
 import com.talha.academix.exception.ForbiddenException;
@@ -24,7 +23,6 @@ import com.talha.academix.repository.AttemptRepo;
 import com.talha.academix.repository.EnrollmentRepo;
 import com.talha.academix.repository.ExamRepo;
 import com.talha.academix.repository.UserRepo;
-import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.AttemptService;
 import com.talha.academix.services.EnrollmentService;
 
@@ -39,7 +37,6 @@ public class AttemptServiceImpl implements AttemptService {
     private final ExamRepo examRepo;
     private final AttemptAnswerRepo attemptAnswerRepo;
     private final EnrollmentRepo enrollmentRepo;
-    private final ActivityLogService activityLogService;
     private final EnrollmentService enrollmentService;
     private final UserRepo userRepo; // added
     private final ModelMapper modelMapper;
@@ -57,11 +54,6 @@ public class AttemptServiceImpl implements AttemptService {
             attempt.setStudent(student); // refactored
             attempt.setStartedAt(Instant.now());
             attempt = attemptRepo.save(attempt);
-
-            activityLogService.logAction(
-                    studentId,
-                    ActivityAction.EXAM_ATTEMPT,
-                    "Student " + studentId + " started attempt " + attempt.getId() + " for Exam " + examId);
 
             AttemptDTO dto = modelMapper.map(attempt, AttemptDTO.class);
             dto.setStudentId(studentId); // manual mapping
@@ -104,11 +96,6 @@ public class AttemptServiceImpl implements AttemptService {
         }
         enrollment.setMarks(percentage);
         enrollmentRepo.save(enrollment);
-
-        activityLogService.logAction(
-                attempt.getStudent().getUserid(),
-                ActivityAction.EXAM_ATTEMPT,
-                "Student " + attempt.getStudent().getUserid() + " submitted attempt " + attempt.getId() + " with score " + percentage + "%");
 
         AttemptDTO out = modelMapper.map(attempt, AttemptDTO.class);
         out.setStudentId(attempt.getStudent().getUserid());

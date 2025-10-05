@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.talha.academix.dto.AttemptDTO;
 import com.talha.academix.dto.EnrollmentDTO;
 import com.talha.academix.dto.ExamDTO;
-import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.exception.BlankAnswerException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
@@ -21,7 +20,6 @@ import com.talha.academix.model.QuestionOption;
 import com.talha.academix.repository.AttemptRepo;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.ExamRepo;
-import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.CourseService;
 import com.talha.academix.services.EnrollmentService;
 import com.talha.academix.services.ExamService;
@@ -37,7 +35,6 @@ public class ExamServiceImpl implements ExamService {
     private final CourseService courseService;
     private final AttemptRepo attemptRepo;
     private final EnrollmentService enrollmentService;
-    private final ActivityLogService activityLogService;
     private final ModelMapper modelMapper;
 
     @Override
@@ -145,11 +142,6 @@ public class ExamServiceImpl implements ExamService {
     
         enrollment.setMarks(percentage);
         enrollmentService.updateEnrollment(enrollment);
-    
-        activityLogService.logAction(
-            dto.getStudentId(), ActivityAction.EXAM_ATTEMPT,
-            "Checked exam, scored: " + percentage + "%"
-        );
     
         return percentage;
     }

@@ -7,7 +7,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.CourseDTO;
-import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.enums.CourseCategory;
 import com.talha.academix.enums.CourseState;
 import com.talha.academix.exception.AlreadyExistException;
@@ -18,7 +17,6 @@ import com.talha.academix.model.Course;
 import com.talha.academix.model.User;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.UserRepo;
-import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.CourseService;
 import com.talha.academix.services.UserService;
 
@@ -32,7 +30,6 @@ public class CourseServiceImpl implements CourseService {
     private final ModelMapper mapper;
     private final UserService userService;
     private final UserRepo userRepo;
-    private final ActivityLogService activityLogService;
 
     /*----------------------------------- View Methods ----------------------------------- */
 
@@ -100,7 +97,6 @@ public class CourseServiceImpl implements CourseService {
             Course course = courseRepo.findById(courseId)
                     .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
             deleteCourse(courseId);
-            activityLogService.logAction(userid, ActivityAction.COURSE_DELETION, null);
         } else
             throw new RoleMismatchException("Only Teacher can delete course");
     }
@@ -127,11 +123,6 @@ public class CourseServiceImpl implements CourseService {
         }
         course.setState(CourseState.REJECTED);
         courseRepo.save(course);
-        activityLogService.logAction(
-                adminId,
-                ActivityAction.COURSE_REJECTED,
-                course.getCoursename() + " of " + course.getTeacher().getUsername() + " has been rejected. ID = "
-                        + courseId);
         return true;
     }
 
@@ -148,11 +139,6 @@ public class CourseServiceImpl implements CourseService {
             course.setState(CourseState.APPROVED);
             courseRepo.save(course);
 
-            activityLogService.logAction(
-                    adminId,
-                    ActivityAction.COURSE_APPROVED,
-                    course.getCoursename() + " of " + course.getTeacher().getUsername() + " has been approved. ID = "
-                            + courseId);
             return true;
         } else {
             throw new ForbiddenException("Only DRAFTED or MODIFIED courses can be approved");
@@ -172,7 +158,6 @@ public class CourseServiceImpl implements CourseService {
 
             CourseDTO updated = updateCourse(courseId, dto);
 
-            activityLogService.logAction(teacher.getUserid(), ActivityAction.COURSE_MODIFIED, null);
             return updated;
         } else
             throw new ForbiddenException("Only courses in DRAFT, MODIFIED or REJECTED state can be modified");
@@ -189,7 +174,6 @@ public class CourseServiceImpl implements CourseService {
             course.setState(CourseState.IN_DEVELOPMENT);
             courseRepo.save(course);
 
-            activityLogService.logAction(teacher.getUserid(), ActivityAction.COURSE_IN_DEVELOPMENT, null);
             return true;
         } else {
             throw new ForbiddenException("Only approved courses can be moved to IN_DEVELOPMENT state");
@@ -205,7 +189,6 @@ public class CourseServiceImpl implements CourseService {
             course.setState(CourseState.LAUNCHED);
             courseRepo.save(course);
 
-            activityLogService.logAction(teacher.getUserid(), ActivityAction.COURSE_LAUNCHED, null);
             return true;
         } else {
             throw new ForbiddenException("Only courses in IN_DEVELOPMENT state can be launched");
@@ -224,11 +207,6 @@ public class CourseServiceImpl implements CourseService {
             course.setState(CourseState.DISABLED);
             courseRepo.save(course);
 
-            activityLogService.logAction(
-                    adminId,
-                    ActivityAction.COURSE_DISABLED,
-                    course.getCoursename() + " of " + course.getTeacher().getUsername() + " has been disabled. ID = "
-                            + courseId);
             return mapper.map(course, CourseDTO.class);
         } else {
             throw new ForbiddenException("Only launched courses can be disabled");
@@ -250,8 +228,6 @@ public class CourseServiceImpl implements CourseService {
             course.setTeacher(teacher);
             course.setState(CourseState.DRAFT);
             course = courseRepo.save(course);
-
-            activityLogService.logAction(dto.getTeacherid(), ActivityAction.COURSE_DRAFTED, null);
 
             return mapper.map(course, CourseDTO.class);
         } else

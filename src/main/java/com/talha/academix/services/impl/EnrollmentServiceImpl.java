@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.talha.academix.dto.EnrollmentDTO;
-import com.talha.academix.enums.ActivityAction;
 import com.talha.academix.enums.EnrollmentStatus;
 import com.talha.academix.exception.AlreadyEnrolledException;
 import com.talha.academix.exception.ResourceNotFoundException;
@@ -20,7 +19,6 @@ import com.talha.academix.model.User;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.EnrollmentRepo;
 import com.talha.academix.repository.UserRepo;
-import com.talha.academix.services.ActivityLogService;
 import com.talha.academix.services.EnrollmentService;
 import com.talha.academix.services.PaymentService;
 
@@ -33,7 +31,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final UserRepo userRepo;
     private final CourseRepo courseRepo;
     private final PaymentService paymentService;
-    private final ActivityLogService activityLogService;
     private final ModelMapper mapper;
 
     @Override
@@ -163,12 +160,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         e.setStatus(EnrollmentStatus.IN_PROGRESS);
         e.setCompletionPercentage(0);
         Enrollment saved = enrollmentRepo.save(e);
-
-        // 4. Log the action
-        activityLogService.logAction(
-                studentId,
-                ActivityAction.ENROLLMENT,
-                "Student " + studentId + " enrolled in Course " + courseId);
 
         // 5. Map to DTO and return
         return mapper.map(saved, EnrollmentDTO.class);
