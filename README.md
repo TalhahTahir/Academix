@@ -52,3 +52,6 @@ Platform gets security, scalibility, cost-friendly service(async feature)
     1.  Webhook client secret ho
     2.  Stripe ke incomming se seccess / fail extract kro
     3.  result k according Business Logic apply kro
+
+---
+#### Handle real storing for lectures and documents
