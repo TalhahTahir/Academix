@@ -55,3 +55,5 @@ Platform gets security, scalibility, cost-friendly service(async feature)
 
 ---
 #### Handle real storing for lectures and documents
+---
+frontend = React.js
