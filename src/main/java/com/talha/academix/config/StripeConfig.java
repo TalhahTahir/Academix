@@ -46,7 +46,7 @@ public class StripeConfig {
 
         PaymentIntentCreateParams.Builder builder = PaymentIntentCreateParams.builder()
                 .setAmount(amountMinor)
-                .setCurrency(currency == null ? defaultCurrency : currency.toLowerCase())
+                .setCurrency(currency == null ? defaultCurrency : currency)
                 .setAutomaticPaymentMethods(
                         PaymentIntentCreateParams.AutomaticPaymentMethods
                                 .builder()
