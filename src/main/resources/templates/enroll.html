@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>LMS Course Enrollment</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+      }
+      #card-element {
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .hidden {
+        display: none;
+      }
+      .status {
+        margin-top: 1rem;
+      }
+      button {
+        padding: 10px 18px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Enroll in Course (Demo)</h2>
+    <p>Student: Alice (id=1)</p>
+    <label
+      >Course ID:
+      <select id="courseId">
+        <option value="1">1 - Java Programming Basics</option>
+        <option value="5">5 - Machine Learning Advanced</option>
+      </select>
+    </label>
+    <div id="card-element"></div>
+    <button id="payBtn">Pay & Enroll</button>
+    <div class="status" id="status"></div>
+
+    <script>
+      (async function init() {
+        const publishableKey = await fetch(
+          "/api/payments/config/publishable-key"
+        ).then((r) => r.text());
+        const stripe = Stripe(publishableKey);
+        const elements = stripe.elements();
+        const card = elements.create("card");
+        card.mount("#card-element");
+
+        document
+          .getElementById("payBtn")
+          .addEventListener("click", async () => {
+            const courseId = document.getElementById("courseId").value;
+            const body = { courseId: Number(courseId), studentId: 1 };
+            const statusEl = document.getElementById("status");
+            statusEl.textContent = "Creating payment intent...";
+
+            const resp = await fetch("/api/payments/create-intent", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body),
+            });
+
+            // if (!resp.ok) {
+            //     statusEl.textContent = 'Error creating payment intent.';
+            //     return;
+            // }
+            const data = await resp.json();
+            statusEl.textContent = "Confirming card payment...";
+            const result = await stripe.confirmCardPayment(data.clientSecret, {
+              payment_method: { card },
+            });
+
+            if (result.error) {
+              statusEl.textContent = "Payment failed: " + result.error.message;
+            } else {
+              if (result.paymentIntent.status === "succeeded") {
+                statusEl.textContent =
+                  "Payment succeeded! Enrollment will be processed.";
+                // In real app: maybe poll status or show confirmation endpoint
+              } else {
+                statusEl.textContent =
+                  "Payment status: " + result.paymentIntent.status;
+              }
+            }
+          });
+      })();
+    </script>
+  </body>
+</html>

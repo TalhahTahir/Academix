@@ -8,6 +8,8 @@ import com.talha.academix.enums.CourseState;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,12 +39,14 @@ public class Course {
     @NotEmpty
     private BigDecimal fees;
     
+    @Enumerated(EnumType.STRING)
     private CourseCategory category;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable=false)
     private User teacher;
 
+    @Enumerated(EnumType.STRING)
     private CourseState state;
 
     @OneToMany(mappedBy = "course", cascade=CascadeType.ALL, orphanRemoval=true)

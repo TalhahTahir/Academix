@@ -1,6 +1,8 @@
 package com.talha.academix.controllers;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,10 +21,18 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
+    @Value("${stripe.publishable-key}")
+    private String publishableKey;
+    
     @PostMapping("/initiate")
     public ResponseEntity<PaymentInitiateResponse> initiate(@RequestBody PaymentInitiateRequest req) {
         return ResponseEntity.ok(
                 paymentService.initiatePayment(req.getUserId(), req.getCourseId())
         );
+    }
+
+        @GetMapping("/config/publishable-key")
+    public String publishableKey() {
+        return publishableKey;
     }
 }

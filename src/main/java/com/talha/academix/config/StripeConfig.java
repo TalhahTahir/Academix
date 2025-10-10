@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StripeConfig {
 
-    @Value("${stripe.secret-key}")
+    @Value("${STRIPE_SECRET_KEY}")
     private String secretKey;
 
     @Value("${stripe.default-currency:usd}")
@@ -46,7 +46,7 @@ public class StripeConfig {
 
         PaymentIntentCreateParams.Builder builder = PaymentIntentCreateParams.builder()
                 .setAmount(amountMinor)
-                .setCurrency(currency == null ? defaultCurrency : currency)
+                .setCurrency(currency)
                 .setAutomaticPaymentMethods(
                         PaymentIntentCreateParams.AutomaticPaymentMethods
                                 .builder()
