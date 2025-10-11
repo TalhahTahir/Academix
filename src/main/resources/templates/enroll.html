@@ -54,20 +54,20 @@
           .getElementById("payBtn")
           .addEventListener("click", async () => {
             const courseId = document.getElementById("courseId").value;
-            const body = { courseId: Number(courseId), studentId: 1 };
+            const body = { courseId: Number(courseId), userId: 1 };
             const statusEl = document.getElementById("status");
             statusEl.textContent = "Creating payment intent...";
 
-            const resp = await fetch("/api/payments/create-intent", {
+            const resp = await fetch("/api/payments/initiate", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(body),
             });
 
-            // if (!resp.ok) {
-            //     statusEl.textContent = 'Error creating payment intent.';
-            //     return;
-            // }
+            if (!resp.ok) {
+                statusEl.textContent = 'Error creating payment intent.';
+                return;
+            }
             const data = await resp.json();
             statusEl.textContent = "Confirming card payment...";
             const result = await stripe.confirmCardPayment(data.clientSecret, {
