@@ -57,3 +57,12 @@ Platform gets security, scalibility, cost-friendly service(async feature)
 #### Handle real storing for lectures and documents
 ---
 frontend = React.js
+
+---
+### Task ahead:
+    integrate:
+        Vaulting
+        Payment Detailing
+        Stripe Eventing
+        Other Business Logic
+    with payment flow
