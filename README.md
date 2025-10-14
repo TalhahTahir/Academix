@@ -66,3 +66,4 @@ frontend = React.js
         Stripe Eventing
         Other Business Logic
     with payment flow
+    test and debug it
