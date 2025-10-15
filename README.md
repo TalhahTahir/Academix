@@ -67,3 +67,7 @@ frontend = React.js
         Other Business Logic
     with payment flow
     test and debug it
+
+    Do Vaulting:
+        Distribute the shares (Admin & Teacher)
+        make correct & complete flow

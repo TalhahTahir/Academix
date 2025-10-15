@@ -33,8 +33,8 @@ public class StripeWebhookController {
 
     @PostMapping
     public ResponseEntity<StripeWebhookAck> handle(@RequestBody String payload,
-                                                   @RequestHeader("Stripe-Signature") String sigHeader,
-                                                   HttpServletRequest request) throws IOException {
+            @RequestHeader("Stripe-Signature") String sigHeader,
+            HttpServletRequest request) throws IOException {
 
         if (endpointSecret == null || endpointSecret.isBlank()) {
             log.error("Stripe webhook secret not configured (property stripe.webhook-secret).");
@@ -49,7 +49,8 @@ public class StripeWebhookController {
         } catch (SignatureVerificationException e) {
             log.warn("Invalid Stripe signature: {}", e.getMessage());
             signatureValid = false;
-            // We can return 400 immediately OR still record the event with invalid signature.
+            // We can return 400 immediately OR still record the event with invalid
+            // signature.
             return ResponseEntity.badRequest()
                     .body(new StripeWebhookAck(null, "invalid-signature"));
         }
