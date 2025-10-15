@@ -71,3 +71,6 @@ frontend = React.js
     Do Vaulting:
         Distribute the shares (Admin & Teacher)
         make correct & complete flow
+
+
+### Final Touches
