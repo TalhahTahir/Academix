@@ -74,3 +74,4 @@ frontend = React.js
 
 
 ### Final Touches
+    refactor the code according to professional Standards
