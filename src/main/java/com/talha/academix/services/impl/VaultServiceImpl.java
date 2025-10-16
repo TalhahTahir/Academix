@@ -1,17 +1,24 @@
 package com.talha.academix.services.impl;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.VaultDTO;
+import com.talha.academix.dto.VaultTransactionDTO;
+import com.talha.academix.enums.PaymentStatus;
+import com.talha.academix.enums.TxStatus;
+import com.talha.academix.enums.VaultTxType;
 import com.talha.academix.exception.AlreadyExistException;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.model.Payment;
 import com.talha.academix.model.Vault;
 import com.talha.academix.repository.UserRepo;
 import com.talha.academix.repository.VaultRepo;
 import com.talha.academix.services.VaultService;
+import com.talha.academix.services.VaultTransactionService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +29,7 @@ public class VaultServiceImpl implements VaultService {
     private final VaultRepo vaultRepo;
     private final ModelMapper mapper;
     private final UserRepo userRepo;
+    private final VaultTransactionService vaultTxService;
 
     @Override
     public VaultDTO createVault(VaultDTO dto) {
@@ -87,6 +95,53 @@ public class VaultServiceImpl implements VaultService {
     public BigDecimal getTotalAvailableBalance() {
 
         return vaultRepo.getTotalAvailableBalance();
+    }
+
+    @Override
+    public Boolean shareDistribution(Payment payment) {
+        if (payment.getStatus() == PaymentStatus.SUCCEEDED) {
+            Vault teacherVault = vaultRepo.findByUser_Userid(payment.getCourse().getTeacher().getUserid())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Vault not found for teacher with id : " + payment.getCourse().getTeacher().getUserid()));
+
+            Vault adminVault = vaultRepo.findByUser_Userid(1L)
+                    .orElseThrow(() -> new ResourceNotFoundException("Vault not found for admin with id : 1"));
+
+            BigDecimal amount = payment.getAmount();
+
+            VaultTransactionDTO teacherTx = new VaultTransactionDTO();
+            teacherTx.setAmount(amount.multiply(BigDecimal.valueOf(0.80))); // 80
+            teacherTx.setType(VaultTxType.ENROLLMENT_CREDIT);
+            teacherTx.setStatus(TxStatus.COMPLETED);
+            teacherTx.setBalanceAfter(teacherVault.getAvailableBalance().add(teacherTx.getAmount()));
+            teacherTx.setCreatedAt(Instant.now());
+            teacherTx.setVaultId(teacherVault.getId());
+            teacherTx.setPaymentId(payment.getId());
+            teacherTx.setCourseId(payment.getCourse().getCourseid());
+            teacherTx.setInitiaterId(payment.getUser().getUserid());
+
+            vaultTxService.createTransaction(teacherTx);
+
+            // ------------------------------------------------------------------------------
+
+            VaultTransactionDTO adminTx = new VaultTransactionDTO();
+            adminTx.setAmount(amount.multiply(BigDecimal.valueOf(0.20))); // 20
+            adminTx.setType(VaultTxType.ENROLLMENT_CREDIT);
+            adminTx.setStatus(TxStatus.COMPLETED);
+            adminTx.setBalanceAfter(adminVault.getAvailableBalance().add(adminTx.getAmount()));
+            adminTx.setCreatedAt(Instant.now());
+            adminTx.setVaultId(adminVault.getId());
+            adminTx.setPaymentId(payment.getId());
+            adminTx.setCourseId(payment.getCourse().getCourseid());
+            adminTx.setInitiaterId(payment.getUser().getUserid());
+
+            vaultTxService.createTransaction(adminTx);
+
+            return true;
+
+        }
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'shareDistribution'");
     }
 
 }

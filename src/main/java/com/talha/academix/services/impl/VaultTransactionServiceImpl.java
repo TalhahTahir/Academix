@@ -15,12 +15,12 @@ import org.springframework.stereotype.Service;
 import com.talha.academix.dto.VaultTransactionDTO;
 import com.talha.academix.exception.PaymentFailedException;
 import com.talha.academix.exception.ResourceNotFoundException;
-import com.talha.academix.model.Enrollment;
+import com.talha.academix.model.Course;
 import com.talha.academix.model.Payment;
 import com.talha.academix.model.User;
 import com.talha.academix.model.Vault;
 import com.talha.academix.model.VaultTransaction;
-import com.talha.academix.repository.EnrollmentRepo;
+import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.PaymentRepo;
 import com.talha.academix.repository.UserRepo;
 import com.talha.academix.repository.VaultRepo;
@@ -36,7 +36,7 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
     private final ModelMapper mapper;
     private final VaultTransactionRepo vaultTxRepo;
     private final VaultRepo vaultRepo;
-    private final EnrollmentRepo enrollmentRepo;
+    private final CourseRepo courseRepo;
     private final PaymentRepo paymentRepo;
     private final UserRepo userRepo;
     
@@ -49,8 +49,8 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
         Vault vault = vaultRepo.findById(dto.getVaultId())
                 .orElseThrow(() -> new ResourceNotFoundException("Vault not found with id: " + dto.getVaultId()));
 
-        Enrollment enrollment = enrollmentRepo.findById(dto.getEnrollmentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + dto.getEnrollmentId()));
+        Course course = courseRepo.findById(dto.getCourseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + dto.getCourseId()));
 
         Payment payment = paymentRepo.findById(dto.getPaymentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + dto.getPaymentId()));
@@ -66,7 +66,7 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
         vaultTx.setCreatedAt(Instant.now());
         vaultTx.setVault(vault);
         vaultTx.setPayment(payment);
-        vaultTx.setEnrollment(enrollment);
+        vaultTx.setCourse(course);
         vaultTx.setInitiater(initiater);
 
         vaultTx = vaultTxRepo.save(vaultTx);

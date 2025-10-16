@@ -46,8 +46,8 @@ public class VaultTransaction {
     private Payment payment;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "enrollment_id", nullable = true)
-    private Enrollment enrollment;
+    @JoinColumn(name = "course_id", nullable = true)
+    private Course course;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "initiated_by", nullable = true)

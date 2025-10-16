@@ -19,8 +19,8 @@ public class VaultTransactionDTO {
     private BigDecimal amount;
     private VaultTxType type;           // ENROLLMENT_CREDIT | WITHDRAWAL_REQUEST | WITHDRAWAL_PAYOUT
     private TxStatus status;            //     PENDING | COMPLETED | FAILED
-    private Long PaymentId;
-    private Long EnrollmentId;
+    private Long paymentId;
+    private Long courseId;
     private Long initiaterId;
     private BigDecimal balanceAfter;
     private Instant createdAt;

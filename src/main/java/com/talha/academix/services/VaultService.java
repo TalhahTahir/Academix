@@ -3,6 +3,7 @@ package com.talha.academix.services;
 import java.math.BigDecimal;
 
 import com.talha.academix.dto.VaultDTO;
+import com.talha.academix.model.Payment;
 
 public interface VaultService {
     VaultDTO createVault(VaultDTO dto);
@@ -16,6 +17,8 @@ public interface VaultService {
     BigDecimal getTotalWithdrawn();
 
     BigDecimal getTotalAvailableBalance();
+
+    Boolean shareDistribution(Payment payment);
 
 
 
