@@ -14,7 +14,7 @@ import com.talha.academix.model.VaultTransaction;
 
 public interface VaultTransactionRepo extends JpaRepository<VaultTransaction, Long> {
 
-    List<VaultTransaction> findAllByEnrollment_Course_Courseid(Long courseId);
+    List<VaultTransaction> findAllByCourse_Courseid(Long courseId);
 
     List<VaultTransaction> findAllByVaultId(Long vaultId);
 

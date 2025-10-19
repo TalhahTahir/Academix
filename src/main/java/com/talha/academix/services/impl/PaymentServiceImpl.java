@@ -48,6 +48,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentInitiateResponse initiatePayment(Long userId, Long courseId) {
+//
+System.out.println("0.1 --- Payment Service Impl");
+//
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
         Course course = courseRepo.findById(courseId)
@@ -65,7 +68,9 @@ public class PaymentServiceImpl implements PaymentService {
         payment = paymentRepo.save(payment);
 
         long stripeAmountMinor = amount.movePointRight(2).longValueExact();
-
+//
+System.out.println("0.2 --- Payment Service Impl");
+//
         Map<String, String> metadata = new HashMap<>();
         metadata.put("payment_id", payment.getId().toString());
         metadata.put("user_id", user.getUserid().toString());
@@ -88,13 +93,17 @@ public class PaymentServiceImpl implements PaymentService {
 
         // persist stripe detail
         stripeDetailService.createForIntent(payment, intent);
-
+//
+System.out.println("0.3 --- Payment Service Impl");
+//
         PaymentStatus mapped = stripeDetailService.mapStripeStatus(intent.getStatus(), false);
         payment.setStatus(mapped);
         paymentRepo.save(payment);
 
         boolean requiresAction = mapped == PaymentStatus.REQUIRES_ACTION;
-
+//
+System.out.println("0.4 --- Payment Service Impl");
+//
         return PaymentInitiateResponse.builder()
                 .paymentId(payment.getId())
                 .clientSecret(intent.getClientSecret())

@@ -12,6 +12,11 @@ payment logic updation
 
 course with same name?
 ---
+## Webhook
+create a webhook secret from Srtipe Website -> developer screen
+paste it to application properties -> stripe.webhook-secret = ....
+install Stripe CLI
+---
 ### Payment:
 keep async flow:
 1. payment initiate

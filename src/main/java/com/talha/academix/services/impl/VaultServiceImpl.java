@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.talha.academix.dto.VaultDTO;
 import com.talha.academix.dto.VaultTransactionDTO;
 import com.talha.academix.enums.PaymentStatus;
+import com.talha.academix.enums.Role;
 import com.talha.academix.enums.TxStatus;
 import com.talha.academix.enums.VaultTxType;
 import com.talha.academix.exception.AlreadyExistException;
@@ -104,7 +105,7 @@ public class VaultServiceImpl implements VaultService {
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Vault not found for teacher with id : " + payment.getCourse().getTeacher().getUserid()));
 
-            Vault adminVault = vaultRepo.findByUser_Userid(1L)
+            Vault adminVault = vaultRepo.findByUser_Role(Role.ADMIN)
                     .orElseThrow(() -> new ResourceNotFoundException("Vault not found for admin with id : 1"));
 
             BigDecimal amount = payment.getAmount();

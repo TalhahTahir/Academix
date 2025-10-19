@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import com.talha.academix.enums.Role;
 import com.talha.academix.model.Vault;
 
 @Repository
@@ -23,4 +24,7 @@ public interface VaultRepo extends JpaRepository<Vault, Long> {
     @Query("SELECT COALESCE(SUM(v.availableBalance), 0) FROM Vault v")
     BigDecimal getTotalAvailableBalance();
 
+    Optional<Vault> findByUser_Role(Role role);
+        //@Query("SELECT v FROM Vault v WHERE v.user.role = com.talha.academix.model.Role.ADMIN")
+        //Optional<Vault> findAdmin();
 }

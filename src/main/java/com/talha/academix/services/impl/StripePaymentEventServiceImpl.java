@@ -18,6 +18,7 @@ import com.talha.academix.repository.StripePaymentEventRepo;
 import com.talha.academix.services.EnrollmentService;
 import com.talha.academix.services.StripePaymentDetailService;
 import com.talha.academix.services.StripePaymentEventService;
+import com.talha.academix.services.VaultService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +33,13 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
     private final PaymentRepo paymentRepo;
     private final StripePaymentDetailService detailService;
     private final EnrollmentService enrollmentService;
+    private final VaultService vaultService;
 
     @Override
     public void processEvent(Event event, boolean signatureValid) {
+//
+        System.out.println(" 2.1 --- Processing Stripe event: " + event.getId() + " of type " + event.getType());
+//
         if (eventRepo.existsByProviderEventId(event.getId())) {
             log.info("Duplicate Stripe event {} ignored", event.getId());
             return;
@@ -45,6 +50,10 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
             log.warn("Could not resolve PaymentIntent for event {}", event.getId());
             return;
         }
+
+//
+System.out.println(" 2.2 --- StripePaymentEventServiceImpl running ");
+//
 
         String paymentIdMeta = intent.getMetadata() != null ? intent.getMetadata().get("payment_id") : null;
         if (paymentIdMeta == null) {
@@ -65,7 +74,9 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
         audit.setSignatureValid(signatureValid);
         audit.setRawPayload(extractRawPayload(event));
         audit.setReceivedAt(Instant.now());
-
+//
+System.out.println(" 2.3 --- StripePaymentEventServiceImpl running ");
+//
         try {
             switch (event.getType()) {
                 case "payment_intent.processing" -> updateIntent(intent, PaymentStatus.PROCESSING);
@@ -88,6 +99,14 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
         } finally {
             eventRepo.save(audit);
         }
+        
+//
+System.out.println(" 2.4 --- StripePaymentEventServiceImpl running ");
+//
+        vaultService.shareDistribution(payment);
+//
+System.out.println(" 2.5 --- StripePaymentEventServiceImpl running ");
+//
     }
 
     private void updateIntent(PaymentIntent intent, PaymentStatus status) {

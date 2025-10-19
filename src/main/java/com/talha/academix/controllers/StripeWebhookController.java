@@ -35,7 +35,9 @@ public class StripeWebhookController {
     public ResponseEntity<StripeWebhookAck> handle(@RequestBody String payload,
             @RequestHeader("Stripe-Signature") String sigHeader,
             HttpServletRequest request) throws IOException {
-
+//
+                System.out.println("1.1 --- Received Stripe webhook: " + payload);
+//
         if (endpointSecret == null || endpointSecret.isBlank()) {
             log.error("Stripe webhook secret not configured (property stripe.webhook-secret).");
             return ResponseEntity.internalServerError()
@@ -44,6 +46,9 @@ public class StripeWebhookController {
 
         Event event;
         boolean signatureValid = true;
+//
+        System.out.println("1.2 --- Stripe Web Controller running");
+//
         try {
             event = Webhook.constructEvent(payload, sigHeader, endpointSecret);
         } catch (SignatureVerificationException e) {
@@ -56,6 +61,9 @@ public class StripeWebhookController {
         }
 
         stripePaymentEventService.processEvent(event, signatureValid);
+//
+System.out.println("1.2 --- Stripe Web Controller executed");
+//
         return ResponseEntity.ok(new StripeWebhookAck(event.getId(), "processed"));
     }
 }
