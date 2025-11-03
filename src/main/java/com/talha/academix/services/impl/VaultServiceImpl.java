@@ -34,10 +34,10 @@ public class VaultServiceImpl implements VaultService {
 
     @Override
     public VaultDTO createVault(VaultDTO dto) {
-        VaultDTO exist = getVaultByUserId(dto.getUserId());
-        if (exist != null) {
-            throw new AlreadyExistException("Vault already exists for user with ID: " + dto.getUserId());
-        }
+        // VaultDTO exist = getVaultByUserId(dto.getUserId());
+        // if (exist != null) {
+        //     throw new AlreadyExistException("Vault already exists for user with ID: " + dto.getUserId());
+        // }
         Vault vault = mapper.map(dto, Vault.class);
         vault.setUser(userRepo.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + dto.getUserId())));

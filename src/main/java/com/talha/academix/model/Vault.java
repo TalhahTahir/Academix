@@ -20,32 +20,32 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="vault")
+@Table(name = "vault")
 public class Vault {
-        @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="user_id", nullable=false, unique=true)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(name="available_balance", nullable=false, precision=18, scale=2)
+    @Column(name = "available_balance", nullable = false, precision = 18, scale = 2)
     private BigDecimal availableBalance = BigDecimal.ZERO;
 
-    @Column(name="total_earned", nullable=false, precision=18, scale=2)
+    @Column(name = "total_earned", nullable = false, precision = 18, scale = 2)
     private BigDecimal totalEarned = BigDecimal.ZERO;
 
-    @Column(name="total_withdrawn", nullable=false, precision=18, scale=2)
+    @Column(name = "total_withdrawn", nullable = false, precision = 18, scale = 2)
     private BigDecimal totalWithdrawn = BigDecimal.ZERO;
 
-    @Column(name="currency", length=3, nullable=false)
+    @Column(name = "currency", length = 3, nullable = false)
     private String currency = "USD";
 
-    @Column(name="created_at", updatable=false)
+    @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
-    @Column(name="updated_at")
+    @Column(name = "updated_at")
     private Instant updatedAt;
 
 }
