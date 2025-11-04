@@ -77,6 +77,10 @@ frontend = React.js
         Distribute the shares (Admin & Teacher)
         make correct & complete flow
 
+### Code with Flow
+1. Teacher Register ✅
+2. Automatic Vault Creation ✅
+3. Teacher created course (course = DRAFT) ✅
 
 ### Final Touches
     refactor the code according to professional Standards

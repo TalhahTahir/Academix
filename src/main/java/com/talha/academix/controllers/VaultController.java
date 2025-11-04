@@ -7,11 +7,9 @@ import com.talha.academix.dto.VaultDTO;
 import com.talha.academix.services.VaultService;
 
 import lombok.RequiredArgsConstructor;
-import java.math.BigDecimal;
-import java.time.Instant;
 
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 @RequestMapping("/api/vaults")
@@ -20,17 +18,9 @@ public class VaultController {
 
     private final VaultService vaultService;
 
-    @PostMapping("/{id}")
-    public VaultDTO createVault(@PathVariable("id") Long userid) {
-        VaultDTO dto = new VaultDTO();
-        dto.setUserId(userid);
-        dto.setAvailableBalance(BigDecimal.ZERO);
-        dto.setTotalEarned(BigDecimal.ZERO);
-        dto.setTotalWithdrawn(BigDecimal.ZERO);
-        dto.setCurrency("USD");
-        dto.setCreatedAt(Instant.now());
-        dto.setUpdatedAt(Instant.now());
-
-        return vaultService.createVault(dto);
+    @GetMapping("/{id}")
+    public VaultDTO getvault(@PathVariable("id") Long userid) {
+        return vaultService.getVaultByUserId(userid);
     }
+
 }

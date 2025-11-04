@@ -3,14 +3,15 @@ package com.talha.academix.services;
 import java.util.List;
 
 import com.talha.academix.dto.CourseDTO;
+import com.talha.academix.dto.CreateCourseDTO;
 import com.talha.academix.enums.CourseCategory;
 import com.talha.academix.enums.CourseState;
 import com.talha.academix.model.User;
 
 public interface CourseService {
-    CourseDTO createCourse(CourseDTO dto);
+    CourseDTO createCourse(CreateCourseDTO dto);
 
-    CourseDTO createCourseByTeacher(Long userid, CourseDTO dto);
+    // CourseDTO createCourseByTeacher(Long userid, CourseDTO dto);
 
     Boolean courseRejection(Long adminId, Long courseId);
 
@@ -36,13 +37,13 @@ public interface CourseService {
 
     CourseDTO updateCourse(Long courseId, CourseDTO dto);
 
-    CourseDTO updateCourseByAdmin(Long userid, Long courseId, CourseDTO dto);
+    // CourseDTO updateCourseByAdmin(Long userid, Long courseId, CourseDTO dto);
 
     void deleteCourse(Long courseId);
 
-    void deleteCourseByTeacher(Long userid, Long courseId);
+    // void deleteCourseByTeacher(Long userid, Long courseId);
 
-    void deleteCourseByAdmin(Long userid, Long courseId);
+    // void deleteCourseByAdmin(Long userid, Long courseId);
 
     boolean teacherOwnership(Long userid, Long courseId);
 

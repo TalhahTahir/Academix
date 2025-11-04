@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.talha.academix.dto.CourseDTO;
+import com.talha.academix.dto.CreateCourseDTO;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class CourseController {
     private final CourseService courseService;
     
     @PostMapping    
-    public CourseDTO createCourse(@RequestBody CourseDTO dto) {
+    public CourseDTO createCourse(@RequestBody CreateCourseDTO dto) {
         return courseService.createCourse(dto);
     }
     

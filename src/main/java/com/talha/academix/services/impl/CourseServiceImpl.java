@@ -7,6 +7,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.CourseDTO;
+import com.talha.academix.dto.CreateCourseDTO;
 import com.talha.academix.enums.CourseCategory;
 import com.talha.academix.enums.CourseState;
 import com.talha.academix.exception.AlreadyExistException;
@@ -74,40 +75,40 @@ public class CourseServiceImpl implements CourseService {
 
     /*----------------------------------- Action Methods ----------------------------------- */
 
-    @Override
-    public CourseDTO createCourseByTeacher(Long userid, CourseDTO dto) {
-        if (userService.teacherValidation(userid) && Objects.equals(userid, dto.getTeacherid())) {
-            return createCourse(dto);
-        } else
-            throw new RoleMismatchException("Only Teacher can create course");
-    }
+    // @Override
+    // public CourseDTO createCourseByTeacher(Long userid, CourseDTO dto) {
+    //     if (userService.teacherValidation(userid) && Objects.equals(userid, dto.getTeacherid())) {
+    //         return createCourse(dto);
+    //     } else
+    //         throw new RoleMismatchException("Only Teacher can create course");
+    // }
 
-    @Override
-    public CourseDTO updateCourseByAdmin(Long userid, Long courseId, CourseDTO dto) {
-        if (userService.adminValidation(userid)) {
-            return updateCourse(courseId, dto);
-        } else
-            throw new RoleMismatchException("Only Admin can update course");
-    }
+    // @Override
+    // public CourseDTO updateCourseByAdmin(Long userid, Long courseId, CourseDTO dto) {
+    //     if (userService.adminValidation(userid)) {
+    //         return updateCourse(courseId, dto);
+    //     } else
+    //         throw new RoleMismatchException("Only Admin can update course");
+    // }
 
-    @Override
-    public void deleteCourseByTeacher(Long userid, Long courseId) {
-        Boolean owned = teacherOwnership(userid, courseId);
-        if (owned) {
-            Course course = courseRepo.findById(courseId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
-            deleteCourse(courseId);
-        } else
-            throw new RoleMismatchException("Only Teacher can delete course");
-    }
+    // @Override
+    // public void deleteCourseByTeacher(Long userid, Long courseId) {
+    //     Boolean owned = teacherOwnership(userid, courseId);
+    //     if (owned) {
+    //         Course course = courseRepo.findById(courseId)
+    //                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+    //         deleteCourse(courseId);
+    //     } else
+    //         throw new RoleMismatchException("Only Teacher can delete course");
+    // }
 
-    @Override
-    public void deleteCourseByAdmin(Long userid, Long courseId) {
-        if (userService.adminValidation(userid)) {
-            deleteCourse(courseId);
-        } else
-            throw new RoleMismatchException("Only Admin can delete course");
-    }
+    // @Override
+    // public void deleteCourseByAdmin(Long userid, Long courseId) {
+    //     if (userService.adminValidation(userid)) {
+    //         deleteCourse(courseId);
+    //     } else
+    //         throw new RoleMismatchException("Only Admin can delete course");
+    // }
 
     @Override
     public Boolean courseRejection(Long adminId, Long courseId) {
@@ -216,22 +217,24 @@ public class CourseServiceImpl implements CourseService {
     /*----------------------------------- Inner Methods ----------------------------------- */
 
     @Override
-    public CourseDTO createCourse(CourseDTO dto) {
-        if (!courseRepo.existsByCoursenameAndTeacher_Userid(dto.getCoursename(), dto.getTeacherid())) {
+    public CourseDTO createCourse(CreateCourseDTO cdto) {
+        if (!courseRepo.existsByCoursenameAndTeacher_Userid(cdto.getCoursename(), cdto.getTeacherid())) {
             Course course = new Course();
-            course.setCoursename(dto.getCoursename());
-            course.setDuration(dto.getDuration());
-            course.setFees(dto.getFees());
-            course.setCategory(dto.getCategory());
-            User teacher = userRepo.findById(dto.getTeacherid())
-                    .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with id: " + dto.getTeacherid()));
+            course.setCoursename(cdto.getCoursename());
+            course.setDuration(cdto.getDuration());
+            course.setFees(cdto.getFees());
+            course.setCategory(cdto.getCategory());
+            User teacher = userRepo.findById(cdto.getTeacherid())
+                    .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with id: " + cdto.getTeacherid()));
             course.setTeacher(teacher);
             course.setState(CourseState.DRAFT);
             course = courseRepo.save(course);
 
-            return mapper.map(course, CourseDTO.class);
+            CourseDTO dto = mapper.map(course, CourseDTO.class);
+            dto.setTeacherid(course.getTeacher().getUserid());
+            return dto;
         } else
-            throw new AlreadyExistException("Teacher already have a course with name: " + dto.getCoursename());
+            throw new AlreadyExistException("Teacher already have a course with name: " + cdto.getCoursename());
     }
 
     @Override

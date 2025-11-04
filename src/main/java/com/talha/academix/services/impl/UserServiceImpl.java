@@ -1,5 +1,7 @@
 package com.talha.academix.services.impl;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -7,11 +9,13 @@ import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.CreateUserDTO;
 import com.talha.academix.dto.UserDTO;
+import com.talha.academix.dto.VaultDTO;
 import com.talha.academix.enums.Role;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.User;
 import com.talha.academix.repository.UserRepo;
 import com.talha.academix.services.UserService;
+import com.talha.academix.services.VaultService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,12 +24,24 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
+    private final VaultService vaultService;
     private final ModelMapper mapper;
 
     @Override
     public UserDTO createUser(CreateUserDTO dto) {
         User user = mapper.map(dto, User.class);
         user = userRepo.save(user);
+        if ((user.getRole() == Role.ADMIN) || (user.getRole() == Role.TEACHER)) {
+            VaultDTO vaultDto = new VaultDTO();
+            vaultDto.setUserId(user.getUserid());
+            vaultDto.setAvailableBalance(BigDecimal.ZERO);
+            vaultDto.setTotalEarned(BigDecimal.ZERO);
+            vaultDto.setTotalWithdrawn(BigDecimal.ZERO);
+            vaultDto.setCurrency("USD");
+            vaultDto.setCreatedAt(Instant.now());
+            vaultDto.setUpdatedAt(Instant.now());
+            vaultService.createVault(vaultDto);
+        }
         return mapper.map(user, UserDTO.class);
     }
 
