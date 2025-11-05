@@ -62,7 +62,7 @@ public class StripeWebhookController {
 
         stripePaymentEventService.processEvent(event, signatureValid);
 //
-System.out.println("1.2 --- Stripe Web Controller executed");
+System.out.println("1.3 --- Stripe Web Controller executed");
 //
         return ResponseEntity.ok(new StripeWebhookAck(event.getId(), "processed"));
     }

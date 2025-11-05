@@ -3,36 +3,38 @@ package com.talha.academix.services;
 import java.util.List;
 
 import com.talha.academix.dto.CourseDTO;
+import com.talha.academix.dto.CourseViewDTO;
 import com.talha.academix.dto.CreateCourseDTO;
 import com.talha.academix.enums.CourseCategory;
 import com.talha.academix.enums.CourseState;
-import com.talha.academix.model.User;
 
 public interface CourseService {
     CourseDTO createCourse(CreateCourseDTO dto);
 
     // CourseDTO createCourseByTeacher(Long userid, CourseDTO dto);
 
-    Boolean courseRejection(Long adminId, Long courseId);
+    CourseDTO courseRejection(Long courseId);
 
-    CourseDTO courseModification(User Teacher, Long courseId, CourseDTO dto);
-    
-    Boolean courseApproval(Long adminId, Long courseId);
-    
-    Boolean courseDevelopment(User Teacher, Long courseId);
+    CourseDTO courseModification(Long teacherId, Long courseId, CourseDTO dto);
 
-    Boolean courseLaunch(User Teacher, Long courseId);
+    CourseDTO courseApproval(Long courseId);
 
-    CourseDTO courseDisable(Long adminId, Long courseId);
+    CourseDTO courseDevelopment(Long teacherId, Long courseId);
+
+    CourseDTO courseLaunch(Long teacherId, Long courseId);
+
+    CourseDTO courseDisable(Long courseId);
 
     CourseDTO getCourseById(Long courseId);
-    
+
     List<CourseDTO> getCourseByCategory(CourseCategory category);
-    
+
     List<CourseDTO> getAllCourses();
-    
+
+    List<CourseViewDTO>viewAllCourses(Long studentId);
+
     List<CourseDTO> getAllCoursesByTeacher(Long teacherId);
-    
+
     List<CourseDTO> getAllCoursesByState(CourseState state);
 
     CourseDTO updateCourse(Long courseId, CourseDTO dto);

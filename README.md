@@ -81,6 +81,15 @@ frontend = React.js
 1. Teacher Register ✅
 2. Automatic Vault Creation ✅
 3. Teacher created course (course = DRAFT) ✅
+4. Admin views courses in different states and takes action (rejected) ✅
+5. teacher modified course ✅
+6. admin accepted ✅
+7. teacher started developing it, then launched ✅
+8. student see course ✅
+9. enrolls
+
+
+
 
 ### Final Touches
     refactor the code according to professional Standards
