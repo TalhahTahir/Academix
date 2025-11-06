@@ -12,4 +12,8 @@ public interface CertificateRepo extends JpaRepository<Certificate, Long> {
     List<Certificate> findByStudent(User student);
     List<Certificate> findByCourse(Course course);
     Optional<Certificate> findByStudentAndCourse(User student, Course course);
+    Long countByStudent(User student);
+    long count();
+    Long countByCourse(Course course);
+    
 }

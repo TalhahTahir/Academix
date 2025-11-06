@@ -1,6 +1,6 @@
 package com.talha.academix.dto;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,5 +15,5 @@ public class CertificateDTO {
     private Long teacherId;
     private Long courseId;
     private Double marks;
-    private ZonedDateTime date;
+    private Instant date;
 }

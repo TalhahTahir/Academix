@@ -88,8 +88,9 @@ frontend = React.js
 8. student Registered ✅
 9. student see course ✅
 10. enrolls ✅
-11. course progress, stats
-12. share Distributation(Vaulting)
+11. share Distributation(Vaulting) ✅
+12. course progress, stats
+13. Certification
 
 
 

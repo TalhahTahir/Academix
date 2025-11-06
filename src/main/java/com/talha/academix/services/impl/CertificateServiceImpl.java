@@ -11,9 +11,11 @@ import com.talha.academix.enums.EnrollmentStatus;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.UncompleteEnrollmentException;
 import com.talha.academix.model.Certificate;
+import com.talha.academix.model.Course;
 import com.talha.academix.model.Enrollment;
 import com.talha.academix.model.User;
 import com.talha.academix.repository.CertificateRepo;
+import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.EnrollmentRepo;
 import com.talha.academix.repository.UserRepo;
 import com.talha.academix.services.CertificateService;
@@ -27,6 +29,7 @@ public class CertificateServiceImpl implements CertificateService {
     private final CertificateRepo certificateRepo;
     private final EnrollmentRepo enrollmentRepo;
     private final UserRepo userRepo;
+    private final CourseRepo courseRepo;
     private final ModelMapper modelMapper;
 
     @Override
@@ -51,7 +54,7 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public List<CertificateDTO> getCertificatesByStudent(Long studentId) {
+    public List<CertificateDTO> getAllByStudent(Long studentId) {
         User student = userRepo.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
 
@@ -61,9 +64,30 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public CertificateDTO getCertificateById(Long certificateId) {
+    public CertificateDTO getById(Long certificateId) {
         Certificate certificate = certificateRepo.findById(certificateId)
                 .orElseThrow(() -> new ResourceNotFoundException("Certificate not found with id: " + certificateId));
         return modelMapper.map(certificate, CertificateDTO.class);
     }
+
+    @Override
+    public Long countAll() {
+        return certificateRepo.count();
+    }
+
+    @Override
+    public Long countAllByStudent(Long studentId) {
+        User student = userRepo.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
+        return certificateRepo.countByStudent(student);
+    }
+
+    @Override
+    public Long countAllByCourse(Long courseId) {
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+        return certificateRepo.countByCourse(course);
+    }
+
+    
 }

@@ -6,6 +6,10 @@ import com.talha.academix.dto.CertificateDTO;
 
 public interface CertificateService {
     CertificateDTO awardCertificate(Long enrollmentId);
-    List<CertificateDTO> getCertificatesByStudent(Long studentId);
-    CertificateDTO getCertificateById(Long certificateId);
+    List<CertificateDTO> getAllByStudent(Long studentId);
+    CertificateDTO getById(Long certificateId);
+    Long countAll();
+    Long countAllByStudent(Long studentId);
+    Long countAllByCourse(Long courseId);
+
 }
