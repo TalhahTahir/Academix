@@ -85,8 +85,9 @@ frontend = React.js
 5. teacher modified course ✅
 6. admin accepted ✅
 7. teacher started developing it, then launched ✅
-8. student see course ✅
-9. enrolls
+8. student Registered ✅
+9. student see course ✅
+10. enrolls
 
 
 
