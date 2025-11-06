@@ -87,7 +87,9 @@ frontend = React.js
 7. teacher started developing it, then launched ✅
 8. student Registered ✅
 9. student see course ✅
-10. enrolls
+10. enrolls ✅
+11. course progress, stats
+12. share Distributation(Vaulting)
 
 
 

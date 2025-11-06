@@ -123,6 +123,12 @@ public class VaultServiceImpl implements VaultService {
 
             vaultTxService.createTransaction(teacherTx);
 
+            teacherVault.setAvailableBalance(teacherTx.getBalanceAfter());
+            teacherVault.setTotalEarned(teacherVault.getTotalEarned().add(teacherTx.getAmount()));
+            teacherVault.setUpdatedAt(Instant.now());
+            vaultRepo.save(teacherVault);
+
+
             // ------------------------------------------------------------------------------
 
             VaultTransactionDTO adminTx = new VaultTransactionDTO();
@@ -137,6 +143,12 @@ public class VaultServiceImpl implements VaultService {
             adminTx.setInitiaterId(payment.getUser().getUserid());
 
             vaultTxService.createTransaction(adminTx);
+
+            adminVault.setAvailableBalance(adminTx.getBalanceAfter());
+            adminVault.setTotalEarned(adminVault.getTotalEarned().add(adminTx.getAmount()));
+            adminVault.setUpdatedAt(Instant.now());
+
+            vaultRepo.save(adminVault);
 
             return true;
 

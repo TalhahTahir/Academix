@@ -36,7 +36,7 @@ public class StripeWebhookController {
             @RequestHeader("Stripe-Signature") String sigHeader,
             HttpServletRequest request) throws IOException {
 //
-                System.out.println("1.1 --- Received Stripe webhook: " + payload);
+                System.out.println("1.1 --- Received Stripe webhook");
 //
         if (endpointSecret == null || endpointSecret.isBlank()) {
             log.error("Stripe webhook secret not configured (property stripe.webhook-secret).");
