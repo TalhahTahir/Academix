@@ -3,7 +3,7 @@ package com.talha.academix.services.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.modelmapper.ModelMapper;
+import com.talha.academix.mapper.CertificateMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.CertificateDTO;
@@ -30,7 +30,7 @@ public class CertificateServiceImpl implements CertificateService {
     private final EnrollmentRepo enrollmentRepo;
     private final UserRepo userRepo;
     private final CourseRepo courseRepo;
-    private final ModelMapper modelMapper;
+    private final CertificateMapper certificateMapper;
 
     @Override
     public CertificateDTO awardCertificate(Long enrollmentId) {
@@ -48,9 +48,9 @@ public class CertificateServiceImpl implements CertificateService {
         certificate.setMarks(enrollment.getMarks());
         certificate.setDate(new Date().toInstant());
 
-        certificateRepo.save(certificate);
+    certificateRepo.save(certificate);
 
-        return modelMapper.map(certificate, CertificateDTO.class);
+    return certificateMapper.toDto(certificate);
     }
 
     @Override
@@ -58,16 +58,16 @@ public class CertificateServiceImpl implements CertificateService {
         User student = userRepo.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
 
-        return certificateRepo.findByStudent(student).stream()
-                .map(c -> modelMapper.map(c, CertificateDTO.class))
-                .toList();
+    return certificateRepo.findByStudent(student).stream()
+        .map(certificateMapper::toDto)
+        .toList();
     }
 
     @Override
     public CertificateDTO getById(Long certificateId) {
         Certificate certificate = certificateRepo.findById(certificateId)
                 .orElseThrow(() -> new ResourceNotFoundException("Certificate not found with id: " + certificateId));
-        return modelMapper.map(certificate, CertificateDTO.class);
+    return certificateMapper.toDto(certificate);
     }
 
     @Override
