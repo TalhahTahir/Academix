@@ -18,12 +18,18 @@ public interface EnrollmentService {
 
     EnrollmentDTO enrollmentValidation(Long courseid, Long userid);
 
-    EnrollmentDTO updateEnrollment(EnrollmentDTO enrollment);
+    EnrollmentDTO updateEnrollment(Long enrollmentId, EnrollmentDTO enrollment);
 
     EnrollmentDTO finalizeEnrollment(Long studentId, Long courseId);
 
     Enrollment getEnrollmentEntity(Long enrollmentId); // returns entity (or throw)
 
     void updateCompletionPercentage(Long enrollmentId, double percentage);
+
+    Long countAllEnrollments();
+
+    Long countEnrollmentsByCourse(Long courseId);
+
+    Long countEnrollmentsByStudent(Long studentId);
 
 }

@@ -41,9 +41,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         // // 2. If payment requires action, bubble a special exception
         // if (Boolean.TRUE.equals(payment.getRequiresAction())) {
-        //     throw new PaymentFailedException(
-        //             "Further authentication required",
-        //             payment.getClientSecret());
+        // throw new PaymentFailedException(
+        // "Further authentication required",
+        // payment.getClientSecret());
         // }
 
         // 3. If payment succeeded, create the enrollment
@@ -91,9 +91,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public EnrollmentDTO updateEnrollment(EnrollmentDTO enrollmentDTO) {
+    public EnrollmentDTO updateEnrollment(Long enrollmentId, EnrollmentDTO enrollmentDTO) {
         // 1. Fetch existing enrollment
-        Enrollment enrollment = enrollmentRepo.findById(enrollmentDTO.getEnrollmentID())
+        Enrollment enrollment = enrollmentRepo.findById(enrollmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
 
         // 2. Update associations if IDs provided
@@ -177,6 +177,21 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment enrollment = getEnrollmentEntity(enrollmentId);
         enrollment.setCompletionPercentage(percentage);
         enrollmentRepo.save(enrollment);
+    }
+
+    @Override
+    public Long countAllEnrollments() {
+        return enrollmentRepo.count();
+    }
+
+    @Override
+    public Long countEnrollmentsByCourse(Long courseId) {
+        return enrollmentRepo.countByCourse_Courseid(courseId);
+    }
+
+    @Override
+    public Long countEnrollmentsByStudent(Long studentId) {
+        return enrollmentRepo.countByStudent_Userid(studentId);
     }
 
 }

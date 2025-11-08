@@ -141,7 +141,7 @@ public class ExamServiceImpl implements ExamService {
         double percentage = (double) marksCount / answers.size() * 100;
     
         enrollment.setMarks(percentage);
-        enrollmentService.updateEnrollment(enrollment);
+        enrollmentService.updateEnrollment(enrollment.getEnrollmentID(), enrollment);
     
         return percentage;
     }
