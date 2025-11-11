@@ -17,6 +17,7 @@ import com.talha.academix.exception.AlreadyExistException;
 import com.talha.academix.exception.ForbiddenException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
+import com.talha.academix.mapper.CourseMapper;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.User;
 import com.talha.academix.repository.CourseRepo;
@@ -35,20 +36,21 @@ public class CourseServiceImpl implements CourseService {
     private final ModelMapper mapper;
     private final UserRepo userRepo;
     private final EnrollmentRepo enrollmentRepo;
+    private final CourseMapper courseMapper;
     /*----------------------------------- View Methods ----------------------------------- */
 
     @Override
     public CourseDTO getCourseById(Long id) {
         Course course = courseRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
-        return mapper.map(course, CourseDTO.class);
+        return courseMapper.toDto(course);
     }
 
     @Override
     public List<CourseDTO> getCourseByCategory(CourseCategory category) {
         List<Course> courses = courseRepo.findAllByCategory(category);
         return courses.stream()
-                .map(course -> mapper.map(course, CourseDTO.class))
+                .map(courseMapper::toDto)
                 .toList();
     }
 
@@ -56,15 +58,15 @@ public class CourseServiceImpl implements CourseService {
     public List<CourseDTO> getAllCourses() {
         List<Course> courses = courseRepo.findAll();
         return courses.stream()
-                .map(course -> mapper.map(course, CourseDTO.class))
-                .toList();
+                .map(courseMapper::toDto)
+        .toList();
     }
 
     @Override
     public List<CourseDTO> getAllCoursesByTeacher(Long teacherId) {
         List<Course> courses = courseRepo.findAllByTeacher_Userid(teacherId);
         return courses.stream()
-                .map(course -> mapper.map(course, CourseDTO.class))
+                .map(courseMapper::toDto)
                 .toList();
     }
 
@@ -72,7 +74,8 @@ public class CourseServiceImpl implements CourseService {
     public List<CourseDTO> getAllCoursesByState(CourseState state) {
         List<Course> courses = courseRepo.findAllByState(state);
         return courses.stream()
-                .map(course -> mapper.map(course, CourseDTO.class))
+                .map(courseMapper::toDto)
+
                 .toList();
     }
 
@@ -144,7 +147,7 @@ public class CourseServiceImpl implements CourseService {
         }
         course.setState(CourseState.REJECTED);
         courseRepo.save(course);
-        return mapper.map(course, CourseDTO.class);
+        return courseMapper.toDto(course);
     }
 
     @Override
@@ -156,7 +159,7 @@ public class CourseServiceImpl implements CourseService {
             course.setState(CourseState.APPROVED);
             courseRepo.save(course);
 
-            return mapper.map(course, CourseDTO.class);
+            return courseMapper.toDto(course);
         } else {
             throw new ForbiddenException("Only DRAFTED or MODIFIED courses can be approved");
         }
@@ -191,7 +194,7 @@ public class CourseServiceImpl implements CourseService {
             course.setState(CourseState.IN_DEVELOPMENT);
             courseRepo.save(course);
 
-            return mapper.map(course, CourseDTO.class);
+            return courseMapper.toDto(course);
         } else {
             throw new ForbiddenException("Only approved courses can be moved to IN_DEVELOPMENT state");
         }
@@ -206,7 +209,7 @@ public class CourseServiceImpl implements CourseService {
             course.setState(CourseState.LAUNCHED);
             courseRepo.save(course);
 
-            return mapper.map(course, CourseDTO.class);
+            return courseMapper.toDto(course);
         } else {
             throw new ForbiddenException("Only courses in IN_DEVELOPMENT state can be launched");
         }
@@ -222,7 +225,7 @@ public class CourseServiceImpl implements CourseService {
             course.setState(CourseState.DISABLED);
             courseRepo.save(course);
 
-            return mapper.map(course, CourseDTO.class);
+            return courseMapper.toDto(course);
         } else {
             throw new ForbiddenException("Only launched courses can be disabled");
         }
@@ -245,9 +248,8 @@ public class CourseServiceImpl implements CourseService {
             course.setState(CourseState.DRAFT);
             course = courseRepo.save(course);
 
-            CourseDTO dto = mapper.map(course, CourseDTO.class);
-            dto.setTeacherid(course.getTeacher().getUserid());
-            return dto;
+            return courseMapper.toDto(course);
+
         } else
             throw new AlreadyExistException("Teacher already have a course with name: " + cdto.getCoursename());
     }
@@ -261,7 +263,7 @@ public class CourseServiceImpl implements CourseService {
         mapper.map(dto, existing);
         existing.setState(CourseState.MODIFIED);
         existing = courseRepo.save(existing);
-        return mapper.map(existing, CourseDTO.class);
+        return courseMapper.toDto(existing);
     }
 
     @Override
@@ -276,5 +278,10 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
         return course.getTeacher() != null && course.getTeacher().getUserid().equals(userid);
+    }
+
+    @Override
+    public Long countAll() {
+        return courseRepo.count();
     }
 }

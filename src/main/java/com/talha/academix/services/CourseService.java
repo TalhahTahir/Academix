@@ -49,4 +49,5 @@ public interface CourseService {
 
     boolean teacherOwnership(Long userid, Long courseId);
 
+    Long countAll();
 }

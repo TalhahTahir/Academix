@@ -25,4 +25,7 @@ public interface CourseRepo extends JpaRepository<Course, Long> {
     List<Course> findAllByTeacher_Userid(Long userid);
 
     List<Course> findAllByState(CourseState state);
+
+    long count();
+
 }

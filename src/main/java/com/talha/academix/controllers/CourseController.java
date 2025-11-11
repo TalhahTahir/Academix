@@ -35,6 +35,12 @@ public class CourseController {
         return courseService.createCourse(dto);
     }
 
+    @GetMapping("/count")
+    public Long countAllLong() {
+        return courseService.countAll();
+    }
+    
+
     @GetMapping("/{id}")
     public CourseDTO getCourseByID(@PathVariable Long id) {
         return courseService.getCourseById(id);
