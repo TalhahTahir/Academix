@@ -95,7 +95,6 @@ frontend = React.js
 ---
 
 ## Copilot Suggestions:
-    Great progress — most core flows are in place. From the code and your checklist, here’s what’s still remaining or needs tightening to fully complete “course progress, stats” and harden the overall flow.
 
 Top missing pieces to complete step 12 (course progress, stats)
 - Expose progress endpoints
