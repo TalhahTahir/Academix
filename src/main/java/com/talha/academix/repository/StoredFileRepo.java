@@ -8,4 +8,5 @@ import com.talha.academix.model.StoredFile;
 
 public interface StoredFileRepo extends JpaRepository<StoredFile, Long> {
     List<StoredFile> findByContent_ContentID(Long contentId);
+    boolean existsByObjectKey(String objectKey);
 }
