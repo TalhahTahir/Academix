@@ -1,9 +1,11 @@
 package com.talha.academix.services;
 
-import com.talha.academix.dto.FileUploadRequestDTO;
-import com.talha.academix.dto.FileUploadResponseDTO;
+import com.talha.academix.dto.SignedDownloadResponseDTO;
+import com.talha.academix.dto.SignedUploadInitRequestDTO;
+import com.talha.academix.dto.SignedUploadInitResponseDTO;
 
 public interface StoredFileService {
-    FileUploadResponseDTO initiateUpload(Long teacherId, Long courseId, FileUploadRequestDTO req);
+    SignedUploadInitResponseDTO initiateSignedUpload(SignedUploadInitRequestDTO req);
     void markReady(Long storedFileId);
+    SignedDownloadResponseDTO getSignedDownloadUrl(Long storedFileId, int expiresInSeconds);
 }

@@ -5,17 +5,20 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.talha.academix.dto.FileUploadRequestDTO;
-import com.talha.academix.dto.FileUploadResponseDTO;
+import com.talha.academix.config.SupabaseConfig;
+import com.talha.academix.dto.SignedDownloadResponseDTO;
+import com.talha.academix.dto.SignedUploadInitRequestDTO;
+import com.talha.academix.dto.SignedUploadInitResponseDTO;
 import com.talha.academix.enums.StoredFileStatus;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.model.Content;
-import com.talha.academix.model.Course;
 import com.talha.academix.model.StoredFile;
-import com.talha.academix.repository.CourseRepo;
+import com.talha.academix.repository.ContentRepo;
 import com.talha.academix.repository.StoredFileRepo;
-import com.talha.academix.services.SupabaseStorageClient;
+import com.talha.academix.services.CourseService;
 import com.talha.academix.services.StoredFileService;
+import com.talha.academix.services.SupabaseStorageSignedUrlService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,78 +26,68 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StoredFileServiceImpl implements StoredFileService {
 
-    // Change if you want from configuration
-    private static final String BUCKET = "academix"; // <-- set your actual bucket name
-    private static final boolean BUCKET_PUBLIC = true; // <-- set based on your supabase bucket
-
     private final StoredFileRepo storedFileRepo;
-    private final CourseRepo courseRepo;
-    private final SupabaseStorageClient storageClient;
+    private final ContentRepo contentRepo;
+    private final CourseService courseService;
+    private final SupabaseConfig supabaseConfig;
+    private final SupabaseStorageSignedUrlService signedUrlService;
+
+    private static final int DEFAULT_UPLOAD_EXPIRES = 600;  // 10 min
+    private static final int DEFAULT_DOWNLOAD_EXPIRES = 600; // 10 min
 
     @Override
     @Transactional
-    public FileUploadResponseDTO initiateUpload(Long teacherId, Long courseId, FileUploadRequestDTO req) {
-        Course course = courseRepo.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
+    public SignedUploadInitResponseDTO initiateSignedUpload(SignedUploadInitRequestDTO req) {
+        Content content = contentRepo.findById(req.getContentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + req.getContentId()));
 
-        // Minimal ownership check (no Spring Security yet)
-        if (course.getTeacher() == null || !course.getTeacher().getUserid().equals(teacherId)) {
-            throw new RuntimeException("Teacher does not own this course");
+        Long courseId = content.getCourse().getCourseid();
+        if (!courseService.teacherOwnership(req.getTeacherId(), courseId)) {
+            throw new RoleMismatchException("Only course owner can upload files");
         }
 
-        // We need a Content to attach StoredFile to (your StoredFile model requires content_id).
-        // If your course can have multiple contents, you need to decide which Content holds these files.
-        // For now: ensure there is at least one content record, or you pass contentId instead.
-        // Practical simplest fix: change StoredFile.content -> Course (recommended),
-        // but to keep your current model, we will require a single "default content".
-        // If you already create content later, then pass contentId instead of courseId.
-
-        // TEMP approach: use first content as "owner" of stored files (must exist!)
-        Content content = course.getContents() != null && !course.getContents().isEmpty()
-                ? (Content) course.getContents().get(0)
-                : null;
-
-        if (content == null) {
-            throw new RuntimeException("No Content exists for this course yet. Create Content first, then upload.");
+        String bucket = supabaseConfig.getStorage().getBucket();
+        if (bucket == null || bucket.isBlank()) {
+            throw new RuntimeException("supabase.storage.bucket is not configured");
+        }
+        if (supabaseConfig.getServiceRoleKey() == null || supabaseConfig.getServiceRoleKey().isBlank()) {
+            throw new RuntimeException("supabase.serviceRoleKey is not configured (required for signed URLs)");
         }
 
-        String folder = req.getType() == null ? "misc"
+        String folder = (req.getType() == null)
+                ? "misc"
                 : (req.getType().name().equalsIgnoreCase("LECTURE") ? "lectures" : "documents");
 
-        String safeName = req.getFileName() == null ? "file" : req.getFileName().replaceAll("[^a-zA-Z0-9._-]", "_");
-        String objectKey = "teacher-" + teacherId
+        String safeName = (req.getFileName() == null ? "file" : req.getFileName())
+                .replaceAll("[^a-zA-Z0-9._-]", "_");
+
+        // folder structure: teacher/course/content/type/uuid-filename
+        String objectKey = "teacher-" + req.getTeacherId()
                 + "/course-" + courseId
+                + "/content-" + content.getContentID()
                 + "/" + folder
                 + "/" + UUID.randomUUID() + "-" + safeName;
 
         StoredFile sf = new StoredFile();
         sf.setContent(content);
-        sf.setBucket(BUCKET);
+        sf.setBucket(bucket);
         sf.setObjectKey(objectKey);
         sf.setFileName(req.getFileName());
         sf.setMimeType(req.getMimeType());
         sf.setType(req.getType());
         sf.setSizeBytes(req.getSizeBytes());
         sf.setStatus(StoredFileStatus.PENDING);
-
         sf = storedFileRepo.save(sf);
 
-        String uploadUrl = storageClient.buildUploadUrl(BUCKET, objectKey);
+        String signedUploadUrl = signedUrlService.createSignedUploadUrl(bucket, objectKey, DEFAULT_UPLOAD_EXPIRES);
 
-        FileUploadResponseDTO.FileUploadResponseDTOBuilder b = FileUploadResponseDTO.builder()
+        return SignedUploadInitResponseDTO.builder()
                 .storedFileId(sf.getId())
-                .bucket(BUCKET)
+                .bucket(bucket)
                 .objectKey(objectKey)
-                .uploadUrl(uploadUrl)
-                .requiredAuthHeaderExample("Authorization: Bearer " + storageClient.getAnonKey());
-
-        // optional: also return public URL if bucket is public
-        if (BUCKET_PUBLIC) {
-            // You can store this into Lecture.videoUrl / Document.filePath after markReady
-            // (or compute again later)
-        }
-
-        return b.build();
+                .signedUploadUrl(signedUploadUrl)
+                .expiresIn(DEFAULT_UPLOAD_EXPIRES)
+                .build();
     }
 
     @Override
@@ -104,5 +97,24 @@ public class StoredFileServiceImpl implements StoredFileService {
                 .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + storedFileId));
         sf.setStatus(StoredFileStatus.READY);
         storedFileRepo.save(sf);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SignedDownloadResponseDTO getSignedDownloadUrl(Long storedFileId, int expiresInSeconds) {
+        StoredFile sf = storedFileRepo.findById(storedFileId)
+                .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + storedFileId));
+
+        int exp = expiresInSeconds > 0 ? expiresInSeconds : DEFAULT_DOWNLOAD_EXPIRES;
+
+        String signedDownloadUrl = signedUrlService.createSignedDownloadUrl(sf.getBucket(), sf.getObjectKey(), exp);
+
+        return SignedDownloadResponseDTO.builder()
+                .storedFileId(sf.getId())
+                .bucket(sf.getBucket())
+                .objectKey(sf.getObjectKey())
+                .signedDownloadUrl(signedDownloadUrl)
+                .expiresIn(exp)
+                .build();
     }
 }
