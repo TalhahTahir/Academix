@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class SignedUploadInitRequestDTO {
     private Long teacherId;
-    private Long contentId;
+    private Long courseId; // CHANGED (was contentId)
 
     private String fileName;
     private String mimeType;

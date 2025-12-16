@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Table(
     name = "stored_file",
     indexes = {
-        @Index(name = "idx_stored_file_content", columnList = "content_id"),
+        @Index(name = "idx_stored_file_course", columnList = "course_id"),
         @Index(name = "idx_stored_file_status", columnList = "status"),
         @Index(name = "idx_stored_file_type", columnList = "type")
     },
@@ -31,9 +31,10 @@ public class StoredFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // CHANGED: Content -> Course
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "content_id", nullable = false)
-    private Content content;
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course course;
 
     @Column(nullable = false, length = 255)
     private String bucket;
@@ -44,13 +45,12 @@ public class StoredFile {
     @Column(nullable = false, length = 255)
     private String fileName;
 
-    // actual MIME type: video/mp4, application/pdf, etc.
     @Column(nullable = false, length = 100)
     private String mimeType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private StoredFileType type; // LECTURE_VIDEO, DOCUMENT_FILE
+    private StoredFileType type; // LECTURE, DOCUMENT
 
     @Column(nullable = false)
     private Long sizeBytes;

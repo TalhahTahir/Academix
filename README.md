@@ -1,5 +1,5 @@
 The vision is changed: teacher will make course (he will set fees, catagory, name, etc)
-admin will validate course 
+admin will validate course
 teacher will add lectures and documents
 push launch button
 student enroll
@@ -10,15 +10,20 @@ we will have a vault screen for teacher and admin, where they can see their tota
 change admin course declearation
 payment logic updation
 
-course with same name?
----
+## course with same name?
+
 ## Webhook
+
 create a webhook secret from Srtipe Website -> developer screen
 paste it to application properties -> stripe.webhook-secret = ....
 install Stripe CLI
+
 ---
+
 ### Payment:
+
 keep async flow:
+
 1. payment initiate
 2. gateway give response about money deduction or process success
 3. user get notification & access to course
@@ -32,39 +37,52 @@ Platform gets security, scalibility, cost-friendly service(async feature)
 
 ### Payment Service has 2 phases:
 
-1. *Phase 1*: accept only card payments | no wallets | use stripe in backend | only Async
+1. _Phase 1_: accept only card payments | no wallets | use stripe in backend | only Async
 
-2. *Phase 2*: accept cards, bank Transfers, Mobile Wallets | have wallets  
+2. _Phase 2_: accept cards, bank Transfers, Mobile Wallets | have wallets
 
 ---
+
 ## TO-DO:
+
 1. PaymentServiceImpl is Handling work of other fields, split the work
+
 ---
-#### Use pre-made dedicated frameworks / libraries for Auditing. 
+
+#### Use pre-made dedicated frameworks / libraries for Auditing.
+
 ---
+
 ## payment Flow:
+
 1. ek controller bnao processes initiatation k liye, jo data collect kry or payment methods ko call kry (payment controller)
 2. payment method me:
-    1.  input ki authenticity validate kro
-    2.  intent create kro
-    3.  payment intent bnao
-    4.  payment record save kro (jo bhi intent status aye)
-    5.  payment intent se id or client secret le kr return kro
+
+   1. input ki authenticity validate kro
+   2. intent create kro
+   3. payment intent bnao
+   4. payment record save kro (jo bhi intent status aye)
+   5. payment intent se id or client secret le kr return kro
 
 3. frontend se Stripe ka confirmCardPayment hit kro
 4. method result se UI update kro (payment Succeed / failed)
 5. Webhooks receive krne k liye Webhook Controller bnao jisme:
-    1.  Webhook client secret ho
-    2.  Stripe ke incomming se seccess / fail extract kro
-    3.  result k according Business Logic apply kro
+   1. Webhook client secret ho
+   2. Stripe ke incomming se seccess / fail extract kro
+   3. result k according Business Logic apply kro
 
 ---
+
 #### Handle real storing for lectures and documents
+
 ---
+
 frontend = React.js
 
 ---
+
 ### Task ahead:
+
     integrate:
         Vaulting
         Payment Detailing
@@ -78,6 +96,7 @@ frontend = React.js
         make correct & complete flow
 
 ### Code with Flow
+
 1. Teacher Register ✅
 2. Automatic Vault Creation ✅
 3. Teacher created course (course = DRAFT) ✅
@@ -97,6 +116,7 @@ frontend = React.js
 ## Copilot Suggestions:
 
 Top missing pieces to complete step 12 (course progress, stats)
+
 - Expose progress endpoints
   - Student actions:
     - POST to mark a lecture completed (calls ProgressService.markLectureCompleted)
@@ -114,6 +134,7 @@ Top missing pieces to complete step 12 (course progress, stats)
   - AdminDashboardService exists. Consider adding time-series metrics (weekly enrollments, completions), revenue totals, and filtering by date ranges
 
 Important correctness and robustness fixes
+
 - ContentServiceImpl ownership checks use the wrong ID
   - updateContent/deleteContent call teacherOwnership(userid, contentId), but teacherOwnership expects a courseId. Fetch content, then pass its courseId
 - OptionServiceImpl single-correct-option rule
@@ -134,6 +155,7 @@ Important correctness and robustness fixes
   - Add: if new percentage >= 100, set Enrollment.status = COMPLETED and (optionally) award certificate automatically
 
 Payment and distribution integration points
+
 - EnrollmentServiceImpl.enrollStudent currently bypasses PaymentService (commented out). For production:
   - Tie initiatePayment -> requires_action or success -> finalizeEnrollment via webhook/callback
   - On successful payment, credit teacher vault and platform share if your “share distribution” is already implemented elsewhere
@@ -141,6 +163,7 @@ Payment and distribution integration points
   - Implement Stripe webhook to mark Payment status and then finalize enrollment + distribution (this makes the flow resilient to client drop-offs)
 
 Quality-of-life improvements
+
 - Controllers for the new endpoints (progress, stats) and basic security
 - Thresholds and policies
   - If you require exam completion to complete a course, encode that rule when marking enrollment completed (e.g., progress 100% AND passed required exam)
@@ -149,6 +172,7 @@ Quality-of-life improvements
   - Teacher: course performance over time, stuck students, content engagement
 
 Quick code-change checklist
+
 - Fix teacherOwnership misuse:
   - In ContentServiceImpl.updateContent/deleteContent, resolve content -> courseId, then call teacherOwnership(userid, courseId)
 - Enforce single correct option:
@@ -161,10 +185,46 @@ Quick code-change checklist
   - Replace updateEnrollment call with a method that updates only marks; avoid using DTOs with nulls
 
 If you’d like, I can:
+
 - Propose specific controller endpoints for progress and stats (with request/response models)
 - Draft patches for the bugs above
 - Wire auto-completion + certificate awarding
 - Sketch the webhook flow for Stripe to connect payments -> enrollment -> vault distribution
 
 ### Final Touches
+
     refactor the code according to professional Standards
+
+## Supabase Upload/Get
+
+#### Step1:
+  POST: http://localhost:8081/api/files/initiate-signed-upload
+
+  BODY (JSON):
+  {
+  "teacherId": 1,
+  "courseId": 10,
+  "fileName": "intro.mp4",
+  "mimeType": "video/mp4",
+  "sizeBytes": 123456,
+  "type": "LECTURE"
+  }
+
+  HEADER: Content-type: application/json
+---
+#### Step2:
+  Use the returned signedUploadUrl: find it in result of first step
+
+  PUT {signedUploadUrl}
+
+  Body → binary (choose your PNG file)
+  Header: Content-Type: image/png
+
+  OUTPUT: KEY
+---
+#### Step3:
+  POST http://localhost:8081/api/files/{storedFileId}/mark-ready
+---
+#### Step4:
+  GET http://localhost:8081/api/files/{storedFileId}/signed-download?expiresIn=600
+  
