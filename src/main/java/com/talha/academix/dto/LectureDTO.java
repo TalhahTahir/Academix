@@ -11,6 +11,7 @@ public class LectureDTO {
     private Long lectureId;
     private Long contentId;
     private String title;
-    private String videoUrl;
     private String duration;
+    private Long storedFileId;
+    private String videoSignedUrl;
 }

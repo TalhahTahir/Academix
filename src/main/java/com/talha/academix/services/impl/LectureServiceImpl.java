@@ -15,6 +15,11 @@ import com.talha.academix.repository.ContentRepo;
 import com.talha.academix.repository.LectureRepo;
 import com.talha.academix.services.CourseService;
 import com.talha.academix.services.LectureService;
+import com.talha.academix.enums.StoredFileStatus;
+import com.talha.academix.enums.StoredFileType;
+import com.talha.academix.model.StoredFile;
+import com.talha.academix.repository.StoredFileRepo;
+import com.talha.academix.services.StoredFileService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,26 +30,53 @@ public class LectureServiceImpl implements LectureService {
     private final LectureRepo lectureRepo;
     private final ContentRepo contentRepo;
     private final CourseService courseService;
+    private final StoredFileRepo storedFileRepo;
+private final StoredFileService storedFileService;
     private final ModelMapper mapper;
 
-    @Override
-    public LectureDTO addLecture(Long userid, LectureDTO dto) {
+@Override
+public LectureDTO addLecture(Long userid, LectureDTO dto) {
 
-        Content content = contentRepo.findById(dto.getContentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
+    Content content = contentRepo.findById(dto.getContentId())
+            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
 
-        if (courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
-
-            Lecture lecture = new Lecture();
-            lecture.setContent(content);
-            lecture.setTitle(dto.getTitle());
-            lecture.setDuration(dto.getDuration());
-            lecture = lectureRepo.save(lecture);
-
-            return mapper.map(lecture, LectureDTO.class);
-        } else
-            throw new RoleMismatchException("only valid user can add leature");
+    if (!courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
+        throw new RoleMismatchException("only valid user can add lecture");
     }
+
+    StoredFile file = storedFileRepo.findById(dto.getStoredFileId())
+            .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + dto.getStoredFileId()));
+
+    // verify file belongs to same course
+    if (!file.getCourse().getCourseid().equals(content.getCourse().getCourseid())) {
+        throw new RoleMismatchException("StoredFile does not belong to this course");
+    }
+
+    // verify correct type and status
+    if (file.getType() != StoredFileType.LECTURE) {
+        throw new RoleMismatchException("StoredFile type must be LECTURE");
+    }
+    if (file.getStatus() != StoredFileStatus.READY) {
+        throw new RoleMismatchException("StoredFile must be READY before linking");
+    }
+
+    Lecture lecture = new Lecture();
+    lecture.setContent(content);
+    lecture.setTitle(dto.getTitle());
+    lecture.setDuration(dto.getDuration());
+    lecture.setVideoUrl(file);
+    lecture = lectureRepo.save(lecture);
+
+    // build response DTO manually (avoid ModelMapper lazy issues)
+    LectureDTO out = new LectureDTO();
+    out.setLectureId(lecture.getLectureId());
+    out.setContentId(content.getContentID());
+    out.setTitle(lecture.getTitle());
+    out.setDuration(lecture.getDuration());
+    out.setStoredFileId(file.getId());
+    out.setVideoSignedUrl(storedFileService.getSignedDownloadUrl(file.getId(), 600).getSignedDownloadUrl());
+    return out;
+}
 
     @Override
     public LectureDTO updateLecture(Long userid, Long lectureId, LectureDTO dto) {

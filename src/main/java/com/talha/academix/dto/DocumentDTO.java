@@ -11,6 +11,7 @@ public class DocumentDTO {
     private Long documentId;
     private Long contentId;
     private String title;
-    private String filePath;
     private String description;
+    private Long storedFileId;
+    private String fileSignedUrl;
 }
