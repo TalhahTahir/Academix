@@ -11,6 +11,7 @@ public class ContentDTO {
     private Long contentID;
     private Long courseID;
     private String description;
-    private String image;
+    private Long imageFileId;
+    private String imageSignedUrl;
     // Collections like lectures and documents are omitted
 }

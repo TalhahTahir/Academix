@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,7 +29,9 @@ public class Document {
 
     private String title;
 
-    private String filePath;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "file_path_id", unique = true)
+    private StoredFile filePath;
 
     private String description;
 }

@@ -198,6 +198,7 @@ If you’d like, I can:
 ## Supabase Upload/Get
 
 #### Step1:
+
   POST: http://localhost:8081/api/files/initiate-signed-upload
 
   BODY (JSON):
@@ -213,6 +214,7 @@ If you’d like, I can:
   HEADER: Content-type: application/json
 ---
 #### Step2:
+
   Use the returned signedUploadUrl: find it in result of first step
 
   PUT {signedUploadUrl}
@@ -223,8 +225,10 @@ If you’d like, I can:
   OUTPUT: KEY
 ---
 #### Step3:
+
   POST http://localhost:8081/api/files/{storedFileId}/mark-ready
 ---
 #### Step4:
+
   GET http://localhost:8081/api/files/{storedFileId}/signed-download?expiresIn=600
   

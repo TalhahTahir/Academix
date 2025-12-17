@@ -10,4 +10,5 @@ public interface ContentService {
     ContentDTO getContentById(Long contentId);
     List<ContentDTO> getContentByCourse(Long courseId);
     void deleteContent(Long userid, Long contentId);
+    ContentDTO setContentImage(Long teacherId, Long contentId, Long storedFileId);
 }

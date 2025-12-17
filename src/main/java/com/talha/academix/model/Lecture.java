@@ -21,7 +21,9 @@ public class Lecture {
 
     private String title;
 
-    private String videoUrl;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "video_url_id", unique = true)
+    private StoredFile videoUrl;
 
     private String duration;
 }

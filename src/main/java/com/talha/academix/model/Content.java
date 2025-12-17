@@ -23,7 +23,9 @@ public class Content {
 
     private String description;
 
-    private String image;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_file_id", unique = true)
+    private StoredFile imageFile;
 
     @OneToMany(mappedBy="content", cascade=CascadeType.ALL, orphanRemoval=true)
     private List<Lecture> lectures;

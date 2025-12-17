@@ -30,13 +30,12 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public DocumentDTO addDocument(Long userid, DocumentDTO dto) {
         Content content = contentRepo.findById(dto.getContentId())
-            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
 
         if (courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
             Document document = new Document();
             document.setContent(content);
             document.setTitle(dto.getTitle());
-            document.setFilePath(dto.getFilePath());
             document = documentRepo.save(document);
 
             return mapper.map(document, DocumentDTO.class);
@@ -48,19 +47,19 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public DocumentDTO updateDocument(Long userid, Long documentId, DocumentDTO dto) {
         Document existing = documentRepo.findById(documentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
 
         if (courseService.teacherOwnership(userid, existing.getContent().getCourse().getCourseid())) {
 
             mapper.getConfiguration().setSkipNullEnabled(true);
             mapper.map(dto, existing);
-            
+
             if (!existing.getContent().getContentID().equals(dto.getContentId())) {
                 Content content = contentRepo.findById(dto.getContentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
+                        .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
                 existing.setContent(content);
             }
-        
+
             existing = documentRepo.save(existing);
 
             return mapper.map(existing, DocumentDTO.class);
@@ -72,26 +71,26 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public DocumentDTO getDocumentById(Long documentId) {
         Document document = documentRepo.findById(documentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
         return mapper.map(document, DocumentDTO.class);
     }
 
     @Override
     public List<DocumentDTO> getDocumentsByContent(Long contentId) {
         Content content = contentRepo.findById(contentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
         return documentRepo.findByContent(content).stream()
-            .map(d -> mapper.map(d, DocumentDTO.class))
-            .toList();
+                .map(d -> mapper.map(d, DocumentDTO.class))
+                .toList();
     }
 
     @Override
     public void deleteDocument(Long userid, Long documentId) {
         Document document = documentRepo.findById(documentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
 
         Content content = contentRepo.findById(document.getContent().getContentID())
-            .orElseThrow(() -> new ResourceNotFoundException("Content not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found"));
 
         if (courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
             documentRepo.delete(document);

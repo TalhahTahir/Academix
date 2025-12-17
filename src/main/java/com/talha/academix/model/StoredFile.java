@@ -50,7 +50,7 @@ public class StoredFile {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private StoredFileType type; // LECTURE, DOCUMENT
+    private StoredFileType type; // LECTURE, DOCUMENT, CONTENT_IMAGE
 
     @Column(nullable = false)
     private Long sizeBytes;
