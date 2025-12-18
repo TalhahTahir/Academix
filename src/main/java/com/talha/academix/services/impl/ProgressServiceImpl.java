@@ -17,9 +17,11 @@ import com.talha.academix.repository.LectureProgressRepo;
 import com.talha.academix.repository.LectureRepo;
 import com.talha.academix.services.EnrollmentService;
 import com.talha.academix.services.ProgressService;
+import com.talha.academix.dto.EnrollmentStatsDTO;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
 public class ProgressServiceImpl implements ProgressService {
@@ -89,5 +91,32 @@ public class ProgressServiceImpl implements ProgressService {
         long completedItems = completedLectures + completedDocuments;
 
         return totalItems == 0 ? 0.0 : ((double) completedItems / totalItems) * 100.0;
+    }
+
+    @Override
+    public EnrollmentStatsDTO getEnrollmentStats(Long enrollmentId) {
+        Enrollment enrollment = enrollmentService.getEnrollmentEntity(enrollmentId);
+        Long courseId = enrollment.getCourse().getCourseid();
+
+        long totalLectures = lectureRepo.countByContent_Course_Courseid(courseId);
+        long totalDocuments = documentRepo.countByContent_Course_Courseid(courseId);
+
+        long completedLectures = lectureProgressRepo.countCompletedByEnrollmentAndCourse(enrollmentId, courseId);
+        long completedDocuments = documentProgressRepo.countCompletedByEnrollmentAndCourse(enrollmentId, courseId);
+
+        long totalItems = totalLectures + totalDocuments;
+        long completedItems = completedLectures + completedDocuments;
+
+        double percentage = totalItems == 0 ? 0.0 : ((double) completedItems / totalItems) * 100.0;
+
+        return EnrollmentStatsDTO.builder()
+                .enrollmentId(enrollmentId)
+                .courseId(courseId)
+                .totalLectures(totalLectures)
+                .completedLectures(completedLectures)
+                .totalDocuments(totalDocuments)
+                .completedDocuments(completedDocuments)
+                .completionPercentage(percentage)
+                .build();
     }
 }

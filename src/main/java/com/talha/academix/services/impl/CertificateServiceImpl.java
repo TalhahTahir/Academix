@@ -45,7 +45,6 @@ public class CertificateServiceImpl implements CertificateService {
         certificate.setStudent(enrollment.getStudent());
         certificate.setTeacher(enrollment.getCourse().getTeacher());
         certificate.setCourse(enrollment.getCourse());
-        certificate.setMarks(enrollment.getMarks());
         certificate.setDate(new Date().toInstant());
 
     certificateRepo.save(certificate);

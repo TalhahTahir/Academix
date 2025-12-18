@@ -29,7 +29,5 @@ public class Certificate {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    private double marks;
-
     private Instant date;
 }
