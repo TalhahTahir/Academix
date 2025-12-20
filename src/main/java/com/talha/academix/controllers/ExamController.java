@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class ExamController {
         return examService.createExam(teacherId, dto);
     }
 
-    @PostMapping("update/{teacherId}/{examId}")
+    @PutMapping("update/{teacherId}/{examId}")
     public ExamDTO updateExam(@PathVariable Long teacherId, @PathVariable Long examId, @RequestBody ExamDTO dto) {
         return examService.updateExam(teacherId, examId, dto);
     }
@@ -41,7 +42,7 @@ public class ExamController {
         return examService.getExamById(examId);
     }
     
-    @GetMapping("{courseId}")
+    @GetMapping("courses/{courseId}")
     public List<ExamDTO> getExamByCourseId(@PathVariable Long courseId) {
         return examService.getExamsByCourse(courseId);
     }
@@ -52,7 +53,7 @@ public class ExamController {
     }
 
     @PostMapping("check")
-    public Double postMethodName(@RequestBody AttemptDTO attemptDTO) {
+    public Double checkExam(@RequestBody AttemptDTO attemptDTO) {
         return examService.checkExam(attemptDTO);
     }
     
