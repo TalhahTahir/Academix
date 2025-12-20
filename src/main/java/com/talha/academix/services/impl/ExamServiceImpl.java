@@ -3,17 +3,18 @@ package com.talha.academix.services.impl;
 import java.util.List;
 import java.util.Objects;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.AttemptDTO;
 import com.talha.academix.dto.EnrollmentDTO;
-import com.talha.academix.dto.ExamDTO;
+import com.talha.academix.dto.CreateExamRequest;
+import com.talha.academix.dto.ExamResponse;
 import com.talha.academix.exception.BlankAnswerException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.model.Attempt;
 import com.talha.academix.model.AttemptAnswer;
+import com.talha.academix.model.Course;
 import com.talha.academix.model.Exam;
 import com.talha.academix.model.Question;
 import com.talha.academix.model.QuestionOption;
@@ -35,115 +36,117 @@ public class ExamServiceImpl implements ExamService {
     private final CourseService courseService;
     private final AttemptRepo attemptRepo;
     private final EnrollmentService enrollmentService;
-    private final ModelMapper modelMapper;
 
     @Override
-    public ExamDTO createExam(Long teacherId, ExamDTO dto) {
+    public ExamResponse createExam(Long teacherId, CreateExamRequest req) {
+        if (!courseService.teacherOwnership(teacherId, req.getCourseId())) {
+            throw new RoleMismatchException("Only teacher can create exam for this course.");
+        }
 
-        if (courseService.teacherOwnership(teacherId, dto.getCourseId())) {
+        Course course = courseRepo.findById(req.getCourseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-            Exam exam = modelMapper.map(dto, Exam.class);
-            exam.setCourse(courseRepo.findById(dto.getCourseId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Course not found")));
-            exam = examRepo.save(exam);
+        Exam exam = new Exam();
+        exam.setTitle(req.getTitle());
+        exam.setCourse(course);
 
-            return modelMapper.map(exam, ExamDTO.class);
-        } else
-            throw new RoleMismatchException("only Teacher can create exam");
+        exam = examRepo.save(exam);
+        return toResponse(exam);
     }
 
     @Override
-    public ExamDTO updateExam(Long userid, Long examId, ExamDTO dto) {
+    public ExamResponse updateExam(Long teacherId, Long examId, CreateExamRequest req) {
         Exam existing = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
 
-        if (courseService.teacherOwnership(userid, existing.getCourse().getCourseid())) {
-            
-            modelMapper.getConfiguration().setSkipNullEnabled(true);
-            modelMapper.map(dto, existing);
-
-            existing.setCourse(courseRepo.findById(dto.getCourseId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Course not found")));
-
-            examRepo.save(existing);
-
-            return modelMapper.map(existing, ExamDTO.class);
-        } else {
-            throw new RoleMismatchException("Only teacher can update exam");
+        if (!courseService.teacherOwnership(teacherId, existing.getCourse().getCourseid())) {
+            throw new RoleMismatchException("Only teacher can update exam.");
         }
+
+        if (req.getTitle() != null) {
+            existing.setTitle(req.getTitle());
+        }
+
+        existing = examRepo.save(existing);
+        return toResponse(existing);
     }
 
     @Override
-    public ExamDTO getExamById(Long examId) {
+    public ExamResponse getExamById(Long examId) {
         Exam exam = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
-        return modelMapper.map(exam, ExamDTO.class);
+        return toResponse(exam);
     }
 
     @Override
-    public List<ExamDTO> getExamsByCourse(Long courseId) {
-        List<Exam> exams = examRepo.findByCourseId(courseId);
-        return exams.stream()
-                .map(e -> modelMapper.map(e, ExamDTO.class))
+    public List<ExamResponse> getExamsByCourse(Long courseId) {
+        return examRepo.findByCourseId(courseId).stream()
+                .map(this::toResponse)
                 .toList();
     }
 
     @Override
-    public void deleteExam(Long userid, Long examId) {
+    public void deleteExam(Long teacherId, Long examId) {
         Exam exam = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
 
-        if (courseService.teacherOwnership(userid, exam.getCourse().getCourseid())) {
-            examRepo.delete(exam);
-        } else {
-            throw new RoleMismatchException("Only teacher can delete exam");
+        if (!courseService.teacherOwnership(teacherId, exam.getCourse().getCourseid())) {
+            throw new RoleMismatchException("Only teacher can delete exam.");
         }
+
+        examRepo.delete(exam);
     }
 
     @Override
     public Double checkExam(AttemptDTO dto) {
-    
+
         Exam exam = examRepo.findById(dto.getExamId())
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + dto.getExamId()));
-    
+
         Attempt attempt = attemptRepo.findById(dto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Attempt not found with id: " + dto.getId()));
-    
+
         EnrollmentDTO enrollment = enrollmentService.enrollmentValidation(
                 exam.getCourse().getCourseid(), dto.getStudentId());
         if (enrollment == null) {
             throw new ResourceNotFoundException("Enrollment not found for student and course.");
         }
-    
+
         List<AttemptAnswer> answers = attempt.getAnswers();
         if (answers.isEmpty()) {
             throw new BlankAnswerException("Cannot check an attempt without answers.");
         }
-    
+
         int marksCount = 0;
-    
+
         for (AttemptAnswer answer : answers) {
             Question question = answer.getQuestion();
-            Long correctOption = null; 
-    
+            Long correctOption = null;
+
             for (QuestionOption option : question.getOptions()) {
                 if (option.isCorrect()) {
                     correctOption = option.getId();
-                    break; 
+                    break;
                 }
             }
-    
+
             if (Objects.equals(answer.getSelectedOption().getId(), correctOption)) {
                 marksCount++;
             }
         }
-    
+
         double percentage = (double) marksCount / answers.size() * 100;
-    
+
         enrollment.setMarks(percentage);
         enrollmentService.updateEnrollment(enrollment.getEnrollmentID(), enrollment);
-    
+
         return percentage;
     }
-    
+
+    private ExamResponse toResponse(Exam exam) {
+        return new ExamResponse(
+                exam.getId(),
+                exam.getTitle(),
+                exam.getCourse() != null ? exam.getCourse().getCourseid() : null);
+    }
 }

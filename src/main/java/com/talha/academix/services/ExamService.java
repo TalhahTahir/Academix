@@ -3,13 +3,15 @@ package com.talha.academix.services;
 import java.util.List;
 
 import com.talha.academix.dto.AttemptDTO;
-import com.talha.academix.dto.ExamDTO;
+import com.talha.academix.dto.CreateExamRequest;
+import com.talha.academix.dto.ExamResponse;
 
 public interface ExamService {
-    ExamDTO createExam(Long teacherId, ExamDTO dto);
-    ExamDTO getExamById(Long examId);
-    List<ExamDTO> getExamsByCourse(Long courseId);
-    ExamDTO updateExam(Long userid, Long examId, ExamDTO dto);
-    void deleteExam(Long userid, Long examId);
+    ExamResponse createExam(Long teacherId, CreateExamRequest req);
+    ExamResponse getExamById(Long examId);
+    List<ExamResponse> getExamsByCourse(Long courseId);
+    ExamResponse updateExam(Long teacherId, Long examId, CreateExamRequest req);
+    void deleteExam(Long teacherId, Long examId);
+
     Double checkExam(AttemptDTO attempt);
 }
