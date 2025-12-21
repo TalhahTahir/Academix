@@ -97,51 +97,6 @@ public class ExamServiceImpl implements ExamService {
         examRepo.delete(exam);
     }
 
-    @Override
-    public Double checkExam(AttemptDTO dto) {
-
-        Exam exam = examRepo.findById(dto.getExamId())
-                .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + dto.getExamId()));
-
-        Attempt attempt = attemptRepo.findById(dto.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Attempt not found with id: " + dto.getId()));
-
-        EnrollmentDTO enrollment = enrollmentService.enrollmentValidation(
-                exam.getCourse().getCourseid(), dto.getStudentId());
-        if (enrollment == null) {
-            throw new ResourceNotFoundException("Enrollment not found for student and course.");
-        }
-
-        List<AttemptAnswer> answers = attempt.getAnswers();
-        if (answers.isEmpty()) {
-            throw new BlankAnswerException("Cannot check an attempt without answers.");
-        }
-
-        int marksCount = 0;
-
-        for (AttemptAnswer answer : answers) {
-            Question question = answer.getQuestion();
-            Long correctOption = null;
-
-            for (QuestionOption option : question.getOptions()) {
-                if (option.isCorrect()) {
-                    correctOption = option.getId();
-                    break;
-                }
-            }
-
-            if (Objects.equals(answer.getSelectedOption().getId(), correctOption)) {
-                marksCount++;
-            }
-        }
-
-        double percentage = (double) marksCount / answers.size() * 100;
-
-        enrollment.setMarks(percentage);
-        enrollmentService.updateEnrollment(enrollment.getEnrollmentID(), enrollment);
-
-        return percentage;
-    }
 
     private ExamResponse toResponse(Exam exam) {
         return new ExamResponse(

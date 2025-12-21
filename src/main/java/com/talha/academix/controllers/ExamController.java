@@ -54,8 +54,4 @@ public class ExamController {
         examService.deleteExam(teacherId, examId);
     }
 
-    @PostMapping("check")
-    public Double checkExam(@RequestBody AttemptDTO attemptDTO) {
-        return examService.checkExam(attemptDTO);
-    }
 }

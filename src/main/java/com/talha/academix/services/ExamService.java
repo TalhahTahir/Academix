@@ -12,6 +12,4 @@ public interface ExamService {
     List<ExamResponse> getExamsByCourse(Long courseId);
     ExamResponse updateExam(Long teacherId, Long examId, CreateExamRequest req);
     void deleteExam(Long teacherId, Long examId);
-
-    Double checkExam(AttemptDTO attempt);
 }
