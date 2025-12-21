@@ -7,6 +7,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.OptionDTO;
+import com.talha.academix.dto.StudentOptionResponse;
 import com.talha.academix.exception.InvalidAttemptException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
@@ -93,4 +94,19 @@ public class OptionServiceImpl implements OptionService {
     }
     else throw new RoleMismatchException("Only teacher can delete options");
 }
+
+
+    @Override
+    public List<StudentOptionResponse> getOptionsByQuestionForStudent(Long questionId) {
+        List<QuestionOption> options = optionRepo.findByQuestionId(questionId);
+        return options.stream()
+                .map(o -> {
+                    StudentOptionResponse response = new StudentOptionResponse();
+                    response.setId(o.getId());
+                    response.setText(o.getText());
+                    response.setQuestionId(o.getQuestion().getId());
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
 }

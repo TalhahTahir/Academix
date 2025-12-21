@@ -61,7 +61,8 @@ public class AttemptServiceImpl implements AttemptService {
             dto.setStudentId(studentId); // manual mapping
             return dto;
         } else {
-            throw new ForbiddenException("You cannot start an attempt for this exam as your enrollment is not complete.");
+            throw new ForbiddenException(
+                    "You cannot start an attempt for this exam as your enrollment is not complete.");
         }
     }
 
@@ -70,6 +71,10 @@ public class AttemptServiceImpl implements AttemptService {
     public AttemptDTO submitAttempt(Long attemptId, AttemptDTO dto) {
         Attempt attempt = attemptRepo.findById(attemptId)
                 .orElseThrow(() -> new ResourceNotFoundException("Attempt not found with id: " + attemptId));
+
+        if (!attempt.getStudent().getUserid().equals(dto.getStudentId()))
+            throw new ForbiddenException(
+                    "You are not allowed to submit this attempt.");
 
         if (attempt.getCompletedAt() != null) {
             throw new AlreadyExistException("This attempt is already submitted.");
