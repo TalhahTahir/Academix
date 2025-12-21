@@ -71,33 +71,33 @@ public class CourseController {
         return courseService.getAllCoursesByState(state);
     }
 
-    @PostMapping("/state/action/reject")
+    @PostMapping("/state/action/reject/{courseId}")
     public CourseDTO courseRejection(@PathVariable Long courseId) {
         return courseService.courseRejection(courseId);
     }
 
-    @PostMapping("/state/action/approve")
+    @PostMapping("/state/action/approve/{courseId}")
     public CourseDTO courseApproval(@PathVariable Long courseId) {
         return courseService.courseApproval(courseId);
     }
 
-    @PostMapping("/state/action/disable")
+    @PostMapping("/state/action/disable/{courseId}")
     public CourseDTO courseDisable(@PathVariable Long courseId) {
         return courseService.courseDisable(courseId);
     }
 
-    @PostMapping("/state/action/Modify")
+    @PostMapping("/state/action/modify/{teacherId}/{courseId}")
     public CourseDTO courseModification(@PathVariable Long teacherId, @PathVariable Long courseId,
             @RequestBody CourseDTO dto) {
         return courseService.courseModification(teacherId, courseId, dto);
     }
 
-    @PostMapping("/state/action/develop")
+    @PostMapping("/state/action/develop/{teacherId}/{courseId}")
     public CourseDTO courseDevelop(@PathVariable Long teacherId, @PathVariable Long courseId) {
         return courseService.courseDevelopment(teacherId, courseId);
     }
 
-    @PostMapping("/state/action/Launch")
+    @PostMapping("/state/action/launch/{teacherId}/{courseId}")
     public CourseDTO courseLaunch(@PathVariable Long teacherId, @PathVariable Long courseId) {
         return courseService.courseLaunch(teacherId, courseId);
     }

@@ -1,57 +1,56 @@
 package com.talha.academix.controllers;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
-import com.talha.academix.dto.AttemptDTO;
+import org.springframework.web.bind.annotation.*;
+
 import com.talha.academix.dto.CreateExamRequest;
 import com.talha.academix.dto.ExamResponse;
 import com.talha.academix.services.ExamService;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import java.util.List;
-
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/exams/")
+@RequestMapping("/api")
 public class ExamController {
 
     private final ExamService examService;
 
-    @PostMapping("create/{teacherId}")
-    public ExamResponse createExam(@PathVariable Long teacherId, @RequestBody CreateExamRequest req) {
+    // Create exam under a course (teacher step 1)
+    @PostMapping("/courses/{courseId}/exams/teachers/{teacherId}")
+    public ExamResponse createExam(@PathVariable Long teacherId,
+                                   @PathVariable Long courseId,
+                                   @RequestBody CreateExamRequest req) {
+        // enforce courseId from path (ignore body mismatch)
+        req.setCourseId(courseId);
         return examService.createExam(teacherId, req);
     }
 
-    @PutMapping("update/{teacherId}/{examId}")
-    public ExamResponse updateExam(@PathVariable Long teacherId,
-                                   @PathVariable Long examId,
-                                   @RequestBody CreateExamRequest req) {
-        return examService.updateExam(teacherId, examId, req);
+    // List exams of a course
+    @GetMapping("/courses/{courseId}/exams")
+    public List<ExamResponse> getExamsByCourse(@PathVariable Long courseId) {
+        return examService.getExamsByCourse(courseId);
     }
 
-    @GetMapping("{examId}")
+    // Get exam by id
+    @GetMapping("/exams/{examId}")
     public ExamResponse getExamById(@PathVariable Long examId) {
         return examService.getExamById(examId);
     }
 
-    @GetMapping("courses/{courseId}")
-    public List<ExamResponse> getExamByCourseId(@PathVariable Long courseId) {
-        return examService.getExamsByCourse(courseId);
+    // Update exam title only (teacher)
+    @PutMapping("/exams/{examId}/teachers/{teacherId}")
+    public ExamResponse updateExam(@PathVariable Long teacherId,
+                                   @PathVariable Long examId,
+                                   @RequestBody CreateExamRequest req) {
+        // IMPORTANT: courseId is not allowed to change; service ignores it.
+        return examService.updateExam(teacherId, examId, req);
     }
 
-    @DeleteMapping("{teacherId}/{examId}")
+    // Delete exam (teacher)
+    @DeleteMapping("/exams/{examId}/teachers/{teacherId}")
     public void deleteExam(@PathVariable Long teacherId, @PathVariable Long examId) {
         examService.deleteExam(teacherId, examId);
     }
-
 }
