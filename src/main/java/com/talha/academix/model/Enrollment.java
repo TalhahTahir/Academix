@@ -33,7 +33,7 @@ public class Enrollment {
     private User student;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="Course_id", nullable=false)
+    @JoinColumn(name="course_id", nullable=false)
     private Course course;
 
     private Instant enrollmentDate;

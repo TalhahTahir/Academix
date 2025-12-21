@@ -30,6 +30,12 @@ public class Exam {
     @JoinColumn(name = "course_id")
     private Course course;
 
+    private Long durationInMinutes;
+
+    private Long totalMarks;
+
+    private Long passMarks;    
+
     @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions = new ArrayList<>();
 }

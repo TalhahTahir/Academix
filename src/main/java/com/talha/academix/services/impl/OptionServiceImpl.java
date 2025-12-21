@@ -39,7 +39,7 @@ public class OptionServiceImpl implements OptionService {
 
         if (dto.isCorrect()) {
             long count = optionRepo.countByQuestionIdAndIsCorrectTrue(questionId);
-            if (count > 1) {
+            if (count >= 1) {
                 throw new InvalidAttemptException("Only one option can be marked as correct per question.");
             }
         }

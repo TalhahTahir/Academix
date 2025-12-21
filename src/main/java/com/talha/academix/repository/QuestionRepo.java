@@ -13,7 +13,6 @@ public interface QuestionRepo extends JpaRepository<Question, Long> {
     // Was derived (invalid). Explicit JPQL using exam.id
     @Query("SELECT q FROM Question q WHERE q.exam.id = :examId")
     List<Question> findByExamId(@Param("examId") Long examId);
-
-    long countByExamId(Long examId);
+    long countByExam_Id(Long id);
     
 }

@@ -10,5 +10,4 @@ public interface AttemptService {
     AttemptDTO getAttemptById(Long attemptId);
     List<AttemptDTO> getAttemptsByStudent(Long studentId);
     List<AttemptDTO> getAttemptsByExam(Long examId);
-    void completeAttempt(Long attemptId);
 }

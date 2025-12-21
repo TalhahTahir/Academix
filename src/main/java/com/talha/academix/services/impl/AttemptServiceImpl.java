@@ -40,7 +40,7 @@ public class AttemptServiceImpl implements AttemptService {
     private final EnrollmentRepo enrollmentRepo;
     private final QuestionRepo questionRepo;
     private final EnrollmentService enrollmentService;
-    private final UserRepo userRepo; // added
+    private final UserRepo userRepo;
     private final ModelMapper modelMapper;
 
     @Override
@@ -53,12 +53,12 @@ public class AttemptServiceImpl implements AttemptService {
                     .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
             Attempt attempt = new Attempt();
             attempt.setExam(exam);
-            attempt.setStudent(student); // refactored
+            attempt.setStudent(student);
             attempt.setStartedAt(Instant.now());
             attempt = attemptRepo.save(attempt);
 
             AttemptDTO dto = modelMapper.map(attempt, AttemptDTO.class);
-            dto.setStudentId(studentId); // manual mapping
+            dto.setStudentId(studentId);
             return dto;
         } else {
             throw new ForbiddenException(
@@ -85,7 +85,7 @@ public class AttemptServiceImpl implements AttemptService {
             throw new BlankAnswerException("Cannot submit an attempt without answers.");
         }
 
-        long totalQuestions = questionRepo.countByExamId(attempt.getExam().getId());
+        long totalQuestions = questionRepo.countByExam_Id(attempt.getExam().getId());
         long correctAnswers = answers.stream()
                 .filter(ans -> ans.getSelectedOption().isCorrect())
                 .count();
@@ -138,13 +138,5 @@ public class AttemptServiceImpl implements AttemptService {
                     return d;
                 })
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public void completeAttempt(Long attemptId) {
-        Attempt attempt = attemptRepo.findById(attemptId)
-                .orElseThrow(() -> new ResourceNotFoundException("Attempt not found with id: " + attemptId));
-        attempt.setCompletedAt(Instant.now());
-        attemptRepo.save(attempt);
     }
 }
