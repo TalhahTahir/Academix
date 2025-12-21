@@ -9,5 +9,6 @@ import com.talha.academix.model.AttemptAnswer;
 public interface AttemptAnswerRepo extends JpaRepository<AttemptAnswer, Long> {
 
     List<AttemptAnswer> findByAttemptId(Long attemptId);
+    AttemptAnswer findByAttemptIdAndQuestionId(Long attemptId, Long questionId);
     
 }

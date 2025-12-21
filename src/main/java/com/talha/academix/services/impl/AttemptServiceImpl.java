@@ -22,6 +22,7 @@ import com.talha.academix.repository.AttemptAnswerRepo;
 import com.talha.academix.repository.AttemptRepo;
 import com.talha.academix.repository.EnrollmentRepo;
 import com.talha.academix.repository.ExamRepo;
+import com.talha.academix.repository.QuestionRepo;
 import com.talha.academix.repository.UserRepo;
 import com.talha.academix.services.AttemptService;
 import com.talha.academix.services.EnrollmentService;
@@ -37,6 +38,7 @@ public class AttemptServiceImpl implements AttemptService {
     private final ExamRepo examRepo;
     private final AttemptAnswerRepo attemptAnswerRepo;
     private final EnrollmentRepo enrollmentRepo;
+    private final QuestionRepo questionRepo;
     private final EnrollmentService enrollmentService;
     private final UserRepo userRepo; // added
     private final ModelMapper modelMapper;
@@ -78,7 +80,7 @@ public class AttemptServiceImpl implements AttemptService {
             throw new BlankAnswerException("Cannot submit an attempt without answers.");
         }
 
-        long totalQuestions = answers.size();
+        long totalQuestions = questionRepo.countByExamId(attempt.getExam().getId());
         long correctAnswers = answers.stream()
                 .filter(ans -> ans.getSelectedOption().isCorrect())
                 .count();

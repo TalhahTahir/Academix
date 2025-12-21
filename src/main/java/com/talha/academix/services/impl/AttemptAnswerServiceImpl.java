@@ -7,6 +7,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.AttemptAnswerDTO;
+import com.talha.academix.exception.AlreadyExistException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.UnmatchedExamException;
 import com.talha.academix.model.Attempt;
@@ -43,6 +44,10 @@ public class AttemptAnswerServiceImpl implements AttemptAnswerService {
     
         if (!question.getExam().getId().equals(attempt.getExam().getId())) {
             throw new UnmatchedExamException("This question does not belong to the exam for this attempt.");
+        }
+
+        if (attemptAnswerRepo.findByAttemptIdAndQuestionId(attemptId, questionId) != null) {
+            throw new AlreadyExistException("An answer for this question has already been submitted in this attempt.");
         }
     
         QuestionOption questionOption = optionRepo.findById(selectedOptionId)
