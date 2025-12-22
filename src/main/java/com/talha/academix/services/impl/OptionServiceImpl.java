@@ -37,7 +37,7 @@ public class OptionServiceImpl implements OptionService {
     
         if(courseService.teacherOwnership(userid, question.getExam().getCourse().getCourseid())){
 
-        if (dto.isCorrect()) {
+        if ((dto.isCorrect())) {
             long count = optionRepo.countByQuestionIdAndIsCorrectTrue(questionId);
             if (count >= 1) {
                 throw new InvalidAttemptException("Only one option can be marked as correct per question.");
@@ -46,6 +46,7 @@ public class OptionServiceImpl implements OptionService {
     
         QuestionOption questionOption = mapper.map(dto, QuestionOption.class);
         questionOption.setQuestion(question);
+        questionOption.setCorrect((dto.isCorrect()));
         questionOption = optionRepo.save(questionOption);
     
         return mapper.map(questionOption, OptionDTO.class);

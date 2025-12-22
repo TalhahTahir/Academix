@@ -1,6 +1,6 @@
 package com.talha.academix.dto;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ public class AttemptDTO {
     private Long id;
     private Long examId;
     private Long studentId;
-    private ZonedDateTime startedAt;
-    private ZonedDateTime completedAt;
-    private List<Long> answerIds; // Representing answers by their IDs
+    private Instant startedAt;
+    private Instant completedAt;
+    private List<Long> answerIds;
 }

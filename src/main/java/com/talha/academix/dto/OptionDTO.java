@@ -1,7 +1,7 @@
 package com.talha.academix.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @Data
@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class OptionDTO {
     private Long id;
     private String text;
-    private boolean isCorrect;
+    private boolean correct;
     private Long questionId;
 }
