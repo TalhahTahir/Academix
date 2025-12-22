@@ -31,7 +31,7 @@ public class ProgressServiceImpl implements ProgressService {
     private final DocumentRepo documentRepo;
     private final LectureProgressRepo lectureProgressRepo;
     private final DocumentProgressRepo documentProgressRepo;
-    private final Clock clock; // inject java.time.Clock for testability
+    private final Clock clock;
 
     @Override
     @Transactional

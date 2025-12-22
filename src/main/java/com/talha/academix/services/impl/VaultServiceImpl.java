@@ -12,7 +12,6 @@ import com.talha.academix.enums.PaymentStatus;
 import com.talha.academix.enums.Role;
 import com.talha.academix.enums.TxStatus;
 import com.talha.academix.enums.VaultTxType;
-import com.talha.academix.exception.AlreadyExistException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Payment;
 import com.talha.academix.model.Vault;
@@ -153,8 +152,7 @@ public class VaultServiceImpl implements VaultService {
             return true;
 
         }
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'shareDistribution'");
+        return false;
     }
 
 }
