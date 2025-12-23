@@ -28,4 +28,6 @@ public interface CourseRepo extends JpaRepository<Course, Long> {
 
     long count();
 
+    long countByState(CourseState state);
+
 }
