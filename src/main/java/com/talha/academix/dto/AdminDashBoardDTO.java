@@ -16,6 +16,7 @@ public class AdminDashBoardDTO {
     private Enrollments enrollments;
 
     @Data
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Users {
@@ -24,6 +25,7 @@ public class AdminDashBoardDTO {
     }
 
     @Data
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Courses {
@@ -38,6 +40,7 @@ public class AdminDashBoardDTO {
     }
 
     @Data
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Enrollments {
@@ -48,6 +51,7 @@ public class AdminDashBoardDTO {
     }
 
     @Data
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Exams {
