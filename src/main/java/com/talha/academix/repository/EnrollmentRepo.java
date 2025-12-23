@@ -38,4 +38,6 @@ public interface EnrollmentRepo extends JpaRepository<Enrollment, Long> {
 
         long countByStudent_Userid(Long studentId);
 
+        long countByStatus(EnrollmentStatus status);
+
 }
