@@ -3,15 +3,12 @@ package com.talha.academix.controllers;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.stripe.model.Account.Company.Verification.Document;
 import com.talha.academix.dto.DocumentDTO;
 import com.talha.academix.services.DocumentService;
 
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
-
-import javax.print.Doc;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +30,7 @@ public class DocumentController {
     }
 
     @PutMapping("teachers/{teacherId}/documents/{documentId}")
-    public DocumentDTO putMethodName(@PathVariable Long teacherId, @PathVariable Long documentId,
+    public DocumentDTO updateDocument(@PathVariable Long teacherId, @PathVariable Long documentId,
             @RequestBody DocumentDTO dto) {
         return documentService.updateDocument(teacherId, documentId, dto);
     }
@@ -44,7 +41,7 @@ public class DocumentController {
     }
 
     @GetMapping("content/{id}")
-    public List<DocumentDTO> getMethodName(@PathVariable Long id) {
+    public List<DocumentDTO> getDocumentsByContent(@PathVariable Long id) {
         return documentService.getDocumentsByContent(id);
     }
 
