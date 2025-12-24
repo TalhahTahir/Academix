@@ -12,8 +12,9 @@ import lombok.NoArgsConstructor;
 public class AdminDashBoardDTO {
     private Users users;
     private Courses courses;
-    private Exams exams;
     private Enrollments enrollments;
+    private Exams exams;
+    private Certificates certificates;
 
     @Data
     @Builder
@@ -56,6 +57,14 @@ public class AdminDashBoardDTO {
     @AllArgsConstructor
     public static class Exams {
         private long totalExams;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Certificates {
+        private long totalCertificates;
     }
 
 }
