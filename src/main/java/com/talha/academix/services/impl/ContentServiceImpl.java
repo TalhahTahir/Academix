@@ -36,39 +36,39 @@ public class ContentServiceImpl implements ContentService {
         private final StoredFileService storedFileService;
         Boolean owned;
 
-@Override
-public ContentDTO addContent(Long userid, ContentDTO dto) {
+        @Override
+        public ContentDTO addContent(Long userid, ContentDTO dto) {
 
-    Course course = courseRepo.findById(dto.getCourseID())
-            .orElseThrow(() -> new ResourceNotFoundException(
-                    "Course not found with id: " + dto.getCourseID()));
+                Course course = courseRepo.findById(dto.getCourseID())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Course not found with id: " + dto.getCourseID()));
 
-    owned = courseService.teacherOwnership(userid, course.getCourseid());
+                owned = courseService.teacherOwnership(userid, course.getCourseid());
 
-    if (owned && (course.getState() == CourseState.DRAFT
-            || course.getState() == CourseState.IN_DEVELOPMENT
-            || course.getState() == CourseState.REJECTED)) {
+                if (owned && (course.getState() == CourseState.DRAFT
+                                || course.getState() == CourseState.IN_DEVELOPMENT
+                                || course.getState() == CourseState.REJECTED)) {
 
-        Content content = new Content();
-        content.setCourse(course);
-        content.setDescription(dto.getDescription());
-        // DO NOT set image here (imageFile will be linked later)
-        content = contentRepo.save(content);
+                        Content content = new Content();
+                        content.setCourse(course);
+                        content.setDescription(dto.getDescription());
+                        // DO NOT set image here (imageFile will be linked later)
+                        content = contentRepo.save(content);
 
-        // manual DTO mapping to avoid ModelMapper confusion with lazy relations
-        ContentDTO out = new ContentDTO();
-        out.setContentID(content.getContentID());
-        out.setCourseID(course.getCourseid());
-        out.setDescription(content.getDescription());
-        out.setImageFileId(null);
-        out.setImageSignedUrl(null);
+                        // manual DTO mapping to avoid ModelMapper confusion with lazy relations
+                        ContentDTO out = new ContentDTO();
+                        out.setContentID(content.getContentID());
+                        out.setCourseID(course.getCourseid());
+                        out.setDescription(content.getDescription());
+                        out.setImageFileId(null);
+                        out.setImageSignedUrl(null);
 
-        return out;
-    } else {
-        throw new RoleMismatchException(
-                "Owner can only add content in DRAFT, IN_DEVELOPMENT or REJECTED courses");
-    }
-}
+                        return out;
+                } else {
+                        throw new RoleMismatchException(
+                                        "Owner can only add content in DRAFT, IN_DEVELOPMENT or REJECTED courses");
+                }
+        }
 
         @Override
         public ContentDTO updateContent(Long userid, Long contentId, ContentDTO dto) {
@@ -92,22 +92,22 @@ public ContentDTO addContent(Long userid, ContentDTO dto) {
                         throw new RoleMismatchException("Only Teacher can update content");
         }
 
-@Override
-public ContentDTO getContentById(Long contentId) {
-    Content content = contentRepo.findById(contentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
+        @Override
+        public ContentDTO getContentById(Long contentId) {
+                Content content = contentRepo.findById(contentId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
 
-    ContentDTO dto = mapper.map(content, ContentDTO.class);
-    dto.setCourseID(content.getCourse().getCourseid());
+                ContentDTO dto = mapper.map(content, ContentDTO.class);
+                dto.setCourseID(content.getCourse().getCourseid());
 
-    if (content.getImageFile() != null) {
-        dto.setImageFileId(content.getImageFile().getId());
-        dto.setImageSignedUrl(
-                storedFileService.getSignedDownloadUrl(content.getImageFile().getId(), 600).getSignedDownloadUrl()
-        );
-    }
-    return dto;
-}
+                if (content.getImageFile() != null) {
+                        dto.setImageFileId(content.getImageFile().getId());
+                        dto.setImageSignedUrl(
+                                        storedFileService.getSignedDownloadUrl(content.getImageFile().getId(), 600)
+                                                        .getSignedDownloadUrl());
+                }
+                return dto;
+        }
 
         @Override
         public List<ContentDTO> getContentByCourse(Long courseId) {
@@ -132,46 +132,46 @@ public ContentDTO getContentById(Long contentId) {
         }
 
         @Override
-public ContentDTO setContentImage(Long teacherId, Long contentId, Long storedFileId) {
+        public ContentDTO setContentImage(Long teacherId, Long contentId, Long storedFileId) {
 
-    Content content = contentRepo.findById(contentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
+                Content content = contentRepo.findById(contentId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
 
-    Long courseId = content.getCourse().getCourseid();
+                Long courseId = content.getCourse().getCourseid();
 
-    if (!courseService.teacherOwnership(teacherId, courseId)) {
-        throw new RoleMismatchException("Only course owner can set content image");
-    }
+                if (!courseService.teacherOwnership(teacherId, courseId)) {
+                        throw new RoleMismatchException("Only course owner can set content image");
+                }
 
-    StoredFile file = storedFileRepo.findById(storedFileId)
-            .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + storedFileId));
+                StoredFile file = storedFileRepo.findById(storedFileId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "StoredFile not found: " + storedFileId));
 
-    // must be from same course
-    if (!file.getCourse().getCourseid().equals(courseId)) {
-        throw new RoleMismatchException("This file does not belong to the same course");
-    }
+                // must be from same course
+                if (!file.getContent().getContentID().equals(content.getContentID())) {
+                        throw new RoleMismatchException("StoredFile does not belong to this content");
+                }
+                // must be correct type
+                if (file.getType() != StoredFileType.CONTENT_IMAGE) {
+                        throw new RoleMismatchException("StoredFile type must be CONTENT_IMAGE");
+                }
 
-    // must be correct type
-    if (file.getType() != StoredFileType.CONTENT_IMAGE) {
-        throw new RoleMismatchException("StoredFile type must be CONTENT_IMAGE");
-    }
+                // must be ready
+                if (file.getStatus() != StoredFileStatus.READY) {
+                        throw new RoleMismatchException("StoredFile must be READY before linking");
+                }
 
-    // must be ready
-    if (file.getStatus() != StoredFileStatus.READY) {
-        throw new RoleMismatchException("StoredFile must be READY before linking");
-    }
+                content.setImageFile(file);
+                content = contentRepo.save(content);
 
-    content.setImageFile(file);
-    content = contentRepo.save(content);
+                // map to DTO
+                ContentDTO dto = mapper.map(content, ContentDTO.class);
 
-    // map to DTO
-    ContentDTO dto = mapper.map(content, ContentDTO.class);
+                // manually set ids + signed URL
+                dto.setCourseID(courseId);
+                dto.setImageFileId(file.getId());
+                dto.setImageSignedUrl(storedFileService.getSignedDownloadUrl(file.getId(), 600).getSignedDownloadUrl());
 
-    // manually set ids + signed URL
-    dto.setCourseID(courseId);
-    dto.setImageFileId(file.getId());
-    dto.setImageSignedUrl(storedFileService.getSignedDownloadUrl(file.getId(), 600).getSignedDownloadUrl());
-
-    return dto;
-}
+                return dto;
+        }
 }

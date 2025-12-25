@@ -16,13 +16,14 @@ public class ContentController {
 
     private final ContentService contentService;
 
+    @PostMapping("/{teacherId}")
+    public ResponseEntity<ContentDTO> createContent(@PathVariable Long teacherId, @RequestBody ContentDTO dto) {
+        return ResponseEntity.ok(contentService.addContent(teacherId, dto));
+    }
+
     @PutMapping("/{contentId}/image")
-    public ResponseEntity<ContentDTO> setContentImage(
-            @PathVariable Long contentId,
-            @RequestBody ContentImageLinkRequestDTO req
-    ) {
-        return ResponseEntity.ok(
-                contentService.setContentImage(req.getTeacherId(), contentId, req.getStoredFileId())
-        );
+    public ResponseEntity<ContentDTO> setContentImage(@PathVariable Long contentId,
+            @RequestBody ContentImageLinkRequestDTO req) {
+        return ResponseEntity.ok(contentService.setContentImage(req.getTeacherId(), contentId, req.getStoredFileId()));
     }
 }

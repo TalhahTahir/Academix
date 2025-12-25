@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Table(
     name = "stored_file",
     indexes = {
-        @Index(name = "idx_stored_file_course", columnList = "course_id"),
+        @Index(name = "idx_stored_file_content", columnList = "content_id"),
         @Index(name = "idx_stored_file_status", columnList = "status"),
         @Index(name = "idx_stored_file_type", columnList = "type")
     },
@@ -31,10 +31,10 @@ public class StoredFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // CHANGED: Content -> Course
+    // CHANGED: Course -> Content
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "content_id", nullable = false)
+    private Content content;
 
     @Column(nullable = false, length = 255)
     private String bucket;

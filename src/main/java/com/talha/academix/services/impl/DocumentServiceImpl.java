@@ -34,45 +34,45 @@ public class DocumentServiceImpl implements DocumentService {
     private final StoredFileService storedFileService;
     private final ModelMapper mapper;
 
-@Override
-public DocumentDTO addDocument(Long userid, DocumentDTO dto) {
-    Content content = contentRepo.findById(dto.getContentId())
-            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
+    @Override
+    public DocumentDTO addDocument(Long userid, DocumentDTO dto) {
+        Content content = contentRepo.findById(dto.getContentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
 
-    if (!courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
-        throw new RoleMismatchException("Only Owner can add document");
+        if (!courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
+            throw new RoleMismatchException("Only Owner can add document");
+        }
+
+        StoredFile file = storedFileRepo.findById(dto.getStoredFileId())
+                .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + dto.getStoredFileId()));
+
+        if (!file.getContent().getContentID().equals(content.getContentID())) {
+            throw new RoleMismatchException("StoredFile does not belong to this content");
+        }
+
+        if (file.getType() != StoredFileType.DOCUMENT) {
+            throw new RoleMismatchException("StoredFile type must be DOCUMENT");
+        }
+        if (file.getStatus() != StoredFileStatus.READY) {
+            throw new RoleMismatchException("StoredFile must be READY before linking");
+        }
+
+        Document document = new Document();
+        document.setContent(content);
+        document.setTitle(dto.getTitle());
+        document.setDescription(dto.getDescription());
+        document.setFilePath(file);
+        document = documentRepo.save(document);
+
+        DocumentDTO out = new DocumentDTO();
+        out.setDocumentId(document.getDocumentId());
+        out.setContentId(content.getContentID());
+        out.setTitle(document.getTitle());
+        out.setDescription(document.getDescription());
+        out.setStoredFileId(file.getId());
+        out.setFileSignedUrl(storedFileService.getSignedDownloadUrl(file.getId(), 600).getSignedDownloadUrl());
+        return out;
     }
-
-    StoredFile file = storedFileRepo.findById(dto.getStoredFileId())
-            .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + dto.getStoredFileId()));
-
-    if (!file.getCourse().getCourseid().equals(content.getCourse().getCourseid())) {
-        throw new RoleMismatchException("StoredFile does not belong to this course");
-    }
-
-    if (file.getType() != StoredFileType.DOCUMENT) {
-        throw new RoleMismatchException("StoredFile type must be DOCUMENT");
-    }
-    if (file.getStatus() != StoredFileStatus.READY) {
-        throw new RoleMismatchException("StoredFile must be READY before linking");
-    }
-
-    Document document = new Document();
-    document.setContent(content);
-    document.setTitle(dto.getTitle());
-    document.setDescription(dto.getDescription());
-    document.setFilePath(file);
-    document = documentRepo.save(document);
-
-    DocumentDTO out = new DocumentDTO();
-    out.setDocumentId(document.getDocumentId());
-    out.setContentId(content.getContentID());
-    out.setTitle(document.getTitle());
-    out.setDescription(document.getDescription());
-    out.setStoredFileId(file.getId());
-    out.setFileSignedUrl(storedFileService.getSignedDownloadUrl(file.getId(), 600).getSignedDownloadUrl());
-    return out;
-}
 
     @Override
     public DocumentDTO updateDocument(Long userid, Long documentId, DocumentDTO dto) {

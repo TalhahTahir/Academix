@@ -16,7 +16,6 @@ import com.talha.academix.enums.EnrollmentStatus;
 import com.talha.academix.exception.AlreadyExistException;
 import com.talha.academix.exception.ForbiddenException;
 import com.talha.academix.exception.ResourceNotFoundException;
-import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.mapper.CourseMapper;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.User;
@@ -24,7 +23,6 @@ import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.EnrollmentRepo;
 import com.talha.academix.repository.UserRepo;
 import com.talha.academix.services.CourseService;
-import com.talha.academix.services.UserService;
 
 import lombok.RequiredArgsConstructor;
 

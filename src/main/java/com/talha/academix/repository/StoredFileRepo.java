@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.talha.academix.model.StoredFile;
 
 public interface StoredFileRepo extends JpaRepository<StoredFile, Long> {
-    List<StoredFile> findByCourse_Courseid(Long courseId);
+    List<StoredFile> findByContent_ContentID(Long contentId);
     boolean existsByObjectKey(String objectKey);
 }

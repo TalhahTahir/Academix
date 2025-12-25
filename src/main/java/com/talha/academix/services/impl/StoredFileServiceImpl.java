@@ -12,9 +12,9 @@ import com.talha.academix.dto.SignedUploadInitResponseDTO;
 import com.talha.academix.enums.StoredFileStatus;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
-import com.talha.academix.model.Course;
+import com.talha.academix.model.Content;
 import com.talha.academix.model.StoredFile;
-import com.talha.academix.repository.CourseRepo;
+import com.talha.academix.repository.ContentRepo;
 import com.talha.academix.repository.StoredFileRepo;
 import com.talha.academix.services.CourseService;
 import com.talha.academix.services.StoredFileService;
@@ -27,23 +27,25 @@ import lombok.RequiredArgsConstructor;
 public class StoredFileServiceImpl implements StoredFileService {
 
     private final StoredFileRepo storedFileRepo;
-    private final CourseRepo courseRepo; // CHANGED
+    private final ContentRepo contentRepo;
     private final CourseService courseService;
     private final SupabaseConfig supabaseConfig;
     private final SupabaseStorageSignedUrlService signedUrlService;
 
-    private static final int DEFAULT_UPLOAD_EXPIRES = 600;  // 10 min
+    private static final int DEFAULT_UPLOAD_EXPIRES = 600;   // 10 min
     private static final int DEFAULT_DOWNLOAD_EXPIRES = 600; // 10 min
 
     @Override
     @Transactional
     public SignedUploadInitResponseDTO initiateSignedUpload(SignedUploadInitRequestDTO req) {
 
-        Course course = courseRepo.findById(req.getCourseId())
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + req.getCourseId()));
+        Content content = contentRepo.findById(req.getContentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + req.getContentId()));
 
-        if (!courseService.teacherOwnership(req.getTeacherId(), course.getCourseid())) {
-            throw new RoleMismatchException("Only course owner can upload files");
+        Long courseId = content.getCourse().getCourseid();
+
+        if (!courseService.teacherOwnership(req.getTeacherId(), courseId)) {
+            throw new RoleMismatchException("Only course owner can upload files for this content");
         }
 
         String bucket = supabaseConfig.getStorage().getBucket();
@@ -54,28 +56,27 @@ public class StoredFileServiceImpl implements StoredFileService {
             throw new RuntimeException("supabase.serviceRoleKey is not configured (required for signed URLs)");
         }
 
-       String folder;
-if (req.getType() == null) {
-    folder = "misc";
-} else {
-    switch (req.getType()) {
-        case LECTURE -> folder = "lectures";
-        case DOCUMENT -> folder = "documents";
-        case CONTENT_IMAGE -> folder = "content-images";
-        default -> folder = "misc";
-    }
-}
+        String folder;
+        if (req.getType() == null) folder = "misc";
+        else {
+            switch (req.getType()) {
+                case LECTURE -> folder = "lectures";
+                case DOCUMENT -> folder = "documents";
+                case CONTENT_IMAGE -> folder = "content-images";
+                default -> folder = "misc";
+            }
+        }
+
         String safeName = (req.getFileName() == null ? "file" : req.getFileName())
                 .replaceAll("[^a-zA-Z0-9._-]", "_");
 
-        // CHANGED folder structure: teacher/course/type/uuid-filename (no content)
-        String objectKey = "teacher-" + req.getTeacherId()
-                + "/course-" + course.getCourseid()
+        String objectKey =
+                "content-" + content.getContentID()
                 + "/" + folder
                 + "/" + UUID.randomUUID() + "-" + safeName;
 
         StoredFile sf = new StoredFile();
-        sf.setCourse(course); // CHANGED
+        sf.setContent(content);
         sf.setBucket(bucket);
         sf.setObjectKey(objectKey);
         sf.setFileName(req.getFileName());

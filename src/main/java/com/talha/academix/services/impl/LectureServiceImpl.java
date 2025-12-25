@@ -31,52 +31,52 @@ public class LectureServiceImpl implements LectureService {
     private final ContentRepo contentRepo;
     private final CourseService courseService;
     private final StoredFileRepo storedFileRepo;
-private final StoredFileService storedFileService;
+    private final StoredFileService storedFileService;
     private final ModelMapper mapper;
 
-@Override
-public LectureDTO addLecture(Long userid, LectureDTO dto) {
+    @Override
+    public LectureDTO addLecture(Long userid, LectureDTO dto) {
 
-    Content content = contentRepo.findById(dto.getContentId())
-            .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
+        Content content = contentRepo.findById(dto.getContentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
 
-    if (!courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
-        throw new RoleMismatchException("only valid user can add lecture");
+        if (!courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
+            throw new RoleMismatchException("only valid user can add lecture");
+        }
+
+        StoredFile file = storedFileRepo.findById(dto.getStoredFileId())
+                .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + dto.getStoredFileId()));
+
+        // verify file belongs to same course
+        if (!file.getContent().getContentID().equals(content.getContentID())) {
+            throw new RoleMismatchException("StoredFile does not belong to this content");
+        }
+
+        // verify correct type and status
+        if (file.getType() != StoredFileType.LECTURE) {
+            throw new RoleMismatchException("StoredFile type must be LECTURE");
+        }
+        if (file.getStatus() != StoredFileStatus.READY) {
+            throw new RoleMismatchException("StoredFile must be READY before linking");
+        }
+
+        Lecture lecture = new Lecture();
+        lecture.setContent(content);
+        lecture.setTitle(dto.getTitle());
+        lecture.setDuration(dto.getDuration());
+        lecture.setVideoUrl(file);
+        lecture = lectureRepo.save(lecture);
+
+        // build response DTO manually (avoid ModelMapper lazy issues)
+        LectureDTO out = new LectureDTO();
+        out.setLectureId(lecture.getLectureId());
+        out.setContentId(content.getContentID());
+        out.setTitle(lecture.getTitle());
+        out.setDuration(lecture.getDuration());
+        out.setStoredFileId(file.getId());
+        out.setVideoSignedUrl(storedFileService.getSignedDownloadUrl(file.getId(), 600).getSignedDownloadUrl());
+        return out;
     }
-
-    StoredFile file = storedFileRepo.findById(dto.getStoredFileId())
-            .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + dto.getStoredFileId()));
-
-    // verify file belongs to same course
-    if (!file.getCourse().getCourseid().equals(content.getCourse().getCourseid())) {
-        throw new RoleMismatchException("StoredFile does not belong to this course");
-    }
-
-    // verify correct type and status
-    if (file.getType() != StoredFileType.LECTURE) {
-        throw new RoleMismatchException("StoredFile type must be LECTURE");
-    }
-    if (file.getStatus() != StoredFileStatus.READY) {
-        throw new RoleMismatchException("StoredFile must be READY before linking");
-    }
-
-    Lecture lecture = new Lecture();
-    lecture.setContent(content);
-    lecture.setTitle(dto.getTitle());
-    lecture.setDuration(dto.getDuration());
-    lecture.setVideoUrl(file);
-    lecture = lectureRepo.save(lecture);
-
-    // build response DTO manually (avoid ModelMapper lazy issues)
-    LectureDTO out = new LectureDTO();
-    out.setLectureId(lecture.getLectureId());
-    out.setContentId(content.getContentID());
-    out.setTitle(lecture.getTitle());
-    out.setDuration(lecture.getDuration());
-    out.setStoredFileId(file.getId());
-    out.setVideoSignedUrl(storedFileService.getSignedDownloadUrl(file.getId(), 600).getSignedDownloadUrl());
-    return out;
-}
 
     @Override
     public LectureDTO updateLecture(Long userid, Long lectureId, LectureDTO dto) {
