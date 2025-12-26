@@ -235,8 +235,9 @@ If you’d like, I can:
 ---
 ---
 
-### Lecture/Document uploading:
+### Lecture/Document flow:
   Macro Step 1: upload the file in Supabase bucket
+  Macro Step 2: hit add lec/doc method of controllers while inserting storedFileId (from step 1) in Body -> JSON -> DTO.storedFileId
 
 #### TODO:
 1. Complete Executional Workflow
