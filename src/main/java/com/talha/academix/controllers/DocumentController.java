@@ -13,7 +13,6 @@ import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +24,7 @@ public class DocumentController {
     private final DocumentService documentService;
 
     @PostMapping("teachers/{id}")
-    public DocumentDTO addDocument(@RequestParam Long id, @RequestParam DocumentDTO dto) {
+    public DocumentDTO addDocument(@PathVariable Long id, @RequestBody DocumentDTO dto) {
         return documentService.addDocument(id, dto);
     }
 
