@@ -235,6 +235,9 @@ If you’d like, I can:
 ---
 ---
 
+### Lecture/Document uploading:
+  Macro Step 1: upload the file in Supabase bucket
+
 #### TODO:
 1. Complete Executional Workflow
    1. Teacher perspective
