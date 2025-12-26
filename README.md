@@ -245,8 +245,10 @@ If you’d like, I can:
 
 ### Testing
   1. #### Teacher
-    1. Registered
-    2. Vault auto-created
-    3. course, content created
-    4. media files uploaded
+      1. Registered
+      2. Vault auto-created
+      3. course, content created
+      4. media files uploaded
 
+    #### Considerations
+      Folder Structure of Supabase Bucket
