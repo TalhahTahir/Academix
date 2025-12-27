@@ -29,12 +29,12 @@ public class EnrollmentController {
     }
 
     @GetMapping("/count/course/{courseId}")
-    public Long countEnrollmentsByCourse(@PathVariable("courseId") Long courseId) {
+    public Long countEnrollmentsByCourse(@PathVariable Long courseId) {
         return enrollmentService.countEnrollmentsByCourse(courseId);
     }
 
     @GetMapping("/count/student/{studentId}")
-    public Long countEnrollmentsByStudent(@PathVariable("studentId") Long studentId) {
+    public Long countEnrollmentsByStudent(@PathVariable Long studentId) {
         return enrollmentService.countEnrollmentsByStudent(studentId);
     }
 
@@ -54,7 +54,7 @@ public class EnrollmentController {
     }
 
     @DeleteMapping("/{id}")
-    public void withdrawEnrollment(@PathVariable("id") Long id) {
+    public void withdrawEnrollment(@PathVariable Long id) {
         enrollmentService.withdrawEnrollment(id);
     }
 

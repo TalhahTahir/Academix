@@ -48,7 +48,6 @@ public class User {
  @NotEmpty
  private String phone;
  
- @NotEmpty
  private String image;
 
  @OneToMany(mappedBy="student", fetch = FetchType.LAZY)

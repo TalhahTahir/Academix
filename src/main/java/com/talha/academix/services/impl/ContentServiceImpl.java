@@ -47,6 +47,7 @@ public class ContentServiceImpl implements ContentService {
 
                 if (owned && (course.getState() == CourseState.DRAFT
                                 || course.getState() == CourseState.IN_DEVELOPMENT
+                                || course.getState() == CourseState.MODIFIED
                                 || course.getState() == CourseState.REJECTED)) {
 
                         Content content = new Content();

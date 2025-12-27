@@ -8,6 +8,10 @@ import com.talha.academix.dto.ContentImageLinkRequestDTO;
 import com.talha.academix.services.ContentService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 @RestController
 @RequestMapping("/api/contents")
@@ -25,5 +29,10 @@ public class ContentController {
     public ResponseEntity<ContentDTO> setContentImage(@PathVariable Long contentId,
             @RequestBody ContentImageLinkRequestDTO req) {
         return ResponseEntity.ok(contentService.setContentImage(req.getTeacherId(), contentId, req.getStoredFileId()));
+    }
+
+    @PutMapping("/update/{contentId}/teachers/{teacherId}")
+    public ContentDTO updateContent(@PathVariable Long contentId, @PathVariable Long teacherId, @RequestBody ContentDTO dto) {
+        return contentService.updateContent(teacherId, contentId, dto);
     }
 }

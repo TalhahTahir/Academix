@@ -42,6 +42,8 @@ public class UserServiceImpl implements UserService {
             vaultDto.setUpdatedAt(Instant.now());
             vaultService.createVault(vaultDto);
         }
+        mapper.getConfiguration().setSkipNullEnabled(true);
+
         return mapper.map(user, UserDTO.class);
     }
 

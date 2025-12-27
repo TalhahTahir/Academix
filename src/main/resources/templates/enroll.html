@@ -33,7 +33,7 @@
       >Course ID:
       <select id="courseId">
         <option value="1">1 - Arabic Language</option>
-        <option value="3">5 - Machine Learning Advanced</option>
+        <option value="9">9 - Quantum Mechanics</option>
       </select>
     </label>
     <div id="card-element"></div>
@@ -54,7 +54,7 @@
           .getElementById("payBtn")
           .addEventListener("click", async () => {
             const courseId = document.getElementById("courseId").value;
-            const body = { courseId: Number(courseId), userId: 3 };
+            const body = { courseId: Number(courseId), userId: 10 };
             const statusEl = document.getElementById("status");
             statusEl.textContent = "Creating payment intent...";
 
