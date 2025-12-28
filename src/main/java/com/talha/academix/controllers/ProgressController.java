@@ -7,6 +7,9 @@ import com.talha.academix.dto.EnrollmentStatsDTO;
 import com.talha.academix.services.ProgressService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @RestController
 @RequestMapping("/api/progress")
@@ -14,6 +17,15 @@ import lombok.RequiredArgsConstructor;
 public class ProgressController {
 
     private final ProgressService progressService;
+
+    @PostMapping("/enrollments/{enrollmentId}/lectures/{lectureId}/complete")
+    public String markLectureComplete(@PathVariable Long enrollmentId, @PathVariable Long lectureId) {
+
+        progressService.markLectureCompleted(enrollmentId, lectureId);
+        
+        return "Lecture marked as completed.";
+    }
+    
 
     @GetMapping("/enrollments/{enrollmentId}/stats")
     public ResponseEntity<EnrollmentStatsDTO> getEnrollmentStats(@PathVariable Long enrollmentId) {

@@ -1,28 +1,18 @@
 package com.talha.academix.services.impl;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 
-import com.talha.academix.dto.AttemptDTO;
-import com.talha.academix.dto.EnrollmentDTO;
 import com.talha.academix.dto.CreateExamRequest;
 import com.talha.academix.dto.ExamResponse;
-import com.talha.academix.exception.BlankAnswerException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
-import com.talha.academix.model.Attempt;
-import com.talha.academix.model.AttemptAnswer;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.Exam;
-import com.talha.academix.model.Question;
-import com.talha.academix.model.QuestionOption;
-import com.talha.academix.repository.AttemptRepo;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.ExamRepo;
 import com.talha.academix.services.CourseService;
-import com.talha.academix.services.EnrollmentService;
 import com.talha.academix.services.ExamService;
 
 import lombok.RequiredArgsConstructor;
@@ -34,8 +24,6 @@ public class ExamServiceImpl implements ExamService {
     private final ExamRepo examRepo;
     private final CourseRepo courseRepo;
     private final CourseService courseService;
-    private final AttemptRepo attemptRepo;
-    private final EnrollmentService enrollmentService;
 
     @Override
     public ExamResponse createExam(Long teacherId, CreateExamRequest req) {

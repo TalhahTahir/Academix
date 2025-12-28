@@ -1,7 +1,6 @@
 // EnrollmentServiceImpl.java
 package com.talha.academix.services.impl;
 
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -20,7 +19,6 @@ import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.EnrollmentRepo;
 import com.talha.academix.repository.UserRepo;
 import com.talha.academix.services.EnrollmentService;
-import com.talha.academix.services.PaymentService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +28,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final EnrollmentRepo enrollmentRepo;
     private final UserRepo userRepo;
     private final CourseRepo courseRepo;
-    private final PaymentService paymentService;
     private final ModelMapper mapper;
 
     @Override
@@ -110,7 +107,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         }
 
         // 3. Update simple fields
-        enrollment.setEnrollmentDate(enrollmentDTO.getEnrollmentDate().toInstant());
+        enrollment.setEnrollmentDate(enrollmentDTO.getEnrollmentDate());
 
         enrollment.setCompletionPercentage(enrollmentDTO.getCompletionPercentage());
         enrollment.setMarks(enrollmentDTO.getMarks());
@@ -127,9 +124,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         updatedDTO.setEnrollmentID(updated.getEnrollmentID());
         updatedDTO.setStudentID(updated.getStudent().getUserid());
         updatedDTO.setCourseID(updated.getCourse().getCourseid());
-        updatedDTO.setEnrollmentDate(
-                updated.getEnrollmentDate().atZone(ZoneId.systemDefault()));
-
+        updatedDTO.setEnrollmentDate(updated.getEnrollmentDate());
         updatedDTO.setStatus(updated.getStatus());
         updatedDTO.setCompletionPercentage(updated.getCompletionPercentage());
         updatedDTO.setMarks(updated.getMarks());

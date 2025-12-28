@@ -2,7 +2,6 @@ package com.talha.academix.services;
 
 import java.util.List;
 
-import com.talha.academix.dto.AttemptDTO;
 import com.talha.academix.dto.CreateExamRequest;
 import com.talha.academix.dto.ExamResponse;
 
