@@ -257,4 +257,21 @@ If you’d like, I can:
     #### Considerations
       Folder Structure of Supabase Bucket
 
-  
+---
+
+2. #### Student
+      1. Registered
+      2. Viewed courses
+      3. Enrolled
+      4. Lectures Completed(Upgeade it)
+      5. Exammed
+      6. Certificated
+
+    #### Considerations
+      Single Enrollment <-> Multipe Certificates
+
+---
+
+i have to do somthing about Enrollment.Status = completed
+    each content should have its own exam
+      maybe we need to make another table to keep record of attempted exams
