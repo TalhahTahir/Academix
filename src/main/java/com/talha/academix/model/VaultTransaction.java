@@ -3,6 +3,7 @@ package com.talha.academix.model;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+import com.talha.academix.enums.TxReferenceType;
 import com.talha.academix.enums.TxStatus;
 import com.talha.academix.enums.VaultTxType;
 
@@ -41,19 +42,15 @@ public class VaultTransaction {
     @Enumerated(EnumType.STRING)
     private TxStatus status; // PENDING | COMPLETED | FAILED
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id", nullable = true)
-    private Payment payment;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = true)
-    private Course course;
+    @Enumerated(EnumType.STRING)
+    private TxReferenceType referenceType; // PAYMENT | WITHDRAWAL
+
+    private Long referenceId; // paymentId or withdrawalId
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "initiated_by", nullable = true)
     private User initiater;
     
-
     @Column(precision=18, scale=2)
     private BigDecimal balanceAfter;
 

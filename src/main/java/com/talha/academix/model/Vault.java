@@ -39,6 +39,9 @@ public class Vault {
     @Column(name = "total_withdrawn", nullable = false, precision = 18, scale = 2)
     private BigDecimal totalWithdrawn = BigDecimal.ZERO;
 
+    @Column(name = "pending_withdrawn", nullable = false, precision = 18, scale = 2)
+    private BigDecimal pendingWithdrawal = BigDecimal.ZERO;
+
     @Column(name = "currency", length = 3, nullable = false)
     private String currency = "USD";
 

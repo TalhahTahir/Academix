@@ -3,6 +3,7 @@ package com.talha.academix.repository;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.talha.academix.model.User;
 import com.talha.academix.model.VaultTransaction;
 
 public interface VaultTransactionRepo extends JpaRepository<VaultTransaction, Long> {
@@ -27,5 +29,7 @@ public interface VaultTransactionRepo extends JpaRepository<VaultTransaction, Lo
 
     @Query("SELECT vt FROM VaultTransaction vt WHERE vt.createdAt BETWEEN :start AND :end")
     List<VaultTransaction> findAllByCreatedAtBetween(@Param("start") Instant start, @Param("end") Instant end);
+
+    VaultTransaction findByReferenceId(Long id);
     
 }

@@ -17,6 +17,7 @@ public class VaultDTO {
     private BigDecimal availableBalance;
     private BigDecimal totalEarned;
     private BigDecimal totalWithdrawn;
+    private BigDecimal pendingWithdrawal;
     private String currency;
     private Instant createdAt;
     private Instant updatedAt;

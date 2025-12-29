@@ -10,13 +10,16 @@ import com.talha.academix.dto.VaultDTO;
 import com.talha.academix.dto.VaultTransactionDTO;
 import com.talha.academix.enums.PaymentStatus;
 import com.talha.academix.enums.Role;
+import com.talha.academix.enums.TxReferenceType;
 import com.talha.academix.enums.TxStatus;
 import com.talha.academix.enums.VaultTxType;
+import com.talha.academix.exception.AlreadyExistException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Payment;
 import com.talha.academix.model.Vault;
 import com.talha.academix.repository.UserRepo;
 import com.talha.academix.repository.VaultRepo;
+import com.talha.academix.repository.VaultTransactionRepo;
 import com.talha.academix.services.VaultService;
 import com.talha.academix.services.VaultTransactionService;
 
@@ -29,13 +32,15 @@ public class VaultServiceImpl implements VaultService {
     private final VaultRepo vaultRepo;
     private final ModelMapper mapper;
     private final UserRepo userRepo;
+    private final VaultTransactionRepo vaultTxRepo;
     private final VaultTransactionService vaultTxService;
 
     @Override
     public VaultDTO createVault(VaultDTO dto) {
         // VaultDTO exist = getVaultByUserId(dto.getUserId());
         // if (exist != null) {
-        //     throw new AlreadyExistException("Vault already exists for user with ID: " + dto.getUserId());
+        // throw new AlreadyExistException("Vault already exists for user with ID: " +
+        // dto.getUserId());
         // }
         Vault vault = mapper.map(dto, Vault.class);
         vault.setUser(userRepo.findById(dto.getUserId())
@@ -99,6 +104,13 @@ public class VaultServiceImpl implements VaultService {
 
     @Override
     public Boolean shareDistribution(Payment payment) {
+
+        if (vaultTxRepo.findByReferenceId(payment.getId()) != null) {
+            throw new AlreadyExistException(
+                    "Vault Transaction already exists for payment with id : " + payment.getId());
+
+        }
+
         if (payment.getStatus() == PaymentStatus.SUCCEEDED) {
             Vault teacherVault = vaultRepo.findByUser_Userid(payment.getCourse().getTeacher().getUserid())
                     .orElseThrow(() -> new ResourceNotFoundException(
@@ -111,13 +123,13 @@ public class VaultServiceImpl implements VaultService {
 
             VaultTransactionDTO teacherTx = new VaultTransactionDTO();
             teacherTx.setAmount(amount.multiply(BigDecimal.valueOf(0.80))); // 80
-            teacherTx.setType(VaultTxType.ENROLLMENT_CREDIT);
+            teacherTx.setType(VaultTxType.CREDIT);
             teacherTx.setStatus(TxStatus.COMPLETED);
             teacherTx.setBalanceAfter(teacherVault.getAvailableBalance().add(teacherTx.getAmount()));
             teacherTx.setCreatedAt(Instant.now());
             teacherTx.setVaultId(teacherVault.getId());
-            teacherTx.setPaymentId(payment.getId());
-            teacherTx.setCourseId(payment.getCourse().getCourseid());
+            teacherTx.setReferenceType(TxReferenceType.PAYMENT);
+            teacherTx.setReferenceId(payment.getId());
             teacherTx.setInitiaterId(payment.getUser().getUserid());
 
             vaultTxService.createTransaction(teacherTx);
@@ -127,18 +139,17 @@ public class VaultServiceImpl implements VaultService {
             teacherVault.setUpdatedAt(Instant.now());
             vaultRepo.save(teacherVault);
 
-
             // ------------------------------------------------------------------------------
 
             VaultTransactionDTO adminTx = new VaultTransactionDTO();
             adminTx.setAmount(amount.multiply(BigDecimal.valueOf(0.20))); // 20
-            adminTx.setType(VaultTxType.ENROLLMENT_CREDIT);
+            adminTx.setType(VaultTxType.CREDIT);
             adminTx.setStatus(TxStatus.COMPLETED);
             adminTx.setBalanceAfter(adminVault.getAvailableBalance().add(adminTx.getAmount()));
             adminTx.setCreatedAt(Instant.now());
             adminTx.setVaultId(adminVault.getId());
-            adminTx.setPaymentId(payment.getId());
-            adminTx.setCourseId(payment.getCourse().getCourseid());
+            teacherTx.setReferenceType(TxReferenceType.PAYMENT);
+            teacherTx.setReferenceId(payment.getId());
             adminTx.setInitiaterId(payment.getUser().getUserid());
 
             vaultTxService.createTransaction(adminTx);
