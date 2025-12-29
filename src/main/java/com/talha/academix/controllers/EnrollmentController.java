@@ -64,4 +64,8 @@ public class EnrollmentController {
         return enrollmentService.updateEnrollment(enrollmentId, enrollmentDTO);
     }
 
+    @PutMapping("/completion/{id}")
+    public EnrollmentDTO completionEnrollment(@PathVariable("id") Long enrollmentId) {
+        return enrollmentService.enrollmentCompletion(enrollmentId);
+    }
 }
