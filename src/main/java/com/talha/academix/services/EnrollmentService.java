@@ -32,4 +32,6 @@ public interface EnrollmentService {
 
     Long countEnrollmentsByStudent(Long studentId);
 
+    EnrollmentDTO enrollmentCompletion (Long enrollmentId);
+
 }

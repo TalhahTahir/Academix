@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.talha.academix.dto.EnrollmentDTO;
 import com.talha.academix.enums.EnrollmentStatus;
 import com.talha.academix.exception.AlreadyEnrolledException;
+import com.talha.academix.exception.PolicyViolationException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.Enrollment;
@@ -187,6 +188,21 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public Long countEnrollmentsByStudent(Long studentId) {
         return enrollmentRepo.countByStudent_Userid(studentId);
+    }
+
+    @Override
+    public EnrollmentDTO enrollmentCompletion(Long enrollmentId) {
+
+        Enrollment e = enrollmentRepo.findById(enrollmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
+
+        if ((e.getMarks() > 50) || (e.getCompletionPercentage() == 100)) {
+            e.setStatus(EnrollmentStatus.COMPLETED);
+        Enrollment enrollment = enrollmentRepo.save(e);
+        return mapper.map(e, EnrollmentDTO.class);
+        }
+        else
+            throw new PolicyViolationException("Enrollment is not completed");
     }
 
 }
