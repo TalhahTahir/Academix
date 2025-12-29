@@ -256,3 +256,5 @@ If you’d like, I can:
 
     #### Considerations
       Folder Structure of Supabase Bucket
+
+  
