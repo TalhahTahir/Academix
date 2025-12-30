@@ -38,24 +38,37 @@ public class TeacherAccountServiceImpl {
                     if (teacher.getRole() != Role.TEACHER) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not a teacher");
                     }
-
+System.out.println("Teacher Acc. Serv. Impl...M1.1");
                     try {
+
                         AccountCreateParams params = AccountCreateParams.builder()
                                 .setType(AccountCreateParams.Type.EXPRESS)
                                 .setCountry(PLATFORM_COUNTRY)
                                 .setEmail(teacher.getEmail())
                                 .setBusinessType(AccountCreateParams.BusinessType.INDIVIDUAL)
+                                .setCapabilities(
+                                        AccountCreateParams.Capabilities.builder()
+                                                .setTransfers(
+                                                        AccountCreateParams.Capabilities.Transfers.builder()
+                                                                .setRequested(true)
+                                                                .build())
+                                                .build())
                                 .putMetadata("teacher_id", teacherId.toString())
                                 .build();
+System.out.println("Teacher Acc. Serv. Impl...M1.2");
+System.out.println("Stripe Params: " + params.toString());
 
                         Account account = Account.create(params);
+System.out.println("Teacher Acc. Serv. Impl...M1.3");
+System.out.println("Stripe Account Created: " + account.getId());
 
                         TeacherAccount ta = new TeacherAccount();
                         ta.setTeacher(teacher);
                         ta.setStripeAccountId(account.getId());
                         ta.setStatus(TeacherAccountStatus.PENDING);
-
-                        return teacherAccRepo.save(ta);
+                        TeacherAccount teacherAcc = teacherAccRepo.save(ta);
+System.out.println("Teacher Account saved: " + teacherAcc.getId());
+                        return teacherAcc;
                     } catch (Exception e) {
                         throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to create Stripe account", e);
                     }
@@ -90,13 +103,21 @@ public class TeacherAccountServiceImpl {
             Account account = Account.retrieve(ta.getStripeAccountId());
 
             boolean payoutsEnabled = Boolean.TRUE.equals(account.getPayoutsEnabled());
+            boolean hasDue = account.getRequirements() != null
+                    && account.getRequirements().getCurrentlyDue() != null
+                    && !account.getRequirements().getCurrentlyDue().isEmpty();
+
             boolean restricted = account.getRequirements() != null
                     && account.getRequirements().getDisabledReason() != null
                     && !account.getRequirements().getDisabledReason().isBlank();
 
-            TeacherAccountStatus status =
-                    payoutsEnabled ? TeacherAccountStatus.COMPLETED :
-                            (restricted ? TeacherAccountStatus.RESTRICTED : TeacherAccountStatus.PENDING);
+            TeacherAccountStatus status;
+            if (payoutsEnabled && !hasDue)
+                status = TeacherAccountStatus.COMPLETED;
+            else if (restricted)
+                status = TeacherAccountStatus.RESTRICTED;
+            else
+                status = TeacherAccountStatus.PENDING;
 
             ta.setStatus(status);
             teacherAccRepo.save(ta);

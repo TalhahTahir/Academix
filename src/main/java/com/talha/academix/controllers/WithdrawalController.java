@@ -12,6 +12,8 @@ import com.talha.academix.services.WithdrawalService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 @RestController
 @RequestMapping("/api/withdrawals")
@@ -35,4 +37,5 @@ public class WithdrawalController {
     public ResponseEntity<List<WithdrawalDTO>> getByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(withdrawalService.getByUser(userId));
     }
+    
 }
