@@ -10,7 +10,7 @@ import com.talha.academix.model.Withdrawal;
 
 public interface WithdrawalRepo extends JpaRepository<Withdrawal, Long> {
 
-   List<Withdrawal> findAllByRequestedBy_Id(Long userId);
+   List<Withdrawal> findAllByRequestedBy_Userid(Long userId);
 
    Optional<Withdrawal>findByProviderObjectId(String providerObjectId);
 
