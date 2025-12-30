@@ -25,6 +25,13 @@ public class TeacherAccountServiceImpl {
 
     private static final String PLATFORM_COUNTRY = "US";
 
+    // If you have a real website, set it here; otherwise keep null and use product_description.
+    private static final String PLATFORM_WEBSITE_URL = null; // e.g. "https://academix.com"
+
+    // Alternate to website (recommended if you don't have a public site yet)
+    private static final String PLATFORM_PRODUCT_DESCRIPTION =
+            "Academix is a learning management platform. Teachers sell courses and receive payouts for enrollments.";
+
     private final TeacherAccountRepo teacherAccRepo;
     private final UserRepo userRepo;
 
@@ -38,14 +45,23 @@ public class TeacherAccountServiceImpl {
                     if (teacher.getRole() != Role.TEACHER) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not a teacher");
                     }
-System.out.println("Teacher Acc. Serv. Impl...M1.1");
+
                     try {
+                        // Build business profile (use URL if you have it; otherwise product_description)
+                        AccountCreateParams.BusinessProfile.Builder businessProfile =
+                                AccountCreateParams.BusinessProfile.builder()
+                                        .setProductDescription(PLATFORM_PRODUCT_DESCRIPTION);
+
+                        if (PLATFORM_WEBSITE_URL != null && !PLATFORM_WEBSITE_URL.isBlank()) {
+                            businessProfile.setUrl(PLATFORM_WEBSITE_URL);
+                        }
 
                         AccountCreateParams params = AccountCreateParams.builder()
                                 .setType(AccountCreateParams.Type.EXPRESS)
                                 .setCountry(PLATFORM_COUNTRY)
                                 .setEmail(teacher.getEmail())
                                 .setBusinessType(AccountCreateParams.BusinessType.INDIVIDUAL)
+                                .setBusinessProfile(businessProfile.build())
                                 .setCapabilities(
                                         AccountCreateParams.Capabilities.builder()
                                                 .setTransfers(
@@ -55,25 +71,23 @@ System.out.println("Teacher Acc. Serv. Impl...M1.1");
                                                 .build())
                                 .putMetadata("teacher_id", teacherId.toString())
                                 .build();
-System.out.println("Teacher Acc. Serv. Impl...M1.2");
-System.out.println("Stripe Params: " + params.toString());
 
                         Account account = Account.create(params);
-System.out.println("Teacher Acc. Serv. Impl...M1.3");
-System.out.println("Stripe Account Created: " + account.getId());
 
                         TeacherAccount ta = new TeacherAccount();
                         ta.setTeacher(teacher);
                         ta.setStripeAccountId(account.getId());
                         ta.setStatus(TeacherAccountStatus.PENDING);
-                        TeacherAccount teacherAcc = teacherAccRepo.save(ta);
-System.out.println("Teacher Account saved: " + teacherAcc.getId());
-                        return teacherAcc;
+
+                        return teacherAccRepo.save(ta);
+
                     } catch (Exception e) {
                         throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to create Stripe account", e);
                     }
                 });
     }
+
+    // ... keep the rest of your service as-is
 
     @Transactional
     public String createOnboardingLink(Long teacherId, String refreshUrl, String returnUrl) {
