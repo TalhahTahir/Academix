@@ -42,7 +42,7 @@ public class TeacherAccount {
     // status enum: PENDING, COMPLETED, RESTRICTED
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
-    private TeacherAccountStatus status = TeacherAccountStatus.PENDING;
+    private TeacherAccountStatus status = TeacherAccountStatus.PENDING; // default: PENDING, COMPLETED, RESTRICTED
 
     // timestamps
     @CreationTimestamp
