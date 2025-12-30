@@ -9,16 +9,21 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
 import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
+import com.stripe.model.Payout;
 import com.stripe.model.StripeObject;
+import com.stripe.model.Transfer;
 import com.talha.academix.enums.PaymentStatus;
 import com.talha.academix.model.Payment;
 import com.talha.academix.model.StripePaymentEvent;
+import com.talha.academix.model.StripeWebhookEvent;
 import com.talha.academix.repository.PaymentRepo;
 import com.talha.academix.repository.StripePaymentEventRepo;
+import com.talha.academix.repository.StripeWebhookEventRepo;
 import com.talha.academix.services.EnrollmentService;
 import com.talha.academix.services.StripePaymentDetailService;
 import com.talha.academix.services.StripePaymentEventService;
 import com.talha.academix.services.VaultService;
+import com.talha.academix.services.WithdrawalService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,19 +34,95 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class StripePaymentEventServiceImpl implements StripePaymentEventService {
 
-    private final StripePaymentEventRepo eventRepo;
+    private final StripeWebhookEventRepo webhookEventRepo;
+    private final StripePaymentEventRepo paymentEventRepo;
+
     private final PaymentRepo paymentRepo;
     private final StripePaymentDetailService detailService;
     private final EnrollmentService enrollmentService;
     private final VaultService vaultService;
+    private final WithdrawalService withdrawalService;
 
     @Override
     public void processEvent(Event event, boolean signatureValid) {
-        //
-        System.out.println(" 2.1 --- Processing Stripe event: " + event.getId() + " of type " + event.getType());
-        //
-        if (eventRepo.existsByProviderEventId(event.getId())) {
+
+        log.info("Processing Stripe event {} of type {}", event.getId(), event.getType());
+
+        // Generic idempotency for ALL Stripe events
+        if (webhookEventRepo.existsByProviderEventId(event.getId())) {
             log.info("Duplicate Stripe event {} ignored", event.getId());
+            return;
+        }
+
+        StripeWebhookEvent genericAudit = new StripeWebhookEvent();
+        genericAudit.setProviderEventId(event.getId());
+        genericAudit.setEventType(event.getType());
+        genericAudit.setSignatureValid(signatureValid);
+        genericAudit.setRawPayload(extractRawPayload(event));
+        genericAudit.setReceivedAt(Instant.now());
+        webhookEventRepo.save(genericAudit);
+
+        try {
+            // Route connect events first (they don't have payment_id metadata)
+            if (event.getType().startsWith("transfer.")) {
+                handleTransferEvent(event);
+                genericAudit.setProcessedAt(Instant.now());
+                webhookEventRepo.save(genericAudit);
+                return;
+            }
+            if (event.getType().startsWith("payout.")) {
+                handlePayoutEvent(event);
+                genericAudit.setProcessedAt(Instant.now());
+                webhookEventRepo.save(genericAudit);
+                return;
+            }
+
+            // PaymentIntent flow (existing)
+            handlePaymentIntentEvent(event, signatureValid);
+
+            genericAudit.setProcessedAt(Instant.now());
+            webhookEventRepo.save(genericAudit);
+
+        } catch (Exception ex) {
+            log.error("Error processing Stripe event {}", event.getId(), ex);
+            // still persist genericAudit without processedAt (already saved)
+        }
+    }
+
+    private void handleTransferEvent(Event event) {
+        Transfer transfer = deserialize(event, Transfer.class);
+        if (transfer == null) {
+            log.warn("Could not deserialize Transfer for event {}", event.getId());
+            return;
+        }
+
+        String transferId = transfer.getId();
+        switch (event.getType()) {
+            case "transfer.paid" -> withdrawalService.handleTransferPaid(transferId);
+            case "transfer.failed" -> withdrawalService.handleTransferFailed(transferId);
+            default -> log.debug("Unhandled transfer event type {}", event.getType());
+        }
+    }
+
+    private void handlePayoutEvent(Event event) {
+        Payout payout = deserialize(event, Payout.class);
+        if (payout == null) {
+            log.warn("Could not deserialize Payout for event {}", event.getId());
+            return;
+        }
+
+        String payoutId = payout.getId();
+        switch (event.getType()) {
+            case "payout.paid" -> withdrawalService.handlePayoutPaid(payoutId);
+            case "payout.failed" -> withdrawalService.handlePayoutFailed(payoutId);
+            default -> log.debug("Unhandled payout event type {}", event.getType());
+        }
+    }
+
+    private void handlePaymentIntentEvent(Event event, boolean signatureValid) {
+        // Payment-specific idempotency table (optional but fine to keep)
+        if (paymentEventRepo.existsByProviderEventId(event.getId())) {
+            log.info("Duplicate payment event {} ignored", event.getId());
             return;
         }
 
@@ -50,10 +131,6 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
             log.warn("Could not resolve PaymentIntent for event {}", event.getId());
             return;
         }
-
-        //
-        System.out.println(" 2.2 --- StripePaymentEventServiceImpl running ");
-        //
 
         String paymentIdMeta = intent.getMetadata() != null ? intent.getMetadata().get("payment_id") : null;
         if (paymentIdMeta == null) {
@@ -74,30 +151,30 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
         audit.setSignatureValid(signatureValid);
         audit.setRawPayload(extractRawPayload(event));
         audit.setReceivedAt(Instant.now());
-        //
-        System.out.println(" 2.3 --- StripePaymentEventServiceImpl running ");
-        //
+
         try {
             switch (event.getType()) {
                 case "payment_intent.processing" -> updateIntent(intent, PaymentStatus.PROCESSING);
+
                 case "payment_intent.succeeded" -> {
                     updateIntent(intent, PaymentStatus.SUCCEEDED);
                     finalizeEnrollmentIfPossible(intent);
-
-                    // Only distribute after SUCCEEDED
                     vaultService.shareDistribution(payment);
                 }
+
                 case "payment_intent.payment_failed" -> updateIntent(intent, PaymentStatus.FAILED);
                 case "payment_intent.canceled" -> updateIntent(intent, PaymentStatus.CANCELED);
+
                 case "charge.succeeded" -> updateIntent(intent,
                         detailService.mapStripeStatus(intent.getStatus(), true));
+
                 default -> log.debug("Unhandled Stripe event type {}", event.getType());
             }
             audit.setProcessedAt(Instant.now());
         } catch (Exception ex) {
-            log.error("Error processing Stripe event {}", event.getId(), ex);
+            log.error("Error processing Stripe payment event {}", event.getId(), ex);
         } finally {
-            eventRepo.save(audit);
+            paymentEventRepo.save(audit);
         }
     }
 
@@ -139,5 +216,13 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
                 .getObject()
                 .map(StripeObject::toJson)
                 .orElse("{}");
+    }
+
+    private <T extends StripeObject> T deserialize(Event event, Class<T> clazz) {
+        StripeObject obj = event.getDataObjectDeserializer().getObject().orElse(null);
+        if (clazz.isInstance(obj)) {
+            return clazz.cast(obj);
+        }
+        return null;
     }
 }
