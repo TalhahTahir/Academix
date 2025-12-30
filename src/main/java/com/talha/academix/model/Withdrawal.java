@@ -48,7 +48,7 @@ public class Withdrawal {
     private BigDecimal amount;
     
     @Enumerated(EnumType.STRING)
-    private WithdrawalStatus status; // PENDING | APPROVED | REJECTED | PAID_OUT
+    private WithdrawalStatus status; // REQUESTED, PROCESSING, PAID, FAILED
 
     @Column(nullable=true)
     private String providerObjectId; // e.g., (tr_... or po_...)
