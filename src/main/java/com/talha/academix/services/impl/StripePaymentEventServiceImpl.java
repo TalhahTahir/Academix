@@ -76,6 +76,12 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
                 webhookEventRepo.save(genericAudit);
                 return;
             }
+            if (event.getType().startsWith("account.")) {
+                handleAccountEvent(event);
+                genericAudit.setProcessedAt(Instant.now());
+                webhookEventRepo.save(genericAudit);
+                return;
+            }
 
             // PaymentIntent flow (existing)
             handlePaymentIntentEvent(event, signatureValid);
@@ -117,6 +123,14 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
             case "payout.failed" -> withdrawalService.handlePayoutFailed(payoutId);
             default -> log.debug("Unhandled payout event type {}", event.getType());
         }
+    }
+
+    private void handleAccountEvent(Event event) {
+        // account.updated events are fired when a Connect account's status changes
+        // (e.g., teacher completes onboarding). We just log it for now.
+        // The status is synced on-demand in TeacherAccountServiceImpl.syncStatusFromStripe()
+        log.info("Received account event: {} for event {}", event.getType(), event.getId());
+        // Future: could proactively update TeacherAccount status here
     }
 
     private void handlePaymentIntentEvent(Event event, boolean signatureValid) {
