@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import com.talha.academix.enums.TxStatus;
+import com.talha.academix.enums.WithdrawalKind;
+import com.talha.academix.enums.WithdrawalStatus;
 
 import jakarta.persistence.Table;
 import jakarta.persistence.Entity;
@@ -36,6 +37,9 @@ public class Withdrawal {
     @JoinColumn(name="vault_id", nullable=false)
     private Vault vault;
 
+    @Enumerated(EnumType.STRING)
+    private WithdrawalKind kind; // ADMIN | TEACHER
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="requested_by", nullable=false)
     private User requestedBy;
@@ -44,9 +48,9 @@ public class Withdrawal {
     private BigDecimal amount;
     
     @Enumerated(EnumType.STRING)
-    private TxStatus status; // PENDING | APPROVED | REJECTED | PAID_OUT
+    private WithdrawalStatus status; // PENDING | APPROVED | REJECTED | PAID_OUT
 
-    @Column(nullable=false)
+    @Column(nullable=true)
     private String providerObjectId; // e.g., (tr_... or po_...)
 
     private Instant requestedAt;

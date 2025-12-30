@@ -148,8 +148,8 @@ public class VaultServiceImpl implements VaultService {
             adminTx.setBalanceAfter(adminVault.getAvailableBalance().add(adminTx.getAmount()));
             adminTx.setCreatedAt(Instant.now());
             adminTx.setVaultId(adminVault.getId());
-            teacherTx.setReferenceType(TxReferenceType.PAYMENT);
-            teacherTx.setReferenceId(payment.getId());
+            adminTx.setReferenceType(TxReferenceType.PAYMENT);
+            adminTx.setReferenceId(payment.getId());
             adminTx.setInitiaterId(payment.getUser().getUserid());
 
             vaultTxService.createTransaction(adminTx);

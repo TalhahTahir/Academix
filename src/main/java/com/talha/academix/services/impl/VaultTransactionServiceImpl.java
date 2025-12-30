@@ -84,14 +84,6 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
     }
 
     @Override
-    public List<VaultTransactionDTO> getTransactionsByCourseId(Long courseId) {
-        List<VaultTransaction> txs = vaultTxRepo.findAllByCourse_Courseid(courseId);
-        return txs.stream()
-                .map(tx -> mapper.map(tx, VaultTransactionDTO.class))
-                .toList();
-    }
-
-    @Override
     public long countTransactionsByVaultId(Long vaultId) {
         return vaultTxRepo.countByVaultId(vaultId);
     }

@@ -37,7 +37,7 @@ public class VaultTransaction {
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
-    private VaultTxType type; // ENROLLMENT_CREDIT | WITHDRAWAL_REQUEST | WITHDRAWAL_PAYOUT
+    private VaultTxType type; // CREDIT | REQUEST | PAYOUT
 
     @Enumerated(EnumType.STRING)
     private TxStatus status; // PENDING | COMPLETED | FAILED

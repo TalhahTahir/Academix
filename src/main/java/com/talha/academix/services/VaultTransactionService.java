@@ -28,8 +28,6 @@ public interface VaultTransactionService {
 
     Page<VaultTransactionDTO> listAllTransactions(Pageable p); // recommended
 
-    List<VaultTransactionDTO> getTransactionsByCourseId(Long courseId);
-
     List<VaultTransactionDTO> getTransactionsForDay(LocalDate date);
 
     List<VaultTransactionDTO> getTransactionsForWeek(LocalDate weekStart); // ISO week start
