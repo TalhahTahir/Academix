@@ -37,9 +37,9 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
 
     @Override
     public void processEvent(Event event, boolean signatureValid) {
-//
+        //
         System.out.println(" 2.1 --- Processing Stripe event: " + event.getId() + " of type " + event.getType());
-//
+        //
         if (eventRepo.existsByProviderEventId(event.getId())) {
             log.info("Duplicate Stripe event {} ignored", event.getId());
             return;
@@ -51,9 +51,9 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
             return;
         }
 
-//
-System.out.println(" 2.2 --- StripePaymentEventServiceImpl running ");
-//
+        //
+        System.out.println(" 2.2 --- StripePaymentEventServiceImpl running ");
+        //
 
         String paymentIdMeta = intent.getMetadata() != null ? intent.getMetadata().get("payment_id") : null;
         if (paymentIdMeta == null) {
@@ -74,23 +74,23 @@ System.out.println(" 2.2 --- StripePaymentEventServiceImpl running ");
         audit.setSignatureValid(signatureValid);
         audit.setRawPayload(extractRawPayload(event));
         audit.setReceivedAt(Instant.now());
-//
-System.out.println(" 2.3 --- StripePaymentEventServiceImpl running ");
-//
+        //
+        System.out.println(" 2.3 --- StripePaymentEventServiceImpl running ");
+        //
         try {
             switch (event.getType()) {
                 case "payment_intent.processing" -> updateIntent(intent, PaymentStatus.PROCESSING);
                 case "payment_intent.succeeded" -> {
                     updateIntent(intent, PaymentStatus.SUCCEEDED);
                     finalizeEnrollmentIfPossible(intent);
+
+                    // Only distribute after SUCCEEDED
+                    vaultService.shareDistribution(payment);
                 }
                 case "payment_intent.payment_failed" -> updateIntent(intent, PaymentStatus.FAILED);
                 case "payment_intent.canceled" -> updateIntent(intent, PaymentStatus.CANCELED);
-                case "charge.succeeded" -> {
-                    // Additional charge enrichment: refetch & update details
-                    updateIntent(intent,
-                            detailService.mapStripeStatus(intent.getStatus(), true));
-                }
+                case "charge.succeeded" -> updateIntent(intent,
+                        detailService.mapStripeStatus(intent.getStatus(), true));
                 default -> log.debug("Unhandled Stripe event type {}", event.getType());
             }
             audit.setProcessedAt(Instant.now());
@@ -99,14 +99,6 @@ System.out.println(" 2.3 --- StripePaymentEventServiceImpl running ");
         } finally {
             eventRepo.save(audit);
         }
-        
-//
-System.out.println(" 2.4 --- StripePaymentEventServiceImpl running ");
-//
-        vaultService.shareDistribution(payment);
-//
-System.out.println(" 2.5 --- StripePaymentEventServiceImpl running ");
-//
     }
 
     private void updateIntent(PaymentIntent intent, PaymentStatus status) {

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface TeacherAccountRepo extends JpaRepository<TeacherAccount, Long> {
-    Optional<TeacherAccount> findByTeacher_Id(Long teacherId);
+    Optional<TeacherAccount> findByTeacher_Userid(Long teacherId);
     Optional<TeacherAccount> findByStripeAccountId(String stripeAccountId);
-    boolean existsByTeacher_Id(Long teacherId);
+    boolean existsByTeacher_Userid(Long teacherId);
 }

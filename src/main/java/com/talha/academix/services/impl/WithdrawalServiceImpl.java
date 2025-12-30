@@ -3,6 +3,7 @@ package com.talha.academix.services.impl;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import com.talha.academix.enums.VaultTxType;
 import com.talha.academix.enums.WithdrawalKind;
 import com.talha.academix.enums.WithdrawalStatus;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.exception.StripeOnboardingRequiredException;
 import com.talha.academix.model.User;
 import com.talha.academix.model.Vault;
 import com.talha.academix.model.VaultTransaction;
@@ -42,16 +44,20 @@ public class WithdrawalServiceImpl implements WithdrawalService {
     private static final BigDecimal MIN_WITHDRAWAL = new BigDecimal("10.00");
     private static final String CURRENCY = "USD";
 
+    // For now hardcoded; later move to application.properties
+    private static final String CONNECT_REFRESH_URL = "http://localhost:8081/api/stripe/connect/refresh";
+    private static final String CONNECT_RETURN_URL  = "http://localhost:8081/api/stripe/connect/return";
+
     private final WithdrawalRepo withdrawalRepo;
     private final VaultRepo vaultRepo;
     private final VaultTransactionRepo vaultTxRepo;
     private final UserRepo userRepo;
-    private final TeacherAccountServiceImpl teacherAccountService; // you already have it
+    private final TeacherAccountServiceImpl teacherAccountService;
     private final StripeConnectPayoutService stripeConnectPayoutService;
     private final VaultTransactionService vaultTransactionService;
     private final ModelMapper mapper;
 
-    @Override   
+    @Override
     @Transactional
     public WithdrawalDTO requestWithdrawal(WithdrawalRequestDTO req) {
         User user = userRepo.findById(req.getUserId())
@@ -66,6 +72,9 @@ public class WithdrawalServiceImpl implements WithdrawalService {
 
         BigDecimal amount = req.getAmount();
 
+        if (amount == null || amount.signum() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must be > 0");
+        }
         if (amount.compareTo(MIN_WITHDRAWAL) < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Minimum withdrawal is $10");
         }
@@ -87,12 +96,17 @@ public class WithdrawalServiceImpl implements WithdrawalService {
 
         WithdrawalKind kind = (user.getRole() == Role.ADMIN) ? WithdrawalKind.ADMIN : WithdrawalKind.TEACHER;
 
+        // LAZY onboarding: if teacher not onboarded, respond with onboarding URL and do NOT lock funds
         if (kind == WithdrawalKind.TEACHER) {
-            // Require fully onboarded
-            teacherAccountService.requireOnboardedForWithdrawal(user.getUserid());
+            Optional<String> onboardingUrl = teacherAccountService.getOnboardingLinkIfNotOnboarded(
+                    user.getUserid(), CONNECT_REFRESH_URL, CONNECT_RETURN_URL
+            );
+            if (onboardingUrl.isPresent()) {
+                throw new StripeOnboardingRequiredException(onboardingUrl.get());
+            }
         }
 
-        // Lock funds first (important)
+        // Lock funds first
         vault.setAvailableBalance(vault.getAvailableBalance().subtract(amount));
         vault.setPendingWithdrawal(vault.getPendingWithdrawal().add(amount));
         vault.setUpdatedAt(Instant.now());
@@ -117,7 +131,7 @@ public class WithdrawalServiceImpl implements WithdrawalService {
         tx.setInitiaterId(user.getUserid());
         tx.setReferenceType(TxReferenceType.WITHDRAWAL);
         tx.setReferenceId(withdrawal.getId());
-        tx.setBalanceAfter(vault.getAvailableBalance()); // after lock
+        tx.setBalanceAfter(vault.getAvailableBalance());
         tx.setCreatedAt(Instant.now());
         vaultTransactionService.createTransaction(tx);
 
@@ -140,7 +154,6 @@ public class WithdrawalServiceImpl implements WithdrawalService {
             return mapper.map(withdrawal, WithdrawalDTO.class);
 
         } catch (StripeException ex) {
-            // release funds + mark failed
             failWithdrawalAndRelease(withdrawal.getId(), "Stripe failure: " + ex.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Stripe withdrawal failed");
         }
@@ -156,14 +169,12 @@ public class WithdrawalServiceImpl implements WithdrawalService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<WithdrawalDTO> getByUser(Long userId) {
+    public List getByUser(Long userId) {
         return withdrawalRepo.findAllByRequestedBy_Userid(userId)
                 .stream()
                 .map(w -> mapper.map(w, WithdrawalDTO.class))
                 .toList();
     }
-
-    // --- Webhook handlers ---
 
     @Override
     @Transactional
@@ -198,12 +209,11 @@ public class WithdrawalServiceImpl implements WithdrawalService {
     }
 
     private void finalizePaid(Withdrawal w) {
-        if (w.getStatus() == WithdrawalStatus.PAID) return; // idempotent
+        if (w.getStatus() == WithdrawalStatus.PAID) return;
 
         Vault vault = w.getVault();
         BigDecimal amount = w.getAmount();
 
-        // pending -> withdrawn
         vault.setPendingWithdrawal(vault.getPendingWithdrawal().subtract(amount));
         vault.setTotalWithdrawn(vault.getTotalWithdrawn().add(amount));
         vault.setUpdatedAt(Instant.now());
@@ -214,7 +224,7 @@ public class WithdrawalServiceImpl implements WithdrawalService {
         withdrawalRepo.save(w);
 
         VaultTransaction tx = vaultTxRepo.findByReferenceTypeAndReferenceId(TxReferenceType.WITHDRAWAL, w.getId())
-            .orElseThrow(() -> new ResourceNotFoundException("No transaction record with given ref.Type & ref.Id"));
+                .orElseThrow(() -> new ResourceNotFoundException("No transaction record with given ref.Type & ref.Id"));
 
         tx.setStatus(TxStatus.COMPLETED);
         vaultTxRepo.save(tx);
@@ -224,13 +234,12 @@ public class WithdrawalServiceImpl implements WithdrawalService {
         Withdrawal w = withdrawalRepo.findById(withdrawalId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Withdrawal not found"));
 
-        if (w.getStatus() == WithdrawalStatus.FAILED) return; // idempotent
-        if (w.getStatus() == WithdrawalStatus.PAID) return;   // do not rollback paid
+        if (w.getStatus() == WithdrawalStatus.FAILED) return;
+        if (w.getStatus() == WithdrawalStatus.PAID) return;
 
         Vault vault = w.getVault();
         BigDecimal amount = w.getAmount();
 
-        // release pending -> available
         vault.setPendingWithdrawal(vault.getPendingWithdrawal().subtract(amount));
         vault.setAvailableBalance(vault.getAvailableBalance().add(amount));
         vault.setUpdatedAt(Instant.now());
@@ -240,8 +249,8 @@ public class WithdrawalServiceImpl implements WithdrawalService {
         w.setProcessedAt(Instant.now());
         withdrawalRepo.save(w);
 
-                VaultTransaction tx = vaultTxRepo.findByReferenceTypeAndReferenceId(TxReferenceType.WITHDRAWAL, w.getId())
-            .orElseThrow(() -> new ResourceNotFoundException("No transaction record with given ref.Type & ref.Id"));
+        VaultTransaction tx = vaultTxRepo.findByReferenceTypeAndReferenceId(TxReferenceType.WITHDRAWAL, w.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("No transaction record with given ref.Type & ref.Id"));
 
         tx.setStatus(TxStatus.FAILED);
         vaultTxRepo.save(tx);
