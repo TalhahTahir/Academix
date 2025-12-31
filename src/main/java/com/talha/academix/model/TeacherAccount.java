@@ -17,13 +17,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(
-        name = "teacher_accounts",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_teacher_accounts_teacher_id", columnNames = {"teacher_id"}),
-                @UniqueConstraint(name = "uk_teacher_accounts_stripe_account_id", columnNames = {"stripe_account_id"})
-        }
-)
+@Table(name = "teacher_accounts")
 public class TeacherAccount {
 
     @Id

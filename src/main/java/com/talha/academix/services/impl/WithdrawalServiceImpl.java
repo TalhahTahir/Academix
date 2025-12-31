@@ -58,7 +58,6 @@ public class WithdrawalServiceImpl implements WithdrawalService {
     private final ModelMapper mapper;
 
     @Override
-    @Transactional
     public WithdrawalDTO requestWithdrawal(WithdrawalRequestDTO req) {
         User user = userRepo.findById(req.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));

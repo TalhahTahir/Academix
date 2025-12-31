@@ -124,7 +124,13 @@ public class TeacherAccountServiceImpl {
     public TeacherAccountStatus syncStatusFromStripe(Long teacherId) {
         TeacherAccount ta = teacherAccRepo.findByTeacher_Userid(teacherId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Stripe account not created"));
+        return syncStatusFromStripe(ta);
+    }
 
+    /**
+     * Overload that accepts a TeacherAccount directly (avoids re-querying DB).
+     */
+    public TeacherAccountStatus syncStatusFromStripe(TeacherAccount ta) {
         try {
             Account account = Account.retrieve(ta.getStripeAccountId());
 
@@ -148,15 +154,15 @@ public class TeacherAccountServiceImpl {
             return status;
 
         } catch (Exception e) {
-            log.error("Failed to retrieve Stripe account status for teacherId={}, acct={}",
-                    teacherId, ta.getStripeAccountId(), e);
+            log.error("Failed to retrieve Stripe account status for acct={}",
+                    ta.getStripeAccountId(), e);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to retrieve Stripe account status", e);
         }
     }
 
     public Optional<String> getOnboardingLinkIfNotOnboarded(Long teacherId, String refreshUrl, String returnUrl) {
-        getOrCreateStripeAccountForTeacher(teacherId);
-        TeacherAccountStatus status = syncStatusFromStripe(teacherId);
+        TeacherAccount ta = getOrCreateStripeAccountForTeacher(teacherId);
+        TeacherAccountStatus status = syncStatusFromStripe(ta);
 
         if (status == TeacherAccountStatus.COMPLETED) return Optional.empty();
         return Optional.of(createOnboardingLink(teacherId, refreshUrl, returnUrl));
