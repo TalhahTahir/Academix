@@ -65,7 +65,6 @@ public class TeacherAccountServiceImpl {
             AccountCreateParams params = AccountCreateParams.builder()
                     .setType(AccountCreateParams.Type.EXPRESS)
                     .setCountry(PLATFORM_COUNTRY)
-                    .setEmail(teacher.getEmail())
                     .setBusinessType(AccountCreateParams.BusinessType.INDIVIDUAL)
                     .setBusinessProfile(businessProfile.build())
                     .setCapabilities(
