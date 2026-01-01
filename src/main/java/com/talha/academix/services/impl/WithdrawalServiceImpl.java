@@ -36,9 +36,11 @@ import com.talha.academix.services.VaultTransactionService;
 import com.talha.academix.services.WithdrawalService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class WithdrawalServiceImpl implements WithdrawalService {
 
     private static final BigDecimal MIN_WITHDRAWAL = new BigDecimal("10.00");
@@ -178,33 +180,37 @@ public class WithdrawalServiceImpl implements WithdrawalService {
     @Override
     @Transactional
     public void handleTransferPaid(String transferId) {
-        Withdrawal w = withdrawalRepo.findByProviderObjectId(transferId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Withdrawal not found for transfer"));
-        finalizePaid(w);
+        withdrawalRepo.findByProviderObjectId(transferId).ifPresentOrElse(
+                this::finalizePaid,
+                () -> log.debug("Transfer {} not associated with any withdrawal (might be external)", transferId)
+        );
     }
 
     @Override
     @Transactional
     public void handleTransferFailed(String transferId) {
-        Withdrawal w = withdrawalRepo.findByProviderObjectId(transferId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Withdrawal not found for transfer"));
-        failWithdrawalAndRelease(w.getId(), "transfer.failed");
+        withdrawalRepo.findByProviderObjectId(transferId).ifPresentOrElse(
+                w -> failWithdrawalAndRelease(w.getId(), "transfer.failed"),
+                () -> log.debug("Transfer {} not associated with any withdrawal (might be external)", transferId)
+        );
     }
 
     @Override
     @Transactional
     public void handlePayoutPaid(String payoutId) {
-        Withdrawal w = withdrawalRepo.findByProviderObjectId(payoutId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Withdrawal not found for payout"));
-        finalizePaid(w);
+        withdrawalRepo.findByProviderObjectId(payoutId).ifPresentOrElse(
+                this::finalizePaid,
+                () -> log.debug("Payout {} not associated with any withdrawal (might be external)", payoutId)
+        );
     }
 
     @Override
     @Transactional
     public void handlePayoutFailed(String payoutId) {
-        Withdrawal w = withdrawalRepo.findByProviderObjectId(payoutId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Withdrawal not found for payout"));
-        failWithdrawalAndRelease(w.getId(), "payout.failed");
+        withdrawalRepo.findByProviderObjectId(payoutId).ifPresentOrElse(
+                w -> failWithdrawalAndRelease(w.getId(), "payout.failed"),
+                () -> log.debug("Payout {} not associated with any withdrawal (might be external)", payoutId)
+        );
     }
 
     private void finalizePaid(Withdrawal w) {

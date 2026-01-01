@@ -31,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class StripePaymentEventServiceImpl implements StripePaymentEventService {
 
     private final StripeWebhookEventRepo webhookEventRepo;
@@ -44,6 +43,7 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
     private final WithdrawalService withdrawalService;
 
     @Override
+    @Transactional
     public void processEvent(Event event, boolean signatureValid) {
 
         log.info("Processing Stripe event {} of type {}", event.getId(), event.getType());
@@ -63,8 +63,15 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
         webhookEventRepo.save(genericAudit);
 
         try {
+            System.out.println("EVENT TYPE: " + event.getType());
             // Route connect events first (they don't have payment_id metadata)
             if (event.getType().startsWith("transfer.")) {
+                handleTransferEvent(event);
+                genericAudit.setProcessedAt(Instant.now());
+                webhookEventRepo.save(genericAudit);
+                return;
+            }
+            if (event.getType().startsWith("tr_")) {
                 handleTransferEvent(event);
                 genericAudit.setProcessedAt(Instant.now());
                 webhookEventRepo.save(genericAudit);
@@ -104,6 +111,7 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
 
         String transferId = transfer.getId();
         switch (event.getType()) {
+            case "transfer.created" -> withdrawalService.handleTransferPaid(transferId);
             case "transfer.paid" -> withdrawalService.handleTransferPaid(transferId);
             case "transfer.failed" -> withdrawalService.handleTransferFailed(transferId);
             default -> log.debug("Unhandled transfer event type {}", event.getType());
