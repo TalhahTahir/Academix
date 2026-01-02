@@ -275,3 +275,5 @@ If you’d like, I can:
 i have to do somthing about Enrollment.Status = completed
     each content should have its own exam
       maybe we need to make another table to keep record of attempted exams
+---
+Implement Map Struct
