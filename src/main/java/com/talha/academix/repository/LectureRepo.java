@@ -11,5 +11,5 @@ public interface LectureRepo extends JpaRepository<Lecture, Long> {
     List<Lecture> findByContent(Content content);
     int countByContent(Content content);
 
-    long countByContent_Course_Courseid(Long courseId);
+    long countByContent_Course_CourseId(Long courseId);
 }

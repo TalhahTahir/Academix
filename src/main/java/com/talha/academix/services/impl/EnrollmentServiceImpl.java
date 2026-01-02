@@ -83,8 +83,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public EnrollmentDTO enrollmentValidation(Long courseid, Long userid) {
-        Enrollment enrollment = enrollmentRepo.findByStudent_UseridAndCourse_Courseid(userid, courseid);
+    public EnrollmentDTO enrollmentValidation(Long courseId, Long userId) {
+        Enrollment enrollment = enrollmentRepo.findByStudent_UseridAndCourse_CourseId(userId, courseId);
         return mapper.map(enrollment, EnrollmentDTO.class);
     }
 
@@ -95,14 +95,14 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
 
         // 2. Update associations if IDs provided
-        if (enrollmentDTO.getStudentID() != null) {
-            User student = userRepo.findById(enrollmentDTO.getStudentID())
+        if (enrollmentDTO.getStudentId() != null) {
+            User student = userRepo.findById(enrollmentDTO.getStudentId())
                     .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
             enrollment.setStudent(student);
         }
 
-        if (enrollmentDTO.getCourseID() != null) {
-            Course course = courseRepo.findById(enrollmentDTO.getCourseID())
+        if (enrollmentDTO.getCourseId() != null) {
+            Course course = courseRepo.findById(enrollmentDTO.getCourseId())
                     .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
             enrollment.setCourse(course);
         }
@@ -122,9 +122,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         // 5. Map back to DTO (manual for now, or use MapStruct)
         EnrollmentDTO updatedDTO = new EnrollmentDTO();
-        updatedDTO.setEnrollmentID(updated.getEnrollmentID());
-        updatedDTO.setStudentID(updated.getStudent().getUserid());
-        updatedDTO.setCourseID(updated.getCourse().getCourseid());
+        updatedDTO.setEnrollmentId(updated.getEnrollmentId());
+        updatedDTO.setStudentId(updated.getStudent().getUserid());
+        updatedDTO.setCourseId(updated.getCourse().getCourseId());
         updatedDTO.setEnrollmentDate(updated.getEnrollmentDate());
         updatedDTO.setStatus(updated.getStatus());
         updatedDTO.setCompletionPercentage(updated.getCompletionPercentage());
@@ -137,7 +137,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Transactional
     public EnrollmentDTO finalizeEnrollment(Long studentId, Long courseId) {
         // 1. Prevent double‑enroll
-        if (enrollmentRepo.existsByStudent_UseridAndCourse_Courseid(studentId, courseId)) {
+        if (enrollmentRepo.existsByStudent_UseridAndCourse_CourseId(studentId, courseId)) {
             throw new AlreadyEnrolledException(
                     "Student " + studentId + " already enrolled in course " + courseId);
         }
@@ -182,7 +182,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public Long countEnrollmentsByCourse(Long courseId) {
-        return enrollmentRepo.countByCourse_Courseid(courseId);
+        return enrollmentRepo.countByCourse_CourseId(courseId);
     }
 
     @Override
@@ -199,7 +199,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         if ((e.getMarks() > 50) || (e.getCompletionPercentage() == 100)) {
             e.setStatus(EnrollmentStatus.COMPLETED);
         Enrollment enrollment = enrollmentRepo.save(e);
-        return mapper.map(e, EnrollmentDTO.class);
+        return mapper.map(enrollment, EnrollmentDTO.class);
         }
         else
             throw new PolicyViolationException("Enrollment is not completed");

@@ -39,11 +39,11 @@ public class ContentServiceImpl implements ContentService {
         @Override
         public ContentDTO addContent(Long userid, ContentDTO dto) {
 
-                Course course = courseRepo.findById(dto.getCourseID())
+                Course course = courseRepo.findById(dto.getCourseId())
                                 .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Course not found with id: " + dto.getCourseID()));
+                                                "Course not found with id: " + dto.getCourseId()));
 
-                owned = courseService.teacherOwnership(userid, course.getCourseid());
+                owned = courseService.teacherOwnership(userid, course.getCourseId());
 
                 if (owned && (course.getState() == CourseState.DRAFT
                                 || course.getState() == CourseState.IN_DEVELOPMENT
@@ -58,8 +58,8 @@ public class ContentServiceImpl implements ContentService {
 
                         // manual DTO mapping to avoid ModelMapper confusion with lazy relations
                         ContentDTO out = new ContentDTO();
-                        out.setContentID(content.getContentID());
-                        out.setCourseID(course.getCourseid());
+                        out.setContentId(content.getContentId());
+                        out.setCourseId(course.getCourseId());
                         out.setDescription(content.getDescription());
                         out.setImageFileId(null);
                         out.setImageSignedUrl(null);
@@ -74,7 +74,7 @@ public class ContentServiceImpl implements ContentService {
         @Override
         public ContentDTO updateContent(Long userid, Long contentId, ContentDTO dto) {
 
-                owned = courseService.teacherOwnership(userid, dto.getCourseID());
+                owned = courseService.teacherOwnership(userid, dto.getCourseId());
 
                 if (owned) {
                         Content content = contentRepo.findById(contentId)
@@ -83,9 +83,9 @@ public class ContentServiceImpl implements ContentService {
 
                         mapper.getConfiguration().setSkipNullEnabled(true);
                         mapper.map(dto, content);
-                        content.setCourse(courseRepo.findById(dto.getCourseID())
+                        content.setCourse(courseRepo.findById(dto.getCourseId())
                                         .orElseThrow(() -> new ResourceNotFoundException(
-                                                        "Course not found with id: " + dto.getCourseID())));
+                                                        "Course not found with id: " + dto.getCourseId())));
                         content = contentRepo.save(content);
 
                         return mapper.map(content, ContentDTO.class);
@@ -99,7 +99,7 @@ public class ContentServiceImpl implements ContentService {
                                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
 
                 ContentDTO dto = mapper.map(content, ContentDTO.class);
-                dto.setCourseID(content.getCourse().getCourseid());
+                dto.setCourseId(content.getCourse().getCourseId());
 
                 if (content.getImageFile() != null) {
                         dto.setImageFileId(content.getImageFile().getId());
@@ -138,7 +138,7 @@ public class ContentServiceImpl implements ContentService {
                 Content content = contentRepo.findById(contentId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
 
-                Long courseId = content.getCourse().getCourseid();
+                Long courseId = content.getCourse().getCourseId();
 
                 if (!courseService.teacherOwnership(teacherId, courseId)) {
                         throw new RoleMismatchException("Only course owner can set content image");
@@ -149,7 +149,7 @@ public class ContentServiceImpl implements ContentService {
                                                 "StoredFile not found: " + storedFileId));
 
                 // must be from same course
-                if (!file.getContent().getContentID().equals(content.getContentID())) {
+                if (!file.getContent().getContentId().equals(content.getContentId())) {
                         throw new RoleMismatchException("StoredFile does not belong to this content");
                 }
                 // must be correct type
@@ -169,7 +169,7 @@ public class ContentServiceImpl implements ContentService {
                 ContentDTO dto = mapper.map(content, ContentDTO.class);
 
                 // manually set ids + signed URL
-                dto.setCourseID(courseId);
+                dto.setCourseId(courseId);
                 dto.setImageFileId(file.getId());
                 dto.setImageSignedUrl(storedFileService.getSignedDownloadUrl(file.getId(), 600).getSignedDownloadUrl());
 

@@ -12,9 +12,9 @@ import com.talha.academix.enums.EnrollmentStatus;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EnrollmentDTO {
-    private Long enrollmentID;
-    private Long studentID;
-    private Long courseID;
+    private Long enrollmentId;
+    private Long studentId;
+    private Long courseId;
     private Instant enrollmentDate;
     private EnrollmentStatus status;
     private double completionPercentage;

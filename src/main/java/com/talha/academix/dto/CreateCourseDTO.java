@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateCourseDTO {
-    private String coursename;
+    private String courseName;
     private String duration;
     private BigDecimal fees;
     private CourseCategory category;
-    private Long teacherid;
+    private Long teacherId;
 }

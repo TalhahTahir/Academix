@@ -31,7 +31,7 @@ public class Document {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "file_path_id", unique = true)
-    private StoredFile filePath;
+    private StoredFile storedFile;
 
     private String description;
 }

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class Content {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private Long contentID;
+    private Long contentId;
 
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="course_id", nullable=false)

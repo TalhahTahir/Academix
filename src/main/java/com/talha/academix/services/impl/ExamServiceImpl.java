@@ -47,7 +47,7 @@ public class ExamServiceImpl implements ExamService {
         Exam existing = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
 
-        if (!courseService.teacherOwnership(teacherId, existing.getCourse().getCourseid())) {
+        if (!courseService.teacherOwnership(teacherId, existing.getCourse().getCourseId())) {
             throw new RoleMismatchException("Only teacher can update exam.");
         }
 
@@ -78,7 +78,7 @@ public class ExamServiceImpl implements ExamService {
         Exam exam = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
 
-        if (!courseService.teacherOwnership(teacherId, exam.getCourse().getCourseid())) {
+        if (!courseService.teacherOwnership(teacherId, exam.getCourse().getCourseId())) {
             throw new RoleMismatchException("Only teacher can delete exam.");
         }
 
@@ -90,6 +90,6 @@ public class ExamServiceImpl implements ExamService {
         return new ExamResponse(
                 exam.getId(),
                 exam.getTitle(),
-                exam.getCourse() != null ? exam.getCourse().getCourseid() : null);
+                exam.getCourse() != null ? exam.getCourse().getCourseId() : null);
     }
 }

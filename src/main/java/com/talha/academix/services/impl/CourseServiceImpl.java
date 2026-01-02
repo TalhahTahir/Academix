@@ -83,10 +83,10 @@ public class CourseServiceImpl implements CourseService {
         List<CourseViewDTO> coursesview = new ArrayList<>();
         courses.forEach(course -> {
             CourseViewDTO courseViewDTO = mapper.map(course, CourseViewDTO.class);
-            if (enrollmentRepo.existsByStudent_UseridAndCourse_Courseid(studentId, course.getCourseid())) {
+            if (enrollmentRepo.existsByStudent_UseridAndCourse_CourseId(studentId, course.getCourseId())) {
                 courseViewDTO.setBadge(CourseBadge.Enrolled);
             }
-            enrollmentRepo.findEnrollmentStatusByStudent_UseridAndCourse_Courseid(studentId, course.getCourseid())
+            enrollmentRepo.findEnrollmentStatusByStudent_UseridAndCourse_CourseId(studentId, course.getCourseId())
                     .filter(status -> status == EnrollmentStatus.COMPLETED)
                     .ifPresent(s -> courseViewDTO.setBadge(CourseBadge.Completed));
             coursesview.add(courseViewDTO);
@@ -233,15 +233,15 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseDTO createCourse(CreateCourseDTO cdto) {
-        if (!courseRepo.existsByCoursenameAndTeacher_Userid(cdto.getCoursename(), cdto.getTeacherid())) {
+        if (!courseRepo.existsByCourseNameAndTeacher_Userid(cdto.getCourseName(), cdto.getTeacherId())) {
             Course course = new Course();
-            course.setCoursename(cdto.getCoursename());
+            course.setCourseName(cdto.getCourseName());
             course.setDuration(cdto.getDuration());
             course.setFees(cdto.getFees());
             course.setCategory(cdto.getCategory());
-            User teacher = userRepo.findById(cdto.getTeacherid())
+            User teacher = userRepo.findById(cdto.getTeacherId())
                     .orElseThrow(
-                            () -> new ResourceNotFoundException("Teacher not found with id: " + cdto.getTeacherid()));
+                            () -> new ResourceNotFoundException("Teacher not found with id: " + cdto.getTeacherId()));
             course.setTeacher(teacher);
             course.setState(CourseState.DRAFT);
             course = courseRepo.save(course);
@@ -249,7 +249,7 @@ public class CourseServiceImpl implements CourseService {
             return courseMapper.toDto(course);
 
         } else
-            throw new AlreadyExistException("Teacher already have a course with name: " + cdto.getCoursename());
+            throw new AlreadyExistException("Teacher already have a course with name: " + cdto.getCourseName());
     }
 
     @Override

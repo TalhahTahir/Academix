@@ -32,9 +32,9 @@ import lombok.NoArgsConstructor;
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long courseid;
+    private Long courseId;
     @NotEmpty
-    private String coursename;
+    private String courseName;
     @NotEmpty
     private String duration;
     @NotNull

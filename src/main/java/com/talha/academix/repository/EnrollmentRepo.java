@@ -21,20 +21,20 @@ public interface EnrollmentRepo extends JpaRepository<Enrollment, Long> {
 
         List<Enrollment> findByStatus(EnrollmentStatus status);
 
-        Enrollment findByStudent_UseridAndCourse_Courseid(Long userid, Long courseid);
+        Enrollment findByStudent_UseridAndCourse_CourseId(Long userid, Long courseId);
 
         long countByCompletionPercentageGreaterThan(int i);
 
-        boolean existsByStudent_UseridAndCourse_Courseid(Long studentId, Long courseId);
+        boolean existsByStudent_UseridAndCourse_CourseId(Long studentId, Long courseId);
 
         @Query("select e.status from Enrollment e " +
-                        "where e.student.userid = :studentId and e.course.courseid = :courseId")
-        Optional<EnrollmentStatus> findEnrollmentStatusByStudent_UseridAndCourse_Courseid(
+                        "where e.student.userid = :studentId and e.course.courseId = :courseId")
+        Optional<EnrollmentStatus> findEnrollmentStatusByStudent_UseridAndCourse_CourseId(
                         @Param("studentId") Long studentId, @Param("courseId") Long courseId);
 
         long count();
 
-        long countByCourse_Courseid(Long courseId);
+        long countByCourse_CourseId(Long courseId);
 
         long countByStudent_Userid(Long studentId);
 

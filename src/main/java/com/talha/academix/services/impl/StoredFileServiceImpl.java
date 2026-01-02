@@ -42,7 +42,7 @@ public class StoredFileServiceImpl implements StoredFileService {
         Content content = contentRepo.findById(req.getContentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + req.getContentId()));
 
-        Long courseId = content.getCourse().getCourseid();
+        Long courseId = content.getCourse().getCourseId();
 
         if (!courseService.teacherOwnership(req.getTeacherId(), courseId)) {
             throw new RoleMismatchException("Only course owner can upload files for this content");
@@ -71,7 +71,7 @@ public class StoredFileServiceImpl implements StoredFileService {
                 .replaceAll("[^a-zA-Z0-9._-]", "_");
 
         String objectKey =
-                "content-" + content.getContentID()
+                "content-" + content.getContentId()
                 + "/" + folder
                 + "/" + UUID.randomUUID() + "-" + safeName;
 

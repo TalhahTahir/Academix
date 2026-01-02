@@ -39,14 +39,14 @@ public class DocumentServiceImpl implements DocumentService {
         Content content = contentRepo.findById(dto.getContentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
 
-        if (!courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
+        if (!courseService.teacherOwnership(userid, content.getCourse().getCourseId())) {
             throw new RoleMismatchException("Only Owner can add document");
         }
 
         StoredFile file = storedFileRepo.findById(dto.getStoredFileId())
                 .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + dto.getStoredFileId()));
 
-        if (!file.getContent().getContentID().equals(content.getContentID())) {
+        if (!file.getContent().getContentId().equals(content.getContentId())) {
             throw new RoleMismatchException("StoredFile does not belong to this content");
         }
 
@@ -61,12 +61,12 @@ public class DocumentServiceImpl implements DocumentService {
         document.setContent(content);
         document.setTitle(dto.getTitle());
         document.setDescription(dto.getDescription());
-        document.setFilePath(file);
+        document.setStoredFile(file);
         document = documentRepo.save(document);
 
         DocumentDTO out = new DocumentDTO();
         out.setDocumentId(document.getDocumentId());
-        out.setContentId(content.getContentID());
+        out.setContentId(content.getContentId());
         out.setTitle(document.getTitle());
         out.setDescription(document.getDescription());
         out.setStoredFileId(file.getId());
@@ -79,12 +79,12 @@ public class DocumentServiceImpl implements DocumentService {
         Document existing = documentRepo.findById(documentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
 
-        if (courseService.teacherOwnership(userid, existing.getContent().getCourse().getCourseid())) {
+        if (courseService.teacherOwnership(userid, existing.getContent().getCourse().getCourseId())) {
 
             mapper.getConfiguration().setSkipNullEnabled(true);
             mapper.map(dto, existing);
 
-            if (!existing.getContent().getContentID().equals(dto.getContentId())) {
+            if (!existing.getContent().getContentId().equals(dto.getContentId())) {
                 Content content = contentRepo.findById(dto.getContentId())
                         .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
                 existing.setContent(content);
@@ -119,10 +119,10 @@ public class DocumentServiceImpl implements DocumentService {
         Document document = documentRepo.findById(documentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
 
-        Content content = contentRepo.findById(document.getContent().getContentID())
+        Content content = contentRepo.findById(document.getContent().getContentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found"));
 
-        if (courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
+        if (courseService.teacherOwnership(userid, content.getCourse().getCourseId())) {
             documentRepo.delete(document);
         } else {
             throw new RoleMismatchException("Only teacher can delete document");

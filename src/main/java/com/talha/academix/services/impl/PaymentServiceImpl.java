@@ -74,7 +74,7 @@ System.out.println("0.2 --- Payment Service Impl");
         Map<String, String> metadata = new HashMap<>();
         metadata.put("payment_id", payment.getId().toString());
         metadata.put("user_id", user.getUserid().toString());
-        metadata.put("course_id", course.getCourseid().toString());
+        metadata.put("course_id", course.getCourseId().toString());
 
         PaymentIntent intent;
         try {

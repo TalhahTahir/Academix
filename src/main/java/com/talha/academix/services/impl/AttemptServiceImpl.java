@@ -47,7 +47,7 @@ public class AttemptServiceImpl implements AttemptService {
     public AttemptDTO startAttempt(Long examId, Long studentId) {
         Exam exam = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
-        EnrollmentDTO stdEnrollment = enrollmentService.enrollmentValidation(exam.getCourse().getCourseid(), studentId);
+        EnrollmentDTO stdEnrollment = enrollmentService.enrollmentValidation(exam.getCourse().getCourseId(), studentId);
         if (stdEnrollment.getCompletionPercentage() == 100) {
             User student = userRepo.findById(studentId)
                     .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
@@ -95,9 +95,9 @@ public class AttemptServiceImpl implements AttemptService {
         attempt.setCompletedAt(Instant.now());
         attemptRepo.save(attempt);
 
-        Enrollment enrollment = enrollmentRepo.findByStudent_UseridAndCourse_Courseid(
+        Enrollment enrollment = enrollmentRepo.findByStudent_UseridAndCourse_CourseId(
                 attempt.getStudent().getUserid(),
-                attempt.getExam().getCourse().getCourseid());
+                attempt.getExam().getCourse().getCourseId());
         if (enrollment == null) {
             throw new ResourceNotFoundException("Enrollment not found for student and course.");
         }

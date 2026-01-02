@@ -8,6 +8,10 @@ import com.talha.academix.model.Course;
 
 @Mapper(componentModel = "spring")
 public interface CourseMapper {
+
     @Mapping(source = "teacher.userid", target = "teacherid")
     CourseDTO toDto(Course course);
+
+    @Mapping(source = "teacherid", target = "teacher.userid")
+    Course toEntity(CourseDTO dto);
 }

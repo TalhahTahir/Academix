@@ -33,7 +33,7 @@ public class QuestionServiceImpl implements QuestionService {
         Exam exam = examRepo.findById(examId)
             .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
 
-            if(courseService.teacherOwnership(userid, exam.getCourse().getCourseid())){
+            if(courseService.teacherOwnership(userid, exam.getCourse().getCourseId())){
         Question question = mapper.map(dto, Question.class);
         question.setExam(exam);
         question = questionRepo.save(question);
@@ -60,7 +60,7 @@ public class QuestionServiceImpl implements QuestionService {
         Exam exam = examRepo.findById(examId)
             .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
 
-        if (courseService.teacherOwnership(userid, question.getExam().getCourse().getCourseid())) {
+        if (courseService.teacherOwnership(userid, question.getExam().getCourse().getCourseId())) {
 
             mapper.getConfiguration().setSkipNullEnabled(true);
             mapper.map(dto, question);
@@ -79,7 +79,7 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = questionRepo.findById(questionId)
             .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
 
-        if (courseService.teacherOwnership(userid, question.getExam().getCourse().getCourseid())) {
+        if (courseService.teacherOwnership(userid, question.getExam().getCourse().getCourseId())) {
             questionRepo.delete(question);
         } else {
             throw new RoleMismatchException("Only teacher can delete question");

@@ -40,7 +40,7 @@ public class LectureServiceImpl implements LectureService {
         Content content = contentRepo.findById(dto.getContentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
 
-        if (!courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
+        if (!courseService.teacherOwnership(userid, content.getCourse().getCourseId())) {
             throw new RoleMismatchException("only valid user can add lecture");
         }
 
@@ -48,7 +48,7 @@ public class LectureServiceImpl implements LectureService {
                 .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + dto.getStoredFileId()));
 
         // verify file belongs to same course
-        if (!file.getContent().getContentID().equals(content.getContentID())) {
+        if (!file.getContent().getContentId().equals(content.getContentId())) {
             throw new RoleMismatchException("StoredFile does not belong to this content");
         }
 
@@ -70,7 +70,7 @@ public class LectureServiceImpl implements LectureService {
         // build response DTO manually (avoid ModelMapper lazy issues)
         LectureDTO out = new LectureDTO();
         out.setLectureId(lecture.getLectureId());
-        out.setContentId(content.getContentID());
+        out.setContentId(content.getContentId());
         out.setTitle(lecture.getTitle());
         out.setDuration(lecture.getDuration());
         out.setStoredFileId(file.getId());
@@ -84,7 +84,7 @@ public class LectureServiceImpl implements LectureService {
         Content content = contentRepo.findById(dto.getContentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
 
-        if (courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
+        if (courseService.teacherOwnership(userid, content.getCourse().getCourseId())) {
 
             Lecture existing = lectureRepo.findById(lectureId)
                     .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
@@ -93,7 +93,7 @@ public class LectureServiceImpl implements LectureService {
             mapper.map(dto, existing);
 
             // if contentId changed, reassign content
-            if (!existing.getContent().getContentID().equals(content.getContentID())) {
+            if (!existing.getContent().getContentId().equals(content.getContentId())) {
                 Content newcontent = contentRepo.findById(dto.getContentId())
                         .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
                 existing.setContent(newcontent);
@@ -128,10 +128,10 @@ public class LectureServiceImpl implements LectureService {
         Lecture lecture = lectureRepo.findById(lectureId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
 
-        Content content = contentRepo.findById(lecture.getContent().getContentID())
+        Content content = contentRepo.findById(lecture.getContent().getContentId())
                 .orElseThrow(() -> new ResourceNotFoundException("COntent not found"));
 
-        if (courseService.teacherOwnership(userid, content.getCourse().getCourseid())) {
+        if (courseService.teacherOwnership(userid, content.getCourse().getCourseId())) {
             lectureRepo.delete(lecture);
         } else
             throw new RoleMismatchException("Only Teacher can delete lecture");

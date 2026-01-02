@@ -9,9 +9,13 @@ import com.talha.academix.model.Certificate;
 @Mapper(componentModel = "spring")
 public interface CertificateMapper {
 
-    @Mapping(source = "course.courseid", target = "courseId")
+    @Mapping(source = "course.courseId", target = "courseId")
     @Mapping(source = "student.userid", target = "studentId")
     @Mapping(source = "teacher.userid", target = "teacherId")
     CertificateDTO toDto(Certificate certificate);
 
+    @Mapping(source = "courseId", target = "course.courseId")
+    @Mapping(source = "studentId", target = "student.userid")
+    @Mapping(source = "teacherId", target = "teacher.userid")
+    Certificate toEntity(CertificateDTO dto);
 }

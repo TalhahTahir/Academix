@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContentDTO {
-    private Long contentID;
-    private Long courseID;
+    private Long contentId;
+    private Long courseId;
     private String description;
     private Long imageFileId;
     private String imageSignedUrl;

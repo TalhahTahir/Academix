@@ -79,10 +79,10 @@ public class ProgressServiceImpl implements ProgressService {
     @Override
     public double computeCourseCompletionPercentage(Long enrollmentId) {
         Enrollment enrollment = enrollmentService.getEnrollmentEntity(enrollmentId);
-        Long courseId = enrollment.getCourse().getCourseid();
+        Long courseId = enrollment.getCourse().getCourseId();
 
-        long totalLectures = lectureRepo.countByContent_Course_Courseid(courseId);
-        long totalDocuments = documentRepo.countByContent_Course_Courseid(courseId);
+        long totalLectures = lectureRepo.countByContent_Course_CourseId(courseId);
+        long totalDocuments = documentRepo.countByContent_Course_CourseId(courseId);
 
         long completedLectures = lectureProgressRepo.countCompletedByEnrollmentAndCourse(enrollmentId, courseId);
         long completedDocuments = documentProgressRepo.countCompletedByEnrollmentAndCourse(enrollmentId, courseId);
@@ -96,10 +96,10 @@ public class ProgressServiceImpl implements ProgressService {
     @Override
     public EnrollmentStatsDTO getEnrollmentStats(Long enrollmentId) {
         Enrollment enrollment = enrollmentService.getEnrollmentEntity(enrollmentId);
-        Long courseId = enrollment.getCourse().getCourseid();
+        Long courseId = enrollment.getCourse().getCourseId();
 
-        long totalLectures = lectureRepo.countByContent_Course_Courseid(courseId);
-        long totalDocuments = documentRepo.countByContent_Course_Courseid(courseId);
+        long totalLectures = lectureRepo.countByContent_Course_CourseId(courseId);
+        long totalDocuments = documentRepo.countByContent_Course_CourseId(courseId);
 
         long completedLectures = lectureProgressRepo.countCompletedByEnrollmentAndCourse(enrollmentId, courseId);
         long completedDocuments = documentProgressRepo.countCompletedByEnrollmentAndCourse(enrollmentId, courseId);

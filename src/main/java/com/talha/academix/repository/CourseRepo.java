@@ -18,9 +18,9 @@ public interface CourseRepo extends JpaRepository<Course, Long> {
 
     // Optional replacement if needed later (safe explicit JPQL)
     @Query("SELECT c FROM Course c WHERE c.courseid = :courseId AND c.teacher.userid = :teacherId")
-    Course findByCourseidAndTeacherUserid(@Param("courseId") Long courseId, @Param("teacherId") Long teacherId);
+    Course findByCourseIdAndTeacherUserid(@Param("courseId") Long courseId, @Param("teacherId") Long teacherId);
 
-    boolean existsByCoursenameAndTeacher_Userid(String coursename, Long userid);
+    boolean existsByCourseNameAndTeacher_Userid(String courseName, Long userid);
 
     List<Course> findAllByTeacher_Userid(Long userid);
 
