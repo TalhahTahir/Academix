@@ -33,7 +33,7 @@ public class TeacherAccountServiceImpl {
 
     private final TeacherAccountRepo teacherAccRepo;
     private final UserRepo userRepo;
-    private final TeacherAccountPersistenceService persistence; // NEW
+    private final TeacherAccountPersistenceService persistence;
 
     /**
      * IMPORTANT: This method should not be @Transactional because it calls Stripe API.

@@ -15,6 +15,7 @@ import com.talha.academix.enums.TxStatus;
 import com.talha.academix.enums.VaultTxType;
 import com.talha.academix.exception.AlreadyExistException;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.mapper.VaultMapper;
 import com.talha.academix.model.Payment;
 import com.talha.academix.model.Vault;
 import com.talha.academix.repository.UserRepo;
@@ -34,6 +35,7 @@ public class VaultServiceImpl implements VaultService {
     private final UserRepo userRepo;
     private final VaultTransactionRepo vaultTxRepo;
     private final VaultTransactionService vaultTxService;
+    private final VaultMapper vaultMapper;
 
     @Override
     public VaultDTO createVault(VaultDTO dto) {
@@ -46,7 +48,7 @@ public class VaultServiceImpl implements VaultService {
         vault.setUser(userRepo.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + dto.getUserId())));
         vault = vaultRepo.save(vault);
-        return mapper.map(vault, VaultDTO.class);
+        return vaultMapper.toDto(vault);
     }
 
     @Override
@@ -59,7 +61,7 @@ public class VaultServiceImpl implements VaultService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + dto.getUserId())));
         exist.setId(vaultId);
         exist = vaultRepo.save(exist);
-        return mapper.map(exist, VaultDTO.class);
+        return vaultMapper.toDto(exist);
     }
 
     @Override
@@ -81,7 +83,7 @@ public class VaultServiceImpl implements VaultService {
     public VaultDTO getVaultByUserId(Long userId) {
         Vault vault = vaultRepo.findByUser_Userid(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vault not found for user with id : " + userId));
-        return mapper.map(vault, VaultDTO.class);
+        return vaultMapper.toDto(vault);
     }
 
     @Override

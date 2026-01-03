@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.VaultTransactionDTO;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.mapper.VaultTransactionMapper;
 import com.talha.academix.model.User;
 import com.talha.academix.model.Vault;
 import com.talha.academix.model.VaultTransaction;
@@ -32,6 +33,7 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
     private final VaultTransactionRepo vaultTxRepo;
     private final VaultRepo vaultRepo;
     private final UserRepo userRepo;
+    private final VaultTransactionMapper txMapper;
 
     @Override
     public VaultTransactionDTO createTransaction(VaultTransactionDTO dto) {
@@ -54,7 +56,7 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
         vaultTx.setInitiater(initiater);
 
         vaultTx = vaultTxRepo.save(vaultTx);
-        return mapper.map(vaultTx, VaultTransactionDTO.class);
+        return txMapper.toDto(vaultTx);
     }
 
     @Override
@@ -63,14 +65,14 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Vault Transaction record not found with id: " + transactionId));
 
-        return mapper.map(vaultTx, VaultTransactionDTO.class);
+        return txMapper.toDto(vaultTx);
     }
 
     @Override
     public List<VaultTransactionDTO> getTransactionsByVaultId(Long vaultId) {
         List<VaultTransaction> txs = vaultTxRepo.findAllByVaultId(vaultId);
         return txs.stream()
-                .map(tx -> mapper.map(tx, VaultTransactionDTO.class))
+                .map(tx -> txMapper.toDto(tx))
                 .toList();
     }
 
@@ -79,7 +81,7 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
         List<VaultTransaction> vaultTxs = vaultTxRepo.findAll();
 
         return vaultTxs.stream()
-                .map(tx -> mapper.map(tx, VaultTransactionDTO.class))
+                .map(tx -> txMapper.toDto(tx))
                 .toList();
     }
 
@@ -96,13 +98,13 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
     @Override
     public Page<VaultTransactionDTO> listTransactionsByVaultId(Long vaultId, Pageable p) {
         return vaultTxRepo.findAllByVaultId(vaultId, p)
-                .map(tx -> mapper.map(tx, VaultTransactionDTO.class));
+                .map(tx -> txMapper.toDto(tx));
     }
 
     @Override
     public Page<VaultTransactionDTO> listAllTransactions(Pageable p) {
         return vaultTxRepo.findAll(p)
-                .map(tx -> mapper.map(tx, VaultTransactionDTO.class));
+                .map(tx -> txMapper.toDto(tx));
     }
 
     @Override
@@ -111,7 +113,7 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
         Instant end = date.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
 
         return vaultTxRepo.findAllByCreatedAtBetween(start, end)
-                .stream().map(tx -> mapper.map(tx, VaultTransactionDTO.class))
+                .stream().map(tx -> txMapper.toDto(tx))
                 .toList();
     }
 
@@ -121,7 +123,7 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
         Instant end = weekStart.plusWeeks(1).atStartOfDay(ZoneOffset.UTC).toInstant();
 
         return vaultTxRepo.findAllByCreatedAtBetween(start, end)
-                .stream().map(tx -> mapper.map(tx, VaultTransactionDTO.class))
+                .stream().map(tx -> txMapper.toDto(tx))
                 .toList();
     }
 
@@ -131,7 +133,7 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
         Instant end = month.plusMonths(1).atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
 
         return vaultTxRepo.findAllByCreatedAtBetween(start, end)
-                .stream().map(tx -> mapper.map(tx, VaultTransactionDTO.class))
+                .stream().map(tx -> txMapper.toDto(tx))
                 .toList();
     }
 
@@ -141,7 +143,7 @@ public class VaultTransactionServiceImpl implements VaultTransactionService {
         Instant end = LocalDate.of(year + 1, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant();
 
         return vaultTxRepo.findAllByCreatedAtBetween(start, end)
-                .stream().map(tx -> mapper.map(tx, VaultTransactionDTO.class))
+                .stream().map(tx -> txMapper.toDto(tx))
                 .toList();
     }
 
