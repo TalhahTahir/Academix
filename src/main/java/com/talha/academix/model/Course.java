@@ -7,6 +7,7 @@ import com.talha.academix.enums.CourseCategory;
 import com.talha.academix.enums.CourseState;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -32,8 +33,10 @@ import lombok.NoArgsConstructor;
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "courseid")
     private Long courseId;
     @NotEmpty
+    @Column(name = "course_name")
     private String courseName;
     @NotEmpty
     private String duration;

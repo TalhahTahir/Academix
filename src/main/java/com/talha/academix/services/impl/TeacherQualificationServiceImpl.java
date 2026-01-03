@@ -11,6 +11,7 @@ import com.talha.academix.enums.Degree;
 import com.talha.academix.enums.Role;
 import com.talha.academix.exception.ForbiddenException;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.mapper.TeacherQualificationMapper;
 import com.talha.academix.model.TeacherQualification;
 import com.talha.academix.model.User;
 import com.talha.academix.repository.TeacherQualificationRepo;
@@ -25,6 +26,7 @@ public class TeacherQualificationServiceImpl implements TeacherQualificationServ
     private final TeacherQualificationRepo qualRepo;
     private final UserRepo userRepo;
     private final ModelMapper mapper;
+    private final TeacherQualificationMapper qualificationMapper;
 
     @Override
     public TeacherQualificationDTO addQualification(TeacherQualificationDTO dto) {
@@ -33,10 +35,9 @@ public class TeacherQualificationServiceImpl implements TeacherQualificationServ
         if (!teacher.getRole().equals(Role.TEACHER)) {
             throw new ForbiddenException("Only teacher can add qualification");
         }
-        TeacherQualification qual = mapper.map(dto, TeacherQualification.class);
-        qual.setTeacher(teacher);
+        TeacherQualification qual = qualificationMapper.toEntity(dto);
         qual = qualRepo.save(qual);
-        return mapper.map(qual, TeacherQualificationDTO.class);
+        return qualificationMapper.toDto(qual);
     }
 
     @Override

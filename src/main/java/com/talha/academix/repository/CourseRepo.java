@@ -12,12 +12,12 @@ import com.talha.academix.model.Course;
 
 public interface CourseRepo extends JpaRepository<Course, Long> {
 
-    Course findCourseByCoursename(String coursename);
+    Course findCourseByCourseName(String courseName);
 
     List<Course> findAllByCategory(CourseCategory category);
 
     // Optional replacement if needed later (safe explicit JPQL)
-    @Query("SELECT c FROM Course c WHERE c.courseid = :courseId AND c.teacher.userid = :teacherId")
+    @Query("SELECT c FROM Course c WHERE c.courseId = :courseId AND c.teacher.userid = :teacherId")
     Course findByCourseIdAndTeacherUserid(@Param("courseId") Long courseId, @Param("teacherId") Long teacherId);
 
     boolean existsByCourseNameAndTeacher_Userid(String courseName, Long userid);

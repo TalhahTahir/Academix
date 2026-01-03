@@ -14,19 +14,19 @@ import jakarta.persistence.LockModeType;
 
 public interface LectureProgressRepo extends JpaRepository<LectureProgress, Long> {
     
-    @Query("SELECT lp FROM LectureProgress lp WHERE lp.enrollment.enrollmentID = :enrollmentId AND lp.lecture.lectureId = :lectureId")
+    @Query("SELECT lp FROM LectureProgress lp WHERE lp.enrollment.enrollmentId = :enrollmentId AND lp.lecture.lectureId = :lectureId")
     Optional<LectureProgress> findByEnrollmentIdAndLectureId(@Param("enrollmentId") Long enrollmentId,
                                                              @Param("lectureId") Long lectureId);
 
-    @Query("SELECT lp FROM LectureProgress lp WHERE lp.enrollment.enrollmentID = :enrollmentId")
+    @Query("SELECT lp FROM LectureProgress lp WHERE lp.enrollment.enrollmentId = :enrollmentId")
     List<LectureProgress> findByEnrollmentId(@Param("enrollmentId") Long enrollmentId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT lp FROM LectureProgress lp WHERE lp.enrollment.enrollmentID = :enrollmentId AND lp.lecture.lectureId = :lectureId")
+    @Query("SELECT lp FROM LectureProgress lp WHERE lp.enrollment.enrollmentId = :enrollmentId AND lp.lecture.lectureId = :lectureId")
     Optional<LectureProgress> findByEnrollmentIdAndLectureIdForUpdate(@Param("enrollmentId") Long enrollmentId,
                                                                      @Param("lectureId") Long lectureId);
 
-    @Query("SELECT COUNT(lp) FROM LectureProgress lp WHERE lp.enrollment.enrollmentID = :enrollmentId AND lp.completed = true AND lp.lecture.content.course.courseid = :courseId")
+    @Query("SELECT COUNT(lp) FROM LectureProgress lp WHERE lp.enrollment.enrollmentId = :enrollmentId AND lp.completed = true AND lp.lecture.content.course.courseId = :courseId")
     long countCompletedByEnrollmentAndCourse(@Param("enrollmentId") Long enrollmentId, @Param("courseId") Long courseId);
 
 }

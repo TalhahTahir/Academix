@@ -12,7 +12,7 @@ import com.talha.academix.model.Exam;
 public interface ExamRepo extends JpaRepository<Exam, Long> {
     List<Exam> findByCourse(Course course);
 
-    // Explicit JPQL for nested course.courseid
-    @Query("SELECT e FROM Exam e WHERE e.course.courseid = :courseId")
+    // Explicit JPQL for nested course.courseId
+    @Query("SELECT e FROM Exam e WHERE e.course.courseId = :courseId")
     List<Exam> findByCourseId(@Param("courseId") Long courseId);
 }

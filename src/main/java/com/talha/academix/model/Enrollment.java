@@ -5,6 +5,7 @@ import java.time.Instant;
 
 import com.talha.academix.enums.EnrollmentStatus;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -26,6 +27,7 @@ import lombok.NoArgsConstructor;
 public class Enrollment {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @Column(name = "enrollmentid")
     private Long enrollmentId;
 
     @ManyToOne(fetch= FetchType.LAZY)
