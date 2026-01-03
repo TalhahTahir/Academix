@@ -4,7 +4,6 @@ package com.talha.academix.services.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +12,7 @@ import com.talha.academix.enums.EnrollmentStatus;
 import com.talha.academix.exception.AlreadyEnrolledException;
 import com.talha.academix.exception.PolicyViolationException;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.mapper.EnrollmentMapper;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.Enrollment;
 import com.talha.academix.model.User;
@@ -29,7 +29,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final EnrollmentRepo enrollmentRepo;
     private final UserRepo userRepo;
     private final CourseRepo courseRepo;
-    private final ModelMapper mapper;
+    private final EnrollmentMapper enrollmentMapper;
 
     @Override
     @Transactional
@@ -52,7 +52,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public EnrollmentDTO getEnrollmentById(Long id) {
         Enrollment enrollment = enrollmentRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
-        return mapper.map(enrollment, EnrollmentDTO.class);
+        return enrollmentMapper.toDto(enrollment);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         List<Enrollment> list = enrollmentRepo.findByStudent(student);
         return list.stream()
-                .map(e -> mapper.map(e, EnrollmentDTO.class))
+                .map(e -> enrollmentMapper.toDto(e))
                 .toList();
     }
 
@@ -71,7 +71,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
         List<Enrollment> list = enrollmentRepo.findByCourse(course);
         return list.stream()
-                .map(e -> mapper.map(e, EnrollmentDTO.class))
+                .map(e -> enrollmentMapper.toDto(e))
                 .toList();
     }
 
@@ -85,7 +85,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public EnrollmentDTO enrollmentValidation(Long courseId, Long userId) {
         Enrollment enrollment = enrollmentRepo.findByStudent_UseridAndCourse_CourseId(userId, courseId);
-        return mapper.map(enrollment, EnrollmentDTO.class);
+        return enrollmentMapper.toDto(enrollment);
     }
 
     @Override
@@ -121,15 +121,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment updated = enrollmentRepo.save(enrollment);
 
         // 5. Map back to DTO (manual for now, or use MapStruct)
-        EnrollmentDTO updatedDTO = new EnrollmentDTO();
-        updatedDTO.setEnrollmentId(updated.getEnrollmentId());
-        updatedDTO.setStudentId(updated.getStudent().getUserid());
-        updatedDTO.setCourseId(updated.getCourse().getCourseId());
-        updatedDTO.setEnrollmentDate(updated.getEnrollmentDate());
-        updatedDTO.setStatus(updated.getStatus());
-        updatedDTO.setCompletionPercentage(updated.getCompletionPercentage());
-        updatedDTO.setMarks(updated.getMarks());
-
+        EnrollmentDTO updatedDTO = enrollmentMapper.toDto(updated);
         return updatedDTO;
     }
 
@@ -158,7 +150,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment saved = enrollmentRepo.save(e);
 
         // 5. Map to DTO and return
-        return mapper.map(saved, EnrollmentDTO.class);
+        return enrollmentMapper.toDto(saved);
     }
 
     @Override
@@ -199,7 +191,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         if ((e.getMarks() > 50) || (e.getCompletionPercentage() == 100)) {
             e.setStatus(EnrollmentStatus.COMPLETED);
         Enrollment enrollment = enrollmentRepo.save(e);
-        return mapper.map(enrollment, EnrollmentDTO.class);
+        return enrollmentMapper.toDto(enrollment);
         }
         else
             throw new PolicyViolationException("Enrollment is not completed");

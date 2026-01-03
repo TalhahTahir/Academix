@@ -3,12 +3,12 @@ package com.talha.academix.services.impl;
 
 import java.util.List;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.LectureDTO;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
+import com.talha.academix.mapper.LectureMapper;
 import com.talha.academix.model.Content;
 import com.talha.academix.model.Lecture;
 import com.talha.academix.repository.ContentRepo;
@@ -32,7 +32,7 @@ public class LectureServiceImpl implements LectureService {
     private final CourseService courseService;
     private final StoredFileRepo storedFileRepo;
     private final StoredFileService storedFileService;
-    private final ModelMapper mapper;
+    private final LectureMapper lectureMapper;
 
     @Override
     public LectureDTO addLecture(Long userid, LectureDTO dto) {
@@ -67,13 +67,7 @@ public class LectureServiceImpl implements LectureService {
         lecture.setVideoUrl(file);
         lecture = lectureRepo.save(lecture);
 
-        // build response DTO manually (avoid ModelMapper lazy issues)
-        LectureDTO out = new LectureDTO();
-        out.setLectureId(lecture.getLectureId());
-        out.setContentId(content.getContentId());
-        out.setTitle(lecture.getTitle());
-        out.setDuration(lecture.getDuration());
-        out.setStoredFileId(file.getId());
+        LectureDTO out = lectureMapper.toDto(lecture);
         out.setVideoSignedUrl(storedFileService.getSignedDownloadUrl(file.getId(), 600).getSignedDownloadUrl());
         return out;
     }
@@ -89,9 +83,6 @@ public class LectureServiceImpl implements LectureService {
             Lecture existing = lectureRepo.findById(lectureId)
                     .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
 
-            mapper.getConfiguration().setSkipNullEnabled(true);
-            mapper.map(dto, existing);
-
             // if contentId changed, reassign content
             if (!existing.getContent().getContentId().equals(content.getContentId())) {
                 Content newcontent = contentRepo.findById(dto.getContentId())
@@ -101,7 +92,7 @@ public class LectureServiceImpl implements LectureService {
 
             existing = lectureRepo.save(existing);
 
-            return mapper.map(existing, LectureDTO.class);
+            return lectureMapper.toDto(existing);
         } else
             throw new RoleMismatchException("only teacher can update lectures");
     }
@@ -110,7 +101,7 @@ public class LectureServiceImpl implements LectureService {
     public LectureDTO getLectureById(Long lectureId) {
         Lecture lecture = lectureRepo.findById(lectureId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
-        return mapper.map(lecture, LectureDTO.class);
+        return lectureMapper.toDto(lecture);
     }
 
     @Override
@@ -118,7 +109,7 @@ public class LectureServiceImpl implements LectureService {
         Content content = contentRepo.findById(contentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
         return lectureRepo.findByContent(content).stream()
-                .map(l -> mapper.map(l, LectureDTO.class))
+                .map(l -> lectureMapper.toDto(l))
                 .toList();
     }
 

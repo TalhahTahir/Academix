@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.talha.academix.dto.QuestionDTO;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
+import com.talha.academix.mapper.QuestionMapper;
 import com.talha.academix.model.Exam;
 import com.talha.academix.model.Question;
 import com.talha.academix.repository.ExamRepo;
@@ -26,6 +27,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final ExamRepo examRepo;
     private final CourseService courseService; // made final so injected
     private final ModelMapper mapper;
+    private final QuestionMapper questionMapper;
 
     @Override
     public QuestionDTO addQuestion(Long userid, Long examId, QuestionDTO dto) {
@@ -38,7 +40,7 @@ public class QuestionServiceImpl implements QuestionService {
         question.setExam(exam);
         question = questionRepo.save(question);
 
-        return mapper.map(question, QuestionDTO.class);
+        return questionMapper.toDto(question);
             }
             else throw new RoleMismatchException("Only teacher can add questions");
     }
@@ -47,7 +49,7 @@ public class QuestionServiceImpl implements QuestionService {
     public List<QuestionDTO> getQuestionsByExam(Long examId) {
         return questionRepo.findByExamId(examId)
             .stream()
-            .map(q -> mapper.map(q, QuestionDTO.class))
+            .map(q -> questionMapper.toDto(q))
             .collect(Collectors.toList());
     }
 
@@ -62,13 +64,11 @@ public class QuestionServiceImpl implements QuestionService {
 
         if (courseService.teacherOwnership(userid, question.getExam().getCourse().getCourseId())) {
 
-            mapper.getConfiguration().setSkipNullEnabled(true);
-            mapper.map(dto, question);
             question.setId(questionId); // Ensure ID is set for update
             question.setExam(exam); // Reassign exam to ensure it's not null
             question = questionRepo.save(question);
 
-            return mapper.map(question, QuestionDTO.class);
+            return questionMapper.toDto(question);
         } else {
             throw new RoleMismatchException("Only teacher can update question");
         }

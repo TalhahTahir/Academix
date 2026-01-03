@@ -3,13 +3,13 @@ package com.talha.academix.services.impl;
 
 import java.util.List;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.ContentDTO;
 import com.talha.academix.enums.CourseState;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
+import com.talha.academix.mapper.ContentMapper;
 import com.talha.academix.model.Content;
 import com.talha.academix.model.Course;
 import com.talha.academix.repository.ContentRepo;
@@ -31,7 +31,7 @@ public class ContentServiceImpl implements ContentService {
         private final ContentRepo contentRepo;
         private final CourseRepo courseRepo;
         private final CourseService courseService;
-        private final ModelMapper mapper;
+        private final ContentMapper contentMapper;
         private final StoredFileRepo storedFileRepo;
         private final StoredFileService storedFileService;
         Boolean owned;
@@ -81,14 +81,12 @@ public class ContentServiceImpl implements ContentService {
                                         .orElseThrow(() -> new ResourceNotFoundException(
                                                         "Content not found with id: " + contentId));
 
-                        mapper.getConfiguration().setSkipNullEnabled(true);
-                        mapper.map(dto, content);
                         content.setCourse(courseRepo.findById(dto.getCourseId())
                                         .orElseThrow(() -> new ResourceNotFoundException(
                                                         "Course not found with id: " + dto.getCourseId())));
                         content = contentRepo.save(content);
 
-                        return mapper.map(content, ContentDTO.class);
+                        return contentMapper.toDto(content);
                 } else
                         throw new RoleMismatchException("Only Teacher can update content");
         }
@@ -98,7 +96,7 @@ public class ContentServiceImpl implements ContentService {
                 Content content = contentRepo.findById(contentId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
 
-                ContentDTO dto = mapper.map(content, ContentDTO.class);
+                ContentDTO dto = contentMapper.toDto(content);
                 dto.setCourseId(content.getCourse().getCourseId());
 
                 if (content.getImageFile() != null) {
@@ -116,7 +114,7 @@ public class ContentServiceImpl implements ContentService {
                                 .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
                 List<Content> list = contentRepo.findByCourse(course);
                 return list.stream()
-                                .map(c -> mapper.map(c, ContentDTO.class))
+                                .map(c -> contentMapper.toDto(c))
                                 .toList();
         }
 
@@ -166,7 +164,7 @@ public class ContentServiceImpl implements ContentService {
                 content = contentRepo.save(content);
 
                 // map to DTO
-                ContentDTO dto = mapper.map(content, ContentDTO.class);
+                ContentDTO dto = contentMapper.toDto(content);
 
                 // manually set ids + signed URL
                 dto.setCourseId(courseId);

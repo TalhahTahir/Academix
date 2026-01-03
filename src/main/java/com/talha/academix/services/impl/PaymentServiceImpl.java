@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +18,7 @@ import com.talha.academix.enums.PaymentProvider;
 import com.talha.academix.enums.PaymentStatus;
 import com.talha.academix.enums.PaymentType;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.mapper.PaymentMapper;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.Payment;
 import com.talha.academix.model.User;
@@ -42,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final CourseRepo courseRepo;
     private final StripeConfig stripeConfig;
     private final StripePaymentDetailService stripeDetailService;
-    private final ModelMapper mapper;
+    private final PaymentMapper paymentMapper;
 
     private static final String CURRENCY = "USD";
 
@@ -117,7 +117,7 @@ System.out.println("0.4 --- Payment Service Impl");
     public PaymentDTO getPayment(Long paymentId) {
         Payment payment = paymentRepo.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + paymentId));
-        return mapper.map(payment, PaymentDTO.class);
+        return paymentMapper.toDto(payment);
     }
 
     @Override
@@ -126,7 +126,7 @@ System.out.println("0.4 --- Payment Service Impl");
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
         return paymentRepo.findByUser(user).stream()
-                .map(p -> mapper.map(p, PaymentDTO.class))
+                .map(p -> paymentMapper.toDto(p))
                 .toList();
     }
 
@@ -136,7 +136,7 @@ System.out.println("0.4 --- Payment Service Impl");
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
         return paymentRepo.findByCourse(course).stream()
-                .map(p -> mapper.map(p, PaymentDTO.class))
+                .map(p -> paymentMapper.toDto(p))
                 .toList();
     }
 
@@ -144,7 +144,7 @@ System.out.println("0.4 --- Payment Service Impl");
     @Transactional(readOnly = true)
     public List<PaymentDTO> getPaymentsByType(PaymentType type) {
         return paymentRepo.findByPaymentType(type).stream()
-                .map(p -> mapper.map(p, PaymentDTO.class))
+                .map(p -> paymentMapper.toDto(p))
                 .toList();
     }
 
@@ -152,7 +152,7 @@ System.out.println("0.4 --- Payment Service Impl");
     @Transactional(readOnly = true)
     public List<PaymentDTO> getPaymentsCreatedBetween(Instant start, Instant end) {
         return paymentRepo.findByCreatedAtBetween(start, end).stream()
-                .map(p -> mapper.map(p, PaymentDTO.class))
+                .map(p -> paymentMapper.toDto(p))
                 .toList();
     }
 

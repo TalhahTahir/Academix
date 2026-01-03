@@ -3,13 +3,13 @@ package com.talha.academix.services.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.AttemptAnswerDTO;
 import com.talha.academix.exception.AlreadyExistException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.UnmatchedExamException;
+import com.talha.academix.mapper.AttemptAnswerMapper;
 import com.talha.academix.model.Attempt;
 import com.talha.academix.model.AttemptAnswer;
 import com.talha.academix.model.Question;
@@ -31,7 +31,7 @@ public class AttemptAnswerServiceImpl implements AttemptAnswerService {
     private final AttemptRepo attemptRepo;
     private final QuestionRepo questionRepo;
     private final OptionRepo optionRepo;
-    private final ModelMapper modelMapper;
+    private final AttemptAnswerMapper attemptAnswerMapper;
 
     @Override
     @Transactional
@@ -63,7 +63,7 @@ public class AttemptAnswerServiceImpl implements AttemptAnswerService {
         answer.setSelectedOption(questionOption);
         answer = attemptAnswerRepo.save(answer);
     
-        return modelMapper.map(answer, AttemptAnswerDTO.class);
+        return attemptAnswerMapper.toDto(answer);
     }
     
 
@@ -71,7 +71,7 @@ public class AttemptAnswerServiceImpl implements AttemptAnswerService {
     public List<AttemptAnswerDTO> getAnswersByAttempt(Long attemptId) {
         return attemptAnswerRepo.findByAttemptId(attemptId)
             .stream()
-            .map(a -> modelMapper.map(a, AttemptAnswerDTO.class))
+            .map(a -> attemptAnswerMapper.toDto(a))
             .collect(Collectors.toList());
     }
 

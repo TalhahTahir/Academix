@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.AttemptDTO;
@@ -13,6 +12,7 @@ import com.talha.academix.exception.AlreadyExistException;
 import com.talha.academix.exception.BlankAnswerException;
 import com.talha.academix.exception.ForbiddenException;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.mapper.AttemptMapper;
 import com.talha.academix.model.Attempt;
 import com.talha.academix.model.AttemptAnswer;
 import com.talha.academix.model.Enrollment;
@@ -41,7 +41,7 @@ public class AttemptServiceImpl implements AttemptService {
     private final QuestionRepo questionRepo;
     private final EnrollmentService enrollmentService;
     private final UserRepo userRepo;
-    private final ModelMapper modelMapper;
+    private final AttemptMapper attemptMapper;
 
     @Override
     public AttemptDTO startAttempt(Long examId, Long studentId) {
@@ -57,8 +57,7 @@ public class AttemptServiceImpl implements AttemptService {
             attempt.setStartedAt(Instant.now());
             attempt = attemptRepo.save(attempt);
 
-            AttemptDTO dto = modelMapper.map(attempt, AttemptDTO.class);
-            dto.setStudentId(studentId);
+            AttemptDTO dto = attemptMapper.toDto(attempt);
             return dto;
         } else {
             throw new ForbiddenException(
@@ -104,8 +103,7 @@ public class AttemptServiceImpl implements AttemptService {
         enrollment.setMarks(percentage);
         enrollmentRepo.save(enrollment);
 
-        AttemptDTO out = modelMapper.map(attempt, AttemptDTO.class);
-        out.setStudentId(attempt.getStudent().getUserid());
+        AttemptDTO out = attemptMapper.toDto(attempt);
         return out;
     }
 
@@ -113,8 +111,7 @@ public class AttemptServiceImpl implements AttemptService {
     public AttemptDTO getAttemptById(Long attemptId) {
         Attempt attempt = attemptRepo.findById(attemptId)
                 .orElseThrow(() -> new ResourceNotFoundException("Attempt not found with id: " + attemptId));
-        AttemptDTO dto = modelMapper.map(attempt, AttemptDTO.class);
-        dto.setStudentId(attempt.getStudent().getUserid());
+        AttemptDTO dto = attemptMapper.toDto(attempt);
         return dto;
     }
 
@@ -122,7 +119,7 @@ public class AttemptServiceImpl implements AttemptService {
     public List<AttemptDTO> getAttemptsByExam(Long examId) {
         return attemptRepo.findByExamId(examId).stream()
                 .map(a -> {
-                    AttemptDTO d = modelMapper.map(a, AttemptDTO.class);
+                    AttemptDTO d = attemptMapper.toDto(a);
                     d.setStudentId(a.getStudent().getUserid());
                     return d;
                 })
@@ -133,7 +130,7 @@ public class AttemptServiceImpl implements AttemptService {
     public List<AttemptDTO> getAttemptsByStudent(Long studentId) {
         return attemptRepo.findByStudentId(studentId).stream()
                 .map(a -> {
-                    AttemptDTO d = modelMapper.map(a, AttemptDTO.class);
+                    AttemptDTO d = attemptMapper.toDto(a);
                     d.setStudentId(a.getStudent().getUserid());
                     return d;
                 })

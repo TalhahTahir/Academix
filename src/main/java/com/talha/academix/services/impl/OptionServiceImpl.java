@@ -11,6 +11,7 @@ import com.talha.academix.dto.StudentOptionResponse;
 import com.talha.academix.exception.InvalidAttemptException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
+import com.talha.academix.mapper.OptionMapper;
 import com.talha.academix.model.Question;
 import com.talha.academix.model.QuestionOption;
 import com.talha.academix.repository.OptionRepo;
@@ -28,6 +29,7 @@ public class OptionServiceImpl implements OptionService {
     private final QuestionRepo questionRepo;
     private final CourseService courseService;
     private final ModelMapper mapper;
+    private final OptionMapper optionMapper;
 
     @Override
     public OptionDTO addOption(Long userid, Long questionId, OptionDTO dto) {
@@ -59,7 +61,7 @@ public class OptionServiceImpl implements OptionService {
     public List<OptionDTO> getOptionsByQuestion(Long questionId) {
         return optionRepo.findByQuestionId(questionId)
             .stream()
-            .map(o -> mapper.map(o, OptionDTO.class))
+            .map(o -> optionMapper.toDto(o))
             .collect(Collectors.toList());
     }
 
@@ -79,7 +81,7 @@ public class OptionServiceImpl implements OptionService {
             questionOption.setQuestion(question);
             questionOption = optionRepo.save(questionOption);
     
-            return mapper.map(questionOption, OptionDTO.class);
+            return optionMapper.toDto(questionOption);
         }
         else throw new RoleMismatchException("Only teacher can update options");
     }

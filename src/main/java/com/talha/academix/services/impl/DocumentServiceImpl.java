@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.talha.academix.dto.DocumentDTO;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.RoleMismatchException;
+import com.talha.academix.mapper.DocumentMapper;
 import com.talha.academix.model.Content;
 import com.talha.academix.model.Document;
 import com.talha.academix.repository.ContentRepo;
@@ -19,7 +20,6 @@ import com.talha.academix.enums.StoredFileStatus;
 import com.talha.academix.enums.StoredFileType;
 import com.talha.academix.model.StoredFile;
 import com.talha.academix.repository.StoredFileRepo;
-import com.talha.academix.services.StoredFileService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,8 +31,8 @@ public class DocumentServiceImpl implements DocumentService {
     private final ContentRepo contentRepo;
     private final CourseService courseService;
     private final StoredFileRepo storedFileRepo;
-    private final StoredFileService storedFileService;
     private final ModelMapper mapper;
+    private final DocumentMapper documentMapper;
 
     @Override
     public DocumentDTO addDocument(Long userid, DocumentDTO dto) {
@@ -64,13 +64,7 @@ public class DocumentServiceImpl implements DocumentService {
         document.setStoredFile(file);
         document = documentRepo.save(document);
 
-        DocumentDTO out = new DocumentDTO();
-        out.setDocumentId(document.getDocumentId());
-        out.setContentId(content.getContentId());
-        out.setTitle(document.getTitle());
-        out.setDescription(document.getDescription());
-        out.setStoredFileId(file.getId());
-        out.setFileSignedUrl(storedFileService.getSignedDownloadUrl(file.getId(), 600).getSignedDownloadUrl());
+        DocumentDTO out = documentMapper.toDto(document);
         return out;
     }
 
@@ -92,7 +86,7 @@ public class DocumentServiceImpl implements DocumentService {
 
             existing = documentRepo.save(existing);
 
-            return mapper.map(existing, DocumentDTO.class);
+            return documentMapper.toDto(existing);
         } else {
             throw new RoleMismatchException("Only teacher can update document");
         }
@@ -102,7 +96,7 @@ public class DocumentServiceImpl implements DocumentService {
     public DocumentDTO getDocumentById(Long documentId) {
         Document document = documentRepo.findById(documentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
-        return mapper.map(document, DocumentDTO.class);
+        return documentMapper.toDto(document);
     }
 
     @Override
@@ -110,7 +104,7 @@ public class DocumentServiceImpl implements DocumentService {
         Content content = contentRepo.findById(contentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
         return documentRepo.findByContent(content).stream()
-                .map(d -> mapper.map(d, DocumentDTO.class))
+                .map(d -> documentMapper.toDto(d))
                 .toList();
     }
 
