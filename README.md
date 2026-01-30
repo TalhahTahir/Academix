@@ -204,7 +204,7 @@ If you’d like, I can:
   BODY (JSON):
   {
   "teacherId": 1,
-  "courseId": 10,
+  "contentId": 10,
   "fileName": "intro.mp4",
   "mimeType": "video/mp4",
   "sizeBytes": 123456,

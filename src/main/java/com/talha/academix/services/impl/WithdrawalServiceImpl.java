@@ -23,6 +23,7 @@ import com.talha.academix.enums.WithdrawalKind;
 import com.talha.academix.enums.WithdrawalStatus;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.exception.StripeOnboardingRequiredException;
+import com.talha.academix.mapper.WithdrawalMapper;
 import com.talha.academix.model.User;
 import com.talha.academix.model.Vault;
 import com.talha.academix.model.VaultTransaction;
@@ -43,6 +44,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WithdrawalServiceImpl implements WithdrawalService {
 
+
+    private final WithdrawalMapper withdrawalMapper;
     private static final BigDecimal MIN_WITHDRAWAL = new BigDecimal("10.00");
     private static final String CURRENCY = "USD";
 
@@ -152,7 +155,7 @@ public class WithdrawalServiceImpl implements WithdrawalService {
             withdrawal.setProviderObjectId(providerObjectId);
             withdrawalRepo.save(withdrawal);
 
-            return mapper.map(withdrawal, WithdrawalDTO.class);
+            return withdrawalMapper.toDto(withdrawal);
 
         } catch (StripeException ex) {
             failWithdrawalAndRelease(withdrawal.getId(), "Stripe failure: " + ex.getMessage());
@@ -165,7 +168,7 @@ public class WithdrawalServiceImpl implements WithdrawalService {
     public WithdrawalDTO getById(Long withdrawalId) {
         Withdrawal w = withdrawalRepo.findById(withdrawalId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Withdrawal not found"));
-        return mapper.map(w, WithdrawalDTO.class);
+        return withdrawalMapper.toDto(w);
     }
 
     @Override
@@ -173,7 +176,7 @@ public class WithdrawalServiceImpl implements WithdrawalService {
     public List getByUser(Long userId) {
         return withdrawalRepo.findAllByRequestedBy_Userid(userId)
                 .stream()
-                .map(w -> mapper.map(w, WithdrawalDTO.class))
+                .map(w -> withdrawalMapper.toDto(w))
                 .toList();
     }
 

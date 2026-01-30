@@ -25,9 +25,9 @@ public class LectureController {
 
     private final LectureService lectureService;
 
-    @PostMapping("teachers/{id}")
-    public LectureDTO addLecture(@PathVariable Long id, @RequestBody LectureDTO dto) {
-        return lectureService.addLecture(id, dto);
+    @PostMapping("teachers/{teacherid}")
+    public LectureDTO addLecture(@PathVariable Long teacherid, @RequestBody LectureDTO dto) {
+        return lectureService.addLecture(teacherid, dto);
     }
 
     @PutMapping("update/teachers/{teacherid}/lecture/{lectureId}")

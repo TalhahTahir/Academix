@@ -7,7 +7,6 @@ import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.util.List;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class VaultTransactionServiceImpl implements VaultTransactionService {
 
-    private final ModelMapper mapper;
     private final VaultTransactionRepo vaultTxRepo;
     private final VaultRepo vaultRepo;
     private final UserRepo userRepo;

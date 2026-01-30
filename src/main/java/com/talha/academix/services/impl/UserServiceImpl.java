@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.CreateUserDTO;
@@ -26,10 +27,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final VaultService vaultService;
     private final ModelMapper mapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDTO createUser(CreateUserDTO dto) {
         User user = mapper.map(dto, User.class);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         user = userRepo.save(user);
         if ((user.getRole() == Role.ADMIN) || (user.getRole() == Role.TEACHER)) {
             VaultDTO vaultDto = new VaultDTO();
