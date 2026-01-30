@@ -1,279 +1,190 @@
-The vision is changed: teacher will make course (he will set fees, catagory, name, etc)
-admin will validate course
-teacher will add lectures and documents
-push launch button
-student enroll
+# 1. Project overview
 
-fee paid by student will be stored in LMS’s account
-we will have a vault screen for teacher and admin, where they can see their total balance, history, and withdraw it
+**Academix** is a Spring Boot application that implements an online learning / course platform with the following capabilities (implemented or scaffolded in code found in this repository):
 
-change admin course declearation
-payment logic updation
-
-## course with same name?
-
-## Webhook
-
-create a webhook secret from Srtipe Website -> developer screen
-paste it to application properties -> stripe.webhook-secret = ....
-install Stripe CLI
+* Multi-role user model (Admin, Teacher, Student).
+* Course management (courses, lectures, documents, content).
+* Exams, questions, attempts, and progress tracking.
+* Enrollment and payments (Stripe integration, Stripe Connect for teacher onboarding).
+* File storage abstraction backed by Supabase (signed upload / signed download flows).
+* Certificate issuance and a vault/withdrawal subsystem for teacher payouts.
+* OAuth2 (GitHub) login plus JWT for API authentication and a Thymeleaf-based minimal UI (login, register, enroll pages).
 
 ---
 
-### Payment:
+# 2. Tech stack
 
-keep async flow:
+* Java (Spring Boot 3.x)
+* Spring Data JPA (Hibernate)
+* Spring Security + OAuth2 client
+* JWT (io.jsonwebtoken / JJWT)
+* MySQL (jdbc:mysql)
+* Stripe Java SDK (server-side payments & webhooks)
+* Supabase Storage (signed upload/download)
+* Thymeleaf (minimal server-side pages)
+* Lombok, MapStruct / ModelMapper
+* Maven build
 
-1. payment initiate
-2. gateway give response about money deduction or process success
-3. user get notification & access to course
-4. other async chores of payments are handled in backend
-
-by this i dont think we need sync flow because using above strategy:
-user gets fast service(sync feature)
-Platform gets security, scalibility, cost-friendly service(async feature)
-
----
-
-### Payment Service has 2 phases:
-
-1. _Phase 1_: accept only card payments | no wallets | use stripe in backend | only Async
-
-2. _Phase 2_: accept cards, bank Transfers, Mobile Wallets | have wallets
+> Spring Boot parent in `pom.xml` is `3.5.3` — Java 17+ is recommended.
 
 ---
 
-## TO-DO:
+# 3. Project layout (important packages)
 
-1. PaymentServiceImpl is Handling work of other fields, split the work
-
----
-
-#### Use pre-made dedicated frameworks / libraries for Auditing.
-
----
-
-## payment Flow:
-
-1. ek controller bnao processes initiatation k liye, jo data collect kry or payment methods ko call kry (payment controller)
-2. payment method me:
-
-   1. input ki authenticity validate kro
-   2. intent create kro
-   3. payment intent bnao
-   4. payment record save kro (jo bhi intent status aye)
-   5. payment intent se id or client secret le kr return kro
-
-3. frontend se Stripe ka confirmCardPayment hit kro
-4. method result se UI update kro (payment Succeed / failed)
-5. Webhooks receive krne k liye Webhook Controller bnao jisme:
-   1. Webhook client secret ho
-   2. Stripe ke incomming se seccess / fail extract kro
-   3. result k according Business Logic apply kro
+* `com.talha.academix` — main application class (`AcademixApplication`)
+* `config` — Spring Security configuration and application configuration
+* `controllers` — REST controllers & view controllers (API surface)
+* `services` — service layer implementations
+* `repository` — Spring Data JPA repositories
+* `model` — JPA entities
+* `dto` — request/response DTOs
+* `security` — custom `UserDetails`, OAuth2 success handler, etc.
+* `util` — JWT utilities and auth filter
+* `resources/templates` — Thymeleaf pages (`login.html`, `enroll.html`, etc.)
+* `resources/application.properties` — default config used by the application
 
 ---
 
-#### Handle real storing for lectures and documents
+# 4. Key database entities
+
+The repository contains ~25 JPA entities. Primary ones (file names) and purpose:
+
+* `User` — app users (Admin / Teacher / Student)
+* `Course` — course entity
+* `Lecture` — lecture inside course
+* `Content` — course content (videos, text)
+* `Document` — attached files / documents
+* `Enrollment` — course enrollment record
+* `Exam`, `Question`, `QuestionOption` — exam and question models
+* `Attempt`, `AttemptAnswer` — exam attempt tracking
+* `Payment`, `StripePaymentDetail`, `StripePaymentEvent`, `StripeWebhookEvent` — payment & event tracking
+* `StoredFile` — metadata for files stored in Supabase
+* `Certificate` — course certificate records
+* `TeacherAccount`, `TeacherQualification` — teacher profile/account/onboarding
+* `Vault`, `VaultTransaction`, `Withdrawal` — teacher/withdrawal bookkeeping
+* `LectureProgress`, `DocumentProgress`, `StudentContentProgress` — progress tracking
 
 ---
 
-frontend = React.js
+# 5. Important API endpoints (summary)
+
+Controller base paths:
+
+* `GET /` — redirects to `/login` (Thymeleaf view)
+* `GET /login`, `GET /register` — views
+* `GET /oauth2/callback` — OAuth2 callback view
+
+REST controllers (base paths):
+
+* `/api/users` — user registration, listing, update, deletion (JWT authentication protected)
+
+  * Public routes (whitelisted in JWT filter): `/api/users/register`, `/api/users/login`, `/api/users/auth`, `/api/users/welcome` (see security filter)
+* `/api/courses` — create/list/update/delete courses
+* `/api/lectures` — lecture CRUD and playback/progress
+* `/api/contents` — content CRUD
+* `/api/documents` — document management
+* `/api/enrollments` — enroll/unenroll & enrollment listing
+* `/api/exams`, `/api/questions`, `/api/options`, `/api/attempts`, `/api/attempt-answers` — exam lifecycle and answers
+* `/api/payments` — initiate payments, fetch publishable key
+* `/api/stripe/connect` — teacher Stripe Connect onboarding (onboarding link)
+* `/stripe/webhook` — Stripe webhook endpoint (must configure `stripe.webhook-secret`)
+* `/api/files` — Supabase signed upload / mark-ready / signed-download
+* `/api/certificates` — certificate generation & download
+* `/api/vaults`, `/api/withdrawals` — payout & withdrawal flows
+* `/api/admin/dashboard` — admin dashboard endpoints
+* `ViewController` serves the minimal UI views
 
 ---
 
-### Task ahead:
+# 6. Security & auth
 
-    integrate:
-        Vaulting
-        Payment Detailing
-        Stripe Eventing
-        Other Business Logic
-    with payment flow
-    test and debug it
+* JWT-based authentication is implemented (`JwtService`, `JwtAuthFilter`).
 
-    Do Vaulting:
-        Distribute the shares (Admin & Teacher)
-        make correct & complete flow
+  * `JwtAuthFilter` skips auth for public pages and the endpoints listed in section 5.
+* OAuth2 GitHub login is present with an `OAuth2AuthenticationSuccessHandler` that:
 
-### Code with Flow
+  * creates a local `User` (default role `STUDENT`) for OAuth users if not present,
+  * issues a JWT and redirects/carries a token in a redirect (see handler code).
+* `application.properties` contains a default user (`spring.security.user.name=talha`, `spring.security.user.password=2612`) for simple form login and initial access.
 
-1. Teacher Register ✅
-2. Automatic Vault Creation ✅
-3. Teacher created course (course = DRAFT) ✅
-4. Admin views courses in different states and takes action (rejected) ✅
-5. teacher modified course ✅
-6. admin accepted ✅
-7. teacher started developing it, then launched ✅
-8. student Registered ✅
-9. student see course ✅
-10. enrolls ✅ (code clean and meaningfull)
-11. share Distributation(Vaulting) ✅
-12. course progress, stats
-13. Certification ✅(marking remaining)
+* Many credentials in `application.properties` are placeholders or stored directly — do not use this in production.
+
+Security recommendation (must do before production):
+
+* Move all secrets (DB password, JWT secret, Stripe keys, Supabase keys, OAuth client secret) into environment variables or a secret manager.
 
 ---
 
-## Copilot Suggestions:
+# 7. Prerequisites (development)
 
-Top missing pieces to complete step 12 (course progress, stats)
-
-- Expose progress endpoints
-  - Student actions:
-    - POST to mark a lecture completed (calls ProgressService.markLectureCompleted)
-    - POST to mark a document completed (calls ProgressService.markDocumentCompleted)
-  - Queries:
-    - GET enrollment progress summary (percentage, completed/total lectures & documents, last activity)
-    - Optional: GET list of completed lecture/document IDs per enrollment
-- Auto-complete enrollment and award certificate
-  - When progress reaches 100% (and any exam requirement is satisfied if you want it), update Enrollment.status to COMPLETED and trigger CertificateService.awardCertificate(enrollmentId)
-  - Right now ProgressService updates only completionPercentage; it never sets COMPLETED or awards a certificate
-- Course/teacher stats endpoints
-  - Per-course stats for a teacher: enrollments, active students, avg completion %, completions count, revenue (if available), last 30 days activity
-  - Optional: student-level breakdown (to spot who is stuck)
-- Admin stats extension
-  - AdminDashboardService exists. Consider adding time-series metrics (weekly enrollments, completions), revenue totals, and filtering by date ranges
-
-Important correctness and robustness fixes
-
-- ContentServiceImpl ownership checks use the wrong ID
-  - updateContent/deleteContent call teacherOwnership(userid, contentId), but teacherOwnership expects a courseId. Fetch content, then pass its courseId
-- OptionServiceImpl single-correct-option rule
-  - Currently throws only if count > 1. It should reject when count >= 1 before adding another correct option
-- AttemptAnswerServiceImpl
-  - Prevent duplicate answers for the same attempt+question (either update existing answer or enforce a unique constraint on (attempt_id, question_id))
-  - Disallow submissions after Attempt.completedAt is set
-- AttemptServiceImpl.submitAttempt scoring
-  - Denominator should be total questions in the exam, not just number of answers provided; otherwise partial answers inflate scores
-  - Consider persisting the score on Attempt and/or Enrollment; and set Attempt.completedAt once, locking further answers
-- ExamServiceImpl.checkExam update path
-  - It calls enrollmentService.updateEnrollment with a DTO that likely has null fields; updateEnrollment calls enrollmentDTO.getEnrollmentDate().toInstant() which can NPE
-  - Prefer a focused method to update only marks (or use repo directly) to avoid partial DTO issues
-  - Also, this duplicates scoring logic in AttemptServiceImpl — consolidate scoring into a single path
-- AttemptServiceImpl.startAttempt enrollment null safety
-  - enrollmentService.enrollmentValidation can return null, causing mapper/NPEs; explicitly check enrollment exists and handle “not enrolled”
-- ProgressServiceImpl completion rule
-  - Add: if new percentage >= 100, set Enrollment.status = COMPLETED and (optionally) award certificate automatically
-
-Payment and distribution integration points
-
-- EnrollmentServiceImpl.enrollStudent currently bypasses PaymentService (commented out). For production:
-  - Tie initiatePayment -> requires_action or success -> finalizeEnrollment via webhook/callback
-  - On successful payment, credit teacher vault and platform share if your “share distribution” is already implemented elsewhere
-- Webhook handling
-  - Implement Stripe webhook to mark Payment status and then finalize enrollment + distribution (this makes the flow resilient to client drop-offs)
-
-Quality-of-life improvements
-
-- Controllers for the new endpoints (progress, stats) and basic security
-- Thresholds and policies
-  - If you require exam completion to complete a course, encode that rule when marking enrollment completed (e.g., progress 100% AND passed required exam)
-- Student/teacher dashboards
-  - Student: list of enrolled courses with progress, next recommended lecture/document
-  - Teacher: course performance over time, stuck students, content engagement
-
-Quick code-change checklist
-
-- Fix teacherOwnership misuse:
-  - In ContentServiceImpl.updateContent/deleteContent, resolve content -> courseId, then call teacherOwnership(userid, courseId)
-- Enforce single correct option:
-  - In OptionServiceImpl.addOption, change the check to “if dto.isCorrect() and count >= 1 then throw”
-- Prevent duplicate attempt answers:
-  - Before saving a new AttemptAnswer, check repo for existing by (attemptId, questionId). Update instead of insert, and block if attempt.completedAt != null
-- Use exam question count for scoring:
-  - In AttemptServiceImpl.submitAttempt, load total questions for attempt.getExam(), compute percentage against that count
-- Harden ExamServiceImpl.checkExam:
-  - Replace updateEnrollment call with a method that updates only marks; avoid using DTOs with nulls
-
-If you’d like, I can:
-
-- Propose specific controller endpoints for progress and stats (with request/response models)
-- Draft patches for the bugs above
-- Wire auto-completion + certificate awarding
-- Sketch the webhook flow for Stripe to connect payments -> enrollment -> vault distribution
-
-### Final Touches
-
-    refactor the code according to professional Standards
-
-## Supabase Upload/Get
-
-#### Step1:
-
-  POST: http://localhost:8081/api/files/initiate-signed-upload
-
-  BODY (JSON):
-  {
-  "teacherId": 1,
-  "contentId": 10,
-  "fileName": "intro.mp4",
-  "mimeType": "video/mp4",
-  "sizeBytes": 123456,
-  "type": "LECTURE"
-  }
-
-  HEADER: Content-type: application/json
----
-#### Step2:
-
-  Use the returned signedUploadUrl: find it in result of first step
-
-  PUT {signedUploadUrl}
-
-  Body → binary (choose your PNG file)
-  Header: Content-Type: image/png
-
-  OUTPUT: KEY
----
-#### Step3:
-
-  POST http://localhost:8081/api/files/{storedFileId}/mark-ready
----
-#### Step4:
-
-  GET http://localhost:8081/api/files/{storedFileId}/signed-download?expiresIn=600
----
----
----
-
-### Lecture/Document flow:
-  Macro Step 1: upload the file in Supabase bucket
-  Macro Step 2: hit add lec/doc method of controllers while inserting storedFileId (from step 1) in Body -> JSON -> DTO.storedFileId
-
-#### TODO:
-1. Complete Executional Workflow
-   1. Teacher perspective
-   2. Student perspective
-   3. Admin perspective
+* Java 17+ (required by Spring Boot 3.x)
+* Maven 3.6+
+* MySQL server (create database `AcademixDB` or change URL)
+* Stripe account & test keys (for payments, and Stripe Connect for teacher onboarding)
+* Supabase project (for file storage) or modify file storage implementation
+* Optional: GitHub OAuth app for OAuth login
 
 ---
 
-### Testing
-  1. #### Teacher
-      1. Registered
-      2. Vault auto-created
-      3. course, content created
-      4. media files uploaded
+# 8. Build & run (development)
 
-    #### Considerations
-      Folder Structure of Supabase Bucket
+From project root (where `pom.xml` is):
 
----
+```bash
+# Build
+mvn clean package
 
-2. #### Student
-      1. Registered
-      2. Viewed courses
-      3. Enrolled
-      4. Lectures Completed(Upgeade it)
-      5. Exammed
-      6. Certificated
+# Run (from target)
+java -jar target/academix-0.0.1-SNAPSHOT.jar
 
-    #### Considerations
-      Single Enrollment <-> Multipe Certificates
+# Alternatively run with Maven (dev)
+mvn spring-boot:run
+```
+
+The app default port is **8081** (see `application.properties`). Access `http://localhost:8081/login`.
+
+To run with a different `application.properties`, use Spring profiles or pass overrides:
 
 ---
 
-i have to do somthing about Enrollment.Status = completed
-    each content should have its own exam
-      maybe we need to make another table to keep record of attempted exams
+# 9. Stripe & webhooks
+
+* Stripe is used for payments and teacher payouts (`stripe-java` SDK).
+* Configure `STRIPE_SECRET_KEY` and `stripe.publishable-key` in env or `application.properties`.
+* Stripe webhook endpoint: `/stripe/webhook`. You must configure the Stripe dashboard webhook with the endpoint URL and set `stripe.webhook-secret` in config.
+* For local webhook testing, use `stripe listen` and forward to `http://localhost:8081/stripe/webhook` (in Stripe CLI).
+
+Teacher Stripe Connect:
+
+* `TeacherStripeConnectController` provides an onboarding link route that uses `TeacherAccountServiceImpl`. Ensure your server URLs (refresh, return) are accurate in production.
+
 ---
-Implement Map Struct
+
+# 10. File storage (Supabase)
+
+* The app uses Supabase storage for media and document hosting.
+* Flow implemented in `StoredFileController`:
+
+  1. `POST /api/files/initiate-signed-upload` — server returns signed upload parameters (Supabase).
+  2. Client uploads directly to Supabase using signed URL.
+  3. `POST /api/files/{id}/mark-ready` — notify server that upload completed.
+  4. `GET /api/files/{id}/signed-download` — obtain signed download URL for playback or download.
+
+Configure:
+
+* `supabase.url`, `supabase.apiKey` (public), `supabase.serviceRoleKey` (server-side privileged key), and `supabase.storage.bucket`.
+
+---
+
+# 11. Quick start checklist (short)
+
+1. Install Java 17+, Maven, MySQL, StripeCLI.
+2. Create DB: `CREATE DATABASE AcademixDB;`
+3. Set env vars or edit `application.properties`:
+
+   * `spring.datasource.*`, `STRIPE_SECRET_KEY`, `stripe.publishable-key`, `stripe.webhook-secret`, `supabase.*`, `spring.security.oauth2.client.registration.github.client-id/secret`, etc.
+4. `mvn clean package`
+5. `java -jar target/academix-0.0.1-SNAPSHOT.jar`
+6. Browse `http://localhost:8081/login`
+
+---
