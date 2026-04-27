@@ -33,6 +33,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO createUser(CreateUserDTO dto) {
         User user = mapper.map(dto, User.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setCreatedAt(Instant.now());
 
         user = userRepo.save(user);
         if ((user.getRole() == Role.ADMIN) || (user.getRole() == Role.TEACHER)) {

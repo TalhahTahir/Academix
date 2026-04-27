@@ -21,11 +21,6 @@ public class ViewController {
         return "register";
     }
 
-    @GetMapping("/oauth2/callback")
-    public String oauth2Callback() {
-        return "oauth2-callback";
-    }
-
     @GetMapping("/enroll")
     public String enrollPage() {
         return "enroll";

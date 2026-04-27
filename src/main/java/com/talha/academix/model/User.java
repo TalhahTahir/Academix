@@ -1,5 +1,6 @@
 package com.talha.academix.model;
 
+import java.time.Instant;
 import java.util.List;
 
 import com.talha.academix.enums.Role;
@@ -55,5 +56,8 @@ public class User {
 
  @OneToMany(mappedBy="user", fetch=FetchType.LAZY)
  private List<Payment> payments;
+
+ private Instant createdAt;
+ private Instant updatedAt;
 
 }

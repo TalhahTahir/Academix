@@ -12,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.talha.academix.security.OAuth2AuthenticationSuccessHandler;
 import com.talha.academix.util.JwtAuthFilter;
 import com.talha.academix.security.CustomUserDetailService;
 
@@ -33,7 +32,6 @@ public class SecurityConfig {
 
     private final CustomUserDetailService customUserDetailService;
     private final JwtAuthFilter jwtAuthFilter;
-    private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
 
     @Bean
     SecurityFilterChain customSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -53,30 +51,19 @@ public class SecurityConfig {
                         "/api/users/welcome"
                 ).permitAll()
 
-                // OAuth2 endpoints
-                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
-
                 // Public frontend pages
-                .requestMatchers("/", "/login", "/register", "/oauth2/callback").permitAll()
+                .requestMatchers("/", "/login", "/register").permitAll()
 
                 .anyRequest().authenticated()
             )
 
             .userDetailsService(customUserDetailService)
 
-            // Session is allowed ONLY where required (OAuth handshake)
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-
-            // OAuth2 login
-            .oauth2Login(oauth2 -> oauth2
-                .loginPage("/login")
-                .defaultSuccessUrl("/oauth2/callback", false)
-                .successHandler(oAuth2SuccessHandler)
-            )
 
             // PROPER LOGOUT
             .logout(logout -> logout
