@@ -10,7 +10,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
     long countByRole(Role role);
 
-    User findByUsername(String name);
-
     boolean existsByRole(Role admin);
+
+    User findByEmail(String email);
 }
