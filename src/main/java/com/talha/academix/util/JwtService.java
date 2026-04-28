@@ -7,16 +7,22 @@ import java.util.function.Function;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtService {
     
-    private static final String SECRET_KEY = "3sizUolKeSSA3Pz7CUi7ftyxkhCcLpfOFMAKp0qdkhM=";
+    @Value("${app.jwt.secret}")
+    private String secretKey;
+
+    @Value("${app.jwt.expiration}")
+    private long jwtExpiration;
     
     public String generateToken(String name, String role) {
         Map<String, Object> claims = new HashMap<>();
@@ -30,7 +36,7 @@ public class JwtService {
             .claims(claims)
             .subject(name)
             .issuedAt(new Date(System.currentTimeMillis()))
-            .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30)) // 30 minutes
+            .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
             .header().add("typ", "JWT").and()
             .signWith(getSignInKey())
             .compact();
@@ -45,7 +51,8 @@ public class JwtService {
         }
     
     private SecretKey getSignInKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String extractUsername(String token) {

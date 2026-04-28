@@ -54,7 +54,7 @@
           .getElementById("payBtn")
           .addEventListener("click", async () => {
             const courseId = document.getElementById("courseId").value;
-            const body = { courseId: Number(courseId), userId: 10 };
+            const body = { courseId: Number(courseId), userId: 2 };
             const statusEl = document.getElementById("status");
             statusEl.textContent = "Creating payment intent...";
 

@@ -48,7 +48,9 @@ public class SecurityConfig {
                         "/api/users/register",
                         "/api/users/login",
                         "/api/users/auth",
-                        "/api/users/welcome"
+                        "/api/users/welcome",
+                        "/stripe/webhook",
+                        "/enroll"
                 ).permitAll()
 
                 // Public frontend pages
