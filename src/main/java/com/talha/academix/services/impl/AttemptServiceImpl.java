@@ -27,7 +27,7 @@ import com.talha.academix.repository.UserRepo;
 import com.talha.academix.services.AttemptService;
 import com.talha.academix.services.EnrollmentService;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service

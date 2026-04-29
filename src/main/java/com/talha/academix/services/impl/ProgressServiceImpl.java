@@ -19,7 +19,7 @@ import com.talha.academix.services.EnrollmentService;
 import com.talha.academix.services.ProgressService;
 import com.talha.academix.dto.EnrollmentStatsDTO;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service

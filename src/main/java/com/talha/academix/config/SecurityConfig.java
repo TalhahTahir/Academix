@@ -50,7 +50,9 @@ public class SecurityConfig {
                         "/api/users/auth",
                         "/api/users/welcome",
                         "/stripe/webhook",
-                        "/enroll"
+                        "/enroll",
+                        "/api/payments/config/publishable-key",
+                        "/api/payments/initiate"
                 ).permitAll()
 
                 // Public frontend pages

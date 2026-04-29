@@ -84,6 +84,7 @@ public class ContentServiceImpl implements ContentService {
                         content.setCourse(courseRepo.findById(dto.getCourseId())
                                         .orElseThrow(() -> new ResourceNotFoundException(
                                                         "Course not found with id: " + dto.getCourseId())));
+                        content.setDescription(dto.getDescription());
                         content = contentRepo.save(content);
 
                         return contentMapper.toDto(content);
@@ -120,11 +121,11 @@ public class ContentServiceImpl implements ContentService {
 
         @Override
         public void deleteContent(Long userid, Long contentId) {
-                owned = courseService.teacherOwnership(userid, contentId);
+                Content content = contentRepo.findById(contentId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
+
+                owned = courseService.teacherOwnership(userid, content.getCourse().getCourseId());
                 if (owned) {
-                        Content content = contentRepo.findById(contentId)
-                                        .orElseThrow(() -> new ResourceNotFoundException(
-                                                        "Content not found: " + contentId));
                         contentRepo.delete(content);
                 } else
                         throw new RoleMismatchException("Only Teacher can delete content");

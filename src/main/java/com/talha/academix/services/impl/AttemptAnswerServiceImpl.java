@@ -19,8 +19,7 @@ import com.talha.academix.repository.AttemptRepo;
 import com.talha.academix.repository.OptionRepo;
 import com.talha.academix.repository.QuestionRepo;
 import com.talha.academix.services.AttemptAnswerService;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
