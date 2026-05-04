@@ -1,7 +1,8 @@
 package com.talha.academix.controllers;
 
 import java.util.Map;
-
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -47,11 +48,22 @@ public class ViewController {
         // Generate the JWT token
         String token = jwtService.generateToken(userDetails.getUsername(), role);
 
-        // Return token to the client
-        return ResponseEntity.ok(Map.of(
-                "token", token,
-                "username", userDetails.getUsername(),
-                "role", role));
+        // Create the HTTP-Only cookie
+        ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", token)
+                .httpOnly(true)
+                .secure(false) // Set to true in production (requires HTTPS)
+                .path("/") // Available to all endpoints
+                .maxAge(1 * 60 * 60) // 1 hour (match to JWT expiration time)
+                .sameSite("Strict") // Protects against CSRF attacks
+                .build();
+
+    // Return success without exposing the token in the body
+    return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+            .body(Map.of(
+                    "message", "Login successful",
+                    "username", userDetails.getUsername(),
+                    "role", role));
     }
 
     @GetMapping("/register")

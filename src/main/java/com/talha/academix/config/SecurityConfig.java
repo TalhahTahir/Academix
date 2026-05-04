@@ -21,6 +21,11 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,6 +43,7 @@ public class SecurityConfig {
 
         http
             .csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
 
             .authorizeHttpRequests(r -> r
                 // Static resources
@@ -91,9 +97,10 @@ public class SecurityConfig {
                     response.addCookie(jsession);
 
                     // 4. (Optional) delete JWT cookie if you ever set one
-                    Cookie jwt = new Cookie("token", null);
+                    Cookie jwt = new Cookie("jwt_token", null);
                     jwt.setPath("/");
                     jwt.setMaxAge(0);
+                    jwt.setHttpOnly(true);
                     response.addCookie(jwt);
                 })
                 .logoutSuccessHandler((request, response, authentication) -> {
@@ -114,5 +121,19 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configs) throws Exception {
         return configs.getAuthenticationManager();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        // Allow any origin or specify your exact frontend (e.g., "http://localhost:3000", "null" for local file testing, etc.)
+        configuration.setAllowedOriginPatterns(Arrays.asList("*")); 
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Applies to all APIs
+        source.registerCorsConfiguration("/**", configuration); 
+        return source;
     }
 }

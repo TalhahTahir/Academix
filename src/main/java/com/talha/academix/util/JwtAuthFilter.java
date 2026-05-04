@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.talha.academix.security.CustomUserDetailService;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,15 +33,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         // Skip filter for public paths
         return path.equals("/") ||
-               path.equals("/login") ||
-               path.equals("/register") ||
-               path.startsWith("/css/") ||
-               path.startsWith("/js/") ||
-               path.startsWith("/images/") ||
-               path.equals("/api/users/register") ||
-               path.equals("/api/users/login") ||
-               path.equals("/api/users/auth") ||
-               path.equals("/api/users/welcome");
+                path.equals("/login") ||
+                path.equals("/register") ||
+                path.startsWith("/css/") ||
+                path.startsWith("/js/") ||
+                path.startsWith("/images/") ||
+                path.equals("/api/users/register") ||
+                path.equals("/api/users/login") ||
+                path.equals("/api/users/auth") ||
+                path.equals("/api/users/welcome");
     }
 
     @Override
@@ -51,12 +52,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String jwt = null;
         String userName = null;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwt = authHeader.substring(7);
+        // Extract JWT from cookies instead of the Authorization header
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwt_token".equals(cookie.getName())) {
+                    jwt = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (jwt != null) {
             try {
                 userName = jwtService.extractUsername(jwt);
             } catch (Exception ex) {
-                // Invalid or malformed token: do not set authentication, continue filter chain
+                // Invalid or malformed token
                 userName = null;
             }
         }
@@ -85,8 +95,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
-                        authorities
-                );
+                        authorities);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
