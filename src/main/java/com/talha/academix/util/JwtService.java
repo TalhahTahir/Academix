@@ -14,7 +14,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class JwtService {
     
@@ -27,7 +29,7 @@ public class JwtService {
     public String generateToken(String name, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
-        System.out.println("DEBUG: name in jwtservice generate token:  " + name);
+        log.debug("DEBUG: name in jwtservice generate token: {}", name);
         return createToken(name, claims);
     }
 
@@ -41,7 +43,7 @@ public class JwtService {
             .signWith(getSignInKey())
             .compact();
 
-            System.out.println("DEBUG: Generated token in jwtservice create method: " + token);
+            log.debug("DEBUG: Generated token in jwtservice create method");
             return token;
             
     }

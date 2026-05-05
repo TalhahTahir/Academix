@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StripeConfig {
 
-    @Value("${STRIPE_SECRET_KEY}")
+    @Value("${stripe.secret-key}")
     private String secretKey;
 
     @Value("${stripe.default-currency:usd}")
@@ -30,7 +30,7 @@ public class StripeConfig {
     @PostConstruct
     public void init() {
         Stripe.apiKey = secretKey;
-        log.info("Stripe initialized with default currency {}", defaultCurrency);
+        log.info("Stripe initialized");
     }
 
     /**
@@ -58,7 +58,7 @@ public class StripeConfig {
         }
 
         PaymentIntent intent = PaymentIntent.create(builder.build());
-        log.debug("Created PaymentIntent {}", intent.getId());
+        log.debug("Created PaymentIntent");
         return intent;
     }
 }

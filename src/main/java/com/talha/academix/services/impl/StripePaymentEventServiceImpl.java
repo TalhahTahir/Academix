@@ -63,7 +63,7 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
         webhookEventRepo.save(genericAudit);
 
         try {
-            System.out.println("EVENT TYPE: " + event.getType());
+            log.debug("EVENT TYPE: " + event.getType());
             // Route connect events first (they don't have payment_id metadata)
             if (event.getType().startsWith("transfer.")) {
                 handleTransferEvent(event);

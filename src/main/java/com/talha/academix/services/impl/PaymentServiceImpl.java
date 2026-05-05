@@ -37,157 +37,156 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class PaymentServiceImpl implements PaymentService {
 
-    private final PaymentRepo paymentRepo;
-    private final UserRepo userRepo;
-    private final CourseRepo courseRepo;
-    private final StripeConfig stripeConfig;
-    private final StripePaymentDetailService stripeDetailService;
-    private final PaymentMapper paymentMapper;
+        private final PaymentRepo paymentRepo;
+        private final UserRepo userRepo;
+        private final CourseRepo courseRepo;
+        private final StripeConfig stripeConfig;
+        private final StripePaymentDetailService stripeDetailService;
+        private final PaymentMapper paymentMapper;
 
-    private static final String CURRENCY = "USD";
+        private static final String CURRENCY = "USD";
 
-    @Override
-    public PaymentInitiateResponse initiatePayment(Long userId, Long courseId) {
-//
-System.out.println("0.1 --- Payment Service Impl");
-//
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
-        Course course = courseRepo.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
+        @Override
+        public PaymentInitiateResponse initiatePayment(Long userId, Long courseId) {
+                //
+                log.debug("0.1 --- Payment Service Impl");
+                //
+                User user = userRepo.findById(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+                Course course = courseRepo.findById(courseId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
 
-        BigDecimal amount = course.getFees();
+                BigDecimal amount = course.getFees();
 
-        Payment payment = new Payment();
-        payment.setUser(user);
-        payment.setCourse(course);
-        payment.setAmount(amount);
-        payment.setCurrency(CURRENCY);
-        payment.setProvider(PaymentProvider.STRIPE);
-        payment.setStatus(PaymentStatus.CREATED);
-        payment = paymentRepo.save(payment);
+                Payment payment = new Payment();
+                payment.setUser(user);
+                payment.setCourse(course);
+                payment.setAmount(amount);
+                payment.setCurrency(CURRENCY);
+                payment.setProvider(PaymentProvider.STRIPE);
+                payment.setStatus(PaymentStatus.CREATED);
+                payment = paymentRepo.save(payment);
 
-        long stripeAmountMinor = amount.movePointRight(2).longValueExact();
-//
-System.out.println("0.2 --- Payment Service Impl");
-//
-        Map<String, String> metadata = new HashMap<>();
-        metadata.put("payment_id", payment.getId().toString());
-        metadata.put("user_id", user.getUserid().toString());
-        metadata.put("course_id", course.getCourseId().toString());
+                long stripeAmountMinor = amount.movePointRight(2).longValueExact();
+                //
+                log.debug("0.2 --- Payment Service Impl");
+                //
+                Map<String, String> metadata = new HashMap<>();
+                metadata.put("payment_id", payment.getId().toString());
+                metadata.put("user_id", user.getUserid().toString());
+                metadata.put("course_id", course.getCourseId().toString());
 
-        PaymentIntent intent;
-        try {
-            intent = stripeConfig.createPaymentIntent(
-                    stripeAmountMinor,
-                    CURRENCY.toLowerCase(),
-                    metadata
-            );
-        } catch (StripeException e) {
-            log.error("Stripe intent creation failed", e);
-            payment.setStatus(PaymentStatus.FAILED);
-            payment.setFailedAt(Instant.now());
-            paymentRepo.save(payment);
-            throw new RuntimeException("Payment initiation failed");
+                PaymentIntent intent;
+                try {
+                        intent = stripeConfig.createPaymentIntent(
+                                        stripeAmountMinor,
+                                        CURRENCY.toLowerCase(),
+                                        metadata);
+                } catch (StripeException e) {
+                        log.error("Stripe intent creation failed", e);
+                        payment.setStatus(PaymentStatus.FAILED);
+                        payment.setFailedAt(Instant.now());
+                        paymentRepo.save(payment);
+                        throw new RuntimeException("Payment initiation failed");
+                }
+
+                // persist stripe detail
+                stripeDetailService.createForIntent(payment, intent);
+                //
+                log.debug("0.3 --- Payment Service Impl");
+                //
+                PaymentStatus mapped = stripeDetailService.mapStripeStatus(intent.getStatus(), false);
+                payment.setStatus(mapped);
+                paymentRepo.save(payment);
+
+                boolean requiresAction = mapped == PaymentStatus.REQUIRES_ACTION;
+                //
+                log.debug("0.4 --- Payment Service Impl");
+                //
+                return PaymentInitiateResponse.builder()
+                                .paymentId(payment.getId())
+                                .clientSecret(intent.getClientSecret())
+                                .status(payment.getStatus())
+                                .requiresAction(requiresAction)
+                                .build();
         }
 
-        // persist stripe detail
-        stripeDetailService.createForIntent(payment, intent);
-//
-System.out.println("0.3 --- Payment Service Impl");
-//
-        PaymentStatus mapped = stripeDetailService.mapStripeStatus(intent.getStatus(), false);
-        payment.setStatus(mapped);
-        paymentRepo.save(payment);
+        @Override
+        @Transactional(readOnly = true)
+        public PaymentDTO getPayment(Long paymentId) {
+                Payment payment = paymentRepo.findById(paymentId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + paymentId));
+                return paymentMapper.toDto(payment);
+        }
 
-        boolean requiresAction = mapped == PaymentStatus.REQUIRES_ACTION;
-//
-System.out.println("0.4 --- Payment Service Impl");
-//
-        return PaymentInitiateResponse.builder()
-                .paymentId(payment.getId())
-                .clientSecret(intent.getClientSecret())
-                .status(payment.getStatus())
-                .requiresAction(requiresAction)
-                .build();
-    }
+        @Override
+        @Transactional(readOnly = true)
+        public List<PaymentDTO> getPaymentsByUser(Long userId) {
+                User user = userRepo.findById(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+                return paymentRepo.findByUser(user).stream()
+                                .map(p -> paymentMapper.toDto(p))
+                                .toList();
+        }
 
-    @Override
-    @Transactional(readOnly = true)
-    public PaymentDTO getPayment(Long paymentId) {
-        Payment payment = paymentRepo.findById(paymentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + paymentId));
-        return paymentMapper.toDto(payment);
-    }
+        @Override
+        @Transactional(readOnly = true)
+        public List<PaymentDTO> getPaymentsByCourse(Long courseId) {
+                Course course = courseRepo.findById(courseId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
+                return paymentRepo.findByCourse(course).stream()
+                                .map(p -> paymentMapper.toDto(p))
+                                .toList();
+        }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<PaymentDTO> getPaymentsByUser(Long userId) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
-        return paymentRepo.findByUser(user).stream()
-                .map(p -> paymentMapper.toDto(p))
-                .toList();
-    }
+        @Override
+        @Transactional(readOnly = true)
+        public List<PaymentDTO> getPaymentsByType(PaymentType type) {
+                return paymentRepo.findByPaymentType(type).stream()
+                                .map(p -> paymentMapper.toDto(p))
+                                .toList();
+        }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<PaymentDTO> getPaymentsByCourse(Long courseId) {
-        Course course = courseRepo.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
-        return paymentRepo.findByCourse(course).stream()
-                .map(p -> paymentMapper.toDto(p))
-                .toList();
-    }
+        @Override
+        @Transactional(readOnly = true)
+        public List<PaymentDTO> getPaymentsCreatedBetween(Instant start, Instant end) {
+                return paymentRepo.findByCreatedAtBetween(start, end).stream()
+                                .map(p -> paymentMapper.toDto(p))
+                                .toList();
+        }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<PaymentDTO> getPaymentsByType(PaymentType type) {
-        return paymentRepo.findByPaymentType(type).stream()
-                .map(p -> paymentMapper.toDto(p))
-                .toList();
-    }
+        @Override
+        public void markFailed(Long paymentId, String reason) {
+                Payment p = paymentRepo.findById(paymentId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + paymentId));
+                p.setStatus(PaymentStatus.FAILED);
+                p.setFailedAt(Instant.now());
+                paymentRepo.save(p);
+                log.warn("Payment {} failed: {}", paymentId, reason);
+        }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<PaymentDTO> getPaymentsCreatedBetween(Instant start, Instant end) {
-        return paymentRepo.findByCreatedAtBetween(start, end).stream()
-                .map(p -> paymentMapper.toDto(p))
-                .toList();
-    }
+        @Override
+        public void markSucceeded(Long paymentId) {
+                markStatus(paymentId, PaymentStatus.SUCCEEDED);
+        }
 
-    @Override
-    public void markFailed(Long paymentId, String reason) {
-        Payment p = paymentRepo.findById(paymentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + paymentId));
-        p.setStatus(PaymentStatus.FAILED);
-        p.setFailedAt(Instant.now());
-        paymentRepo.save(p);
-        log.warn("Payment {} failed: {}", paymentId, reason);
-    }
+        @Override
+        public void markRequiresAction(Long paymentId) {
+                markStatus(paymentId, PaymentStatus.REQUIRES_ACTION);
+        }
 
-    @Override
-    public void markSucceeded(Long paymentId) {
-        markStatus(paymentId, PaymentStatus.SUCCEEDED);
-    }
+        @Override
+        public void markProcessing(Long paymentId) {
+                markStatus(paymentId, PaymentStatus.PROCESSING);
+        }
 
-    @Override
-    public void markRequiresAction(Long paymentId) {
-        markStatus(paymentId, PaymentStatus.REQUIRES_ACTION);
-    }
-
-    @Override
-    public void markProcessing(Long paymentId) {
-        markStatus(paymentId, PaymentStatus.PROCESSING);
-    }
-
-    @Override
-    public void markStatus(Long paymentId, PaymentStatus status) {
-        Payment p = paymentRepo.findById(paymentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + paymentId));
-        p.setStatus(status);
-        if (status == PaymentStatus.SUCCEEDED)
-            p.setSucceededAt(Instant.now());
-        paymentRepo.save(p);
-    }
+        @Override
+        public void markStatus(Long paymentId, PaymentStatus status) {
+                Payment p = paymentRepo.findById(paymentId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Payment not found: " + paymentId));
+                p.setStatus(status);
+                if (status == PaymentStatus.SUCCEEDED)
+                        p.setSucceededAt(Instant.now());
+                paymentRepo.save(p);
+        }
 }
