@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class CourseController {
     private final CourseService courseService;
 
+    @PreAuthorize("hasRole('TEACHER')")
     @PostMapping
     public CourseDTO createCourse(@RequestBody CreateCourseDTO dto) {
         return courseService.createCourse(dto);
@@ -72,32 +73,38 @@ public class CourseController {
         return courseService.getAllCoursesByState(state);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/state/action/reject/{courseId}")
     public CourseDTO courseRejection(@PathVariable Long courseId) {
         return courseService.courseRejection(courseId);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/state/action/approve/{courseId}")
     public CourseDTO courseApproval(@PathVariable Long courseId) {
         return courseService.courseApproval(courseId);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/state/action/disable/{courseId}")
     public CourseDTO courseDisable(@PathVariable Long courseId) {
         return courseService.courseDisable(courseId);
     }
 
+    @PreAuthorize("hasRole('TEACHER') and @courseSecurity.isCourseOwner(principal, #courseId)")
     @PostMapping("/state/action/modify/{teacherId}/{courseId}")
     public CourseDTO courseModification(@PathVariable Long teacherId, @PathVariable Long courseId,
             @RequestBody CourseDTO dto) {
         return courseService.courseModification(teacherId, courseId, dto);
     }
 
+    @PreAuthorize("hasRole('TEACHER') and @courseSecurity.isCourseOwner(principal, #courseId)")
     @PostMapping("/state/action/develop/{teacherId}/{courseId}")
     public CourseDTO courseDevelop(@PathVariable Long teacherId, @PathVariable Long courseId) {
         return courseService.courseDevelopment(teacherId, courseId);
     }
 
+    @PreAuthorize("hasRole('TEACHER') and @courseSecurity.isCourseOwner(principal, #courseId)")
     @PostMapping("/state/action/launch/{teacherId}/{courseId}")
     public CourseDTO courseLaunch(@PathVariable Long teacherId, @PathVariable Long courseId) {
         return courseService.courseLaunch(teacherId, courseId);
@@ -109,6 +116,7 @@ public class CourseController {
         return courseService.updateCourse(id, dto);
     }
 
+    @PreAuthorize("hasRole('TEACHER') and @courseSecurity.isCourseOwner(principal, #id)")
     @DeleteMapping("/{id}")
     public void deleteCourse(@PathVariable Long id) {
         courseService.deleteCourse(id);
