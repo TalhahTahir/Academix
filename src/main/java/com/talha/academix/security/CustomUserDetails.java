@@ -12,16 +12,24 @@ import com.talha.academix.model.User;
 
 public class CustomUserDetails implements UserDetails {
 
+    private Long id;
     private String name;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {
+        id = user.getUserid();
         name = user.getEmail();
         password = user.getPassword();
         authorities = Arrays.stream(user.getRole().name().split(","))
             .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
             .collect(Collectors.toList());
+    }
+
+    public CustomUserDetails(Long id, String name, Collection<? extends GrantedAuthority> authorities) {
+        this.id = id;
+        this.name = name;
+        this.authorities = authorities;
     }
 
     @Override
@@ -39,4 +47,7 @@ public class CustomUserDetails implements UserDetails {
         return name;
     }
 
+    public Long getId() {
+        return id;
+    }
 }

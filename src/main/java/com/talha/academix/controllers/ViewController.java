@@ -37,7 +37,7 @@ public class ViewController {
                 new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
 
         // If successful, extract the user details
-        var userDetails = (UserDetails) authentication.getPrincipal();
+        var userDetails = (com.talha.academix.security.CustomUserDetails) authentication.getPrincipal();
 
         // Extract the role. Spring Security adds "ROLE_" prefix by default.
         String role = userDetails.getAuthorities().stream()
@@ -46,7 +46,7 @@ public class ViewController {
                 .orElse("STUDENT");
 
         // Generate the JWT token
-        String token = jwtService.generateToken(userDetails.getUsername(), role);
+        String token = jwtService.generateToken(userDetails.getUsername(), role, userDetails.getId());
 
         // Create the HTTP-Only cookie
         ResponseCookie jwtCookie = ResponseCookie.from("jwt_token", token)
@@ -63,7 +63,9 @@ public class ViewController {
             .body(Map.of(
                     "message", "Login successful",
                     "username", userDetails.getUsername(),
-                    "role", role));
+                    "role", role,
+                    "userId", userDetails.getId()
+                ));
     }
 
     @GetMapping("/register")

@@ -26,11 +26,21 @@ public class JwtService {
     @Value("${app.jwt.expiration}")
     private long jwtExpiration;
     
-    public String generateToken(String name, String role) {
+    public String generateToken(String name, String role, Long userId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
+        claims.put("userId", userId);
         log.debug("DEBUG: name in jwtservice generate token: {}", name);
         return createToken(name, claims);
+    }
+
+    public Long extractUserId(String token) {
+        final Claims claims = extractAllClaims(token);
+        Object userIdObj = claims.get("userId");
+        if (userIdObj instanceof Number) {
+            return ((Number) userIdObj).longValue();
+        }
+        return null;
     }
 
     private String createToken(String name, Map<String, Object> claims) {

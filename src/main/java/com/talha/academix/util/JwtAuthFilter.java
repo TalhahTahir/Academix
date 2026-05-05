@@ -6,13 +6,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.talha.academix.security.CustomUserDetailService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
@@ -26,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final CustomUserDetailService userDetailService;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -73,24 +69,27 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // If username is extracted and user is not already authenticated
         if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailService.loadUserByUsername(userName);
-
             // Validate token
             if (!jwtService.isTokenExpired(jwt)) {
-                // Prefer role from token if present, otherwise fall back to DB authorities
+                // Prefer role from token if present
                 String tokenRole = null;
                 try {
                     tokenRole = jwtService.extractRole(jwt);
                 } catch (Exception e) {
                     tokenRole = null;
                 }
+                
+                Long userId = jwtService.extractUserId(jwt);
 
                 List<GrantedAuthority> authorities;
                 if (tokenRole != null && !tokenRole.isBlank()) {
                     authorities = List.of(new SimpleGrantedAuthority("ROLE_" + tokenRole));
                 } else {
-                    authorities = (List<GrantedAuthority>) userDetails.getAuthorities();
+                    authorities = List.of(new SimpleGrantedAuthority("ROLE_STUDENT")); // Fallback
                 }
+                
+                com.talha.academix.security.CustomUserDetails userDetails = 
+                    new com.talha.academix.security.CustomUserDetails(userId, userName, authorities);
 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
