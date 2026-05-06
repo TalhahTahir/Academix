@@ -6,9 +6,9 @@ import com.talha.academix.dto.OptionDTO;
 import com.talha.academix.dto.StudentOptionResponse;
 
 public interface OptionService {
-    OptionDTO addOption(Long userid, Long questionId, OptionDTO dto);
+    OptionDTO addOption(Long questionId, OptionDTO dto);
     List<OptionDTO> getOptionsByQuestion(Long questionId);
-    OptionDTO updateOption(Long userid, Long optionId, OptionDTO dto);
+    OptionDTO updateOption(Long optionId, OptionDTO dto);
     List<StudentOptionResponse> getOptionsByQuestionForStudent(Long questionId);
-    void deleteOption(Long userid, Long optionId);
+    void deleteOption(Long optionId);
 }

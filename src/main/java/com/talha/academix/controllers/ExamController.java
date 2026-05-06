@@ -2,6 +2,7 @@ package com.talha.academix.controllers;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.talha.academix.dto.CreateExamRequest;
@@ -18,13 +19,13 @@ public class ExamController {
     private final ExamService examService;
 
     // Create exam under a course (teacher step 1)
-    @PostMapping("/courses/{courseId}/exams/teachers/{teacherId}")
-    public ExamResponse createExam(@PathVariable Long teacherId,
-                                   @PathVariable Long courseId,
+    @PreAuthorize("@courseSecurity.isCourseOwner(principal, #courseId)")
+    @PostMapping("/courses/{courseId}/exams/")
+    public ExamResponse createExam(@PathVariable Long courseId,
                                    @RequestBody CreateExamRequest req) {
         // enforce courseId from path (ignore body mismatch)
         req.setCourseId(courseId);
-        return examService.createExam(teacherId, req);
+        return examService.createExam(req);
     }
 
     // List exams of a course
@@ -40,17 +41,18 @@ public class ExamController {
     }
 
     // Update exam title only (teacher)
-    @PutMapping("/exams/{examId}/teachers/{teacherId}")
-    public ExamResponse updateExam(@PathVariable Long teacherId,
-                                   @PathVariable Long examId,
+    @PreAuthorize("@examSecurity.isExamOwner(principal, #examId)")
+    @PutMapping("/exams/{examId}")
+    public ExamResponse updateExam(@PathVariable Long examId,
                                    @RequestBody CreateExamRequest req) {
         // IMPORTANT: courseId is not allowed to change; service ignores it.
-        return examService.updateExam(teacherId, examId, req);
+        return examService.updateExam(examId, req);
     }
 
     // Delete exam (teacher)
-    @DeleteMapping("/exams/{examId}/teachers/{teacherId}")
-    public void deleteExam(@PathVariable Long teacherId, @PathVariable Long examId) {
-        examService.deleteExam(teacherId, examId);
+    @PreAuthorize("@examSecurity.isExamOwner(principal, #examId)")
+    @DeleteMapping("/exams/{examId}")
+    public void deleteExam(@PathVariable Long examId) {
+        examService.deleteExam(examId);
     }
 }

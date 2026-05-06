@@ -10,13 +10,11 @@ import com.talha.academix.dto.OptionDTO;
 import com.talha.academix.dto.StudentOptionResponse;
 import com.talha.academix.exception.InvalidAttemptException;
 import com.talha.academix.exception.ResourceNotFoundException;
-import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.mapper.OptionMapper;
 import com.talha.academix.model.Question;
 import com.talha.academix.model.QuestionOption;
 import com.talha.academix.repository.OptionRepo;
 import com.talha.academix.repository.QuestionRepo;
-import com.talha.academix.services.CourseService;
 import com.talha.academix.services.OptionService;
 
 import lombok.RequiredArgsConstructor;
@@ -27,17 +25,14 @@ public class OptionServiceImpl implements OptionService {
 
     private final OptionRepo optionRepo;
     private final QuestionRepo questionRepo;
-    private final CourseService courseService;
     private final ModelMapper mapper;
     private final OptionMapper optionMapper;
 
     @Override
-    public OptionDTO addOption(Long userid, Long questionId, OptionDTO dto) {
+    public OptionDTO addOption(Long questionId, OptionDTO dto) {
 
         Question question = questionRepo.findById(questionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
-    
-        if(courseService.teacherOwnership(userid, question.getExam().getCourse().getCourseId())){
 
         if ((dto.isCorrect())) {
             long count = optionRepo.countByQuestionIdAndIsCorrectTrue(questionId);
@@ -45,59 +40,48 @@ public class OptionServiceImpl implements OptionService {
                 throw new InvalidAttemptException("Only one option can be marked as correct per question.");
             }
         }
-    
+
         QuestionOption questionOption = mapper.map(dto, QuestionOption.class);
         questionOption.setQuestion(question);
         questionOption.setCorrect((dto.isCorrect()));
         questionOption = optionRepo.save(questionOption);
-    
+
         return mapper.map(questionOption, OptionDTO.class);
     }
-    else throw new RoleMismatchException("Only teacher can add options");
-    }
-    
 
     @Override
     public List<OptionDTO> getOptionsByQuestion(Long questionId) {
         return optionRepo.findByQuestionId(questionId)
-            .stream()
-            .map(o -> optionMapper.toDto(o))
-            .collect(Collectors.toList());
+                .stream()
+                .map(o -> optionMapper.toDto(o))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public OptionDTO updateOption(Long userid, Long optionId, OptionDTO dto) {
+    public OptionDTO updateOption(Long optionId, OptionDTO dto) {
         QuestionOption questionOption = optionRepo.findById(optionId)
-            .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + optionId));
+                .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + optionId));
 
         Long questionId = questionOption.getQuestion().getId();
         Question question = questionRepo.findById(questionId)
-            .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
-        
-        if(courseService.teacherOwnership(userid, questionOption.getQuestion().getExam().getCourse().getCourseId())){
+                .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
 
-            mapper.getConfiguration().setSkipNullEnabled(true);
-            mapper.map(dto, questionOption);
-            questionOption.setQuestion(question);
-            questionOption = optionRepo.save(questionOption);
-    
-            return optionMapper.toDto(questionOption);
-        }
-        else throw new RoleMismatchException("Only teacher can update options");
+        mapper.getConfiguration().setSkipNullEnabled(true);
+        mapper.map(dto, questionOption);
+        questionOption.setQuestion(question);
+        questionOption = optionRepo.save(questionOption);
+
+        return optionMapper.toDto(questionOption);
     }
 
     @Override
-    public void deleteOption(Long userid, Long optionId) {
+    public void deleteOption(Long optionId) {
 
         QuestionOption questionOption = optionRepo.findById(optionId)
-            .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + optionId));
+                .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + optionId));
 
-        if(courseService.teacherOwnership(userid, questionOption.getQuestion().getExam().getCourse().getCourseId())){
         optionRepo.delete(questionOption);
     }
-    else throw new RoleMismatchException("Only teacher can delete options");
-}
-
 
     @Override
     public List<StudentOptionResponse> getOptionsByQuestionForStudent(Long questionId) {

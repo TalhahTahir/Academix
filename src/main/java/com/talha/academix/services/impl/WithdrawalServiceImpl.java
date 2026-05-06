@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,8 +59,6 @@ public class WithdrawalServiceImpl implements WithdrawalService {
     private final TeacherAccountServiceImpl teacherAccountService;
     private final StripeConnectPayoutService stripeConnectPayoutService;
     private final VaultTransactionService vaultTransactionService;
-    private final ModelMapper mapper;
-
     @Override
     public WithdrawalDTO requestWithdrawal(WithdrawalRequestDTO req) {
         User user = userRepo.findById(req.getUserId())
@@ -173,7 +170,7 @@ public class WithdrawalServiceImpl implements WithdrawalService {
 
     @Override
     @Transactional(readOnly = true)
-    public List getByUser(Long userId) {
+    public List<WithdrawalDTO> getByUser(Long userId) {
         return withdrawalRepo.findAllByRequestedBy_Userid(userId)
                 .stream()
                 .map(w -> withdrawalMapper.toDto(w))

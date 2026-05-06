@@ -6,9 +6,9 @@ import com.talha.academix.dto.CreateExamRequest;
 import com.talha.academix.dto.ExamResponse;
 
 public interface ExamService {
-    ExamResponse createExam(Long teacherId, CreateExamRequest req);
+    ExamResponse createExam(CreateExamRequest req);
     ExamResponse getExamById(Long examId);
     List<ExamResponse> getExamsByCourse(Long courseId);
-    ExamResponse updateExam(Long teacherId, Long examId, CreateExamRequest req);
-    void deleteExam(Long teacherId, Long examId);
+    ExamResponse updateExam(Long examId, CreateExamRequest req);
+    void deleteExam(Long examId);
 }

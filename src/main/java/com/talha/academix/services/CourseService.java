@@ -15,13 +15,13 @@ public interface CourseService {
 
     CourseDTO courseRejection(Long courseId);
 
-    CourseDTO courseModification(Long teacherId, Long courseId, CourseDTO dto);
+    CourseDTO courseModification(Long courseId, CourseDTO dto);
 
     CourseDTO courseApproval(Long courseId);
 
-    CourseDTO courseDevelopment(Long teacherId, Long courseId);
+    CourseDTO courseDevelopment(Long courseId);
 
-    CourseDTO courseLaunch(Long teacherId, Long courseId);
+    CourseDTO courseLaunch(Long courseId);
 
     CourseDTO courseDisable(Long courseId);
 
@@ -46,8 +46,6 @@ public interface CourseService {
     // void deleteCourseByTeacher(Long userid, Long courseId);
 
     // void deleteCourseByAdmin(Long userid, Long courseId);
-
-    boolean teacherOwnership(Long userid, Long courseId);
 
     Long countAll();
 }

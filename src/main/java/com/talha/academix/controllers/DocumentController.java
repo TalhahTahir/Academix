@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,15 +24,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class DocumentController {
     private final DocumentService documentService;
 
-    @PostMapping("teachers/{id}")
-    public DocumentDTO addDocument(@PathVariable Long id, @RequestBody DocumentDTO dto) {
-        return documentService.addDocument(id, dto);
+    @PreAuthorize("@contentSecurity.isContentOwner(principal, #dto.contentId)")
+    @PostMapping
+    public DocumentDTO addDocument( @RequestBody DocumentDTO dto) {
+        return documentService.addDocument(dto);
     }
 
-    @PutMapping("teachers/{teacherId}/documents/{documentId}")
-    public DocumentDTO updateDocument(@PathVariable Long teacherId, @PathVariable Long documentId,
+    @PreAuthorize("@documentSecurity.isDocumentOwner(principal, #documentId)")
+    @PutMapping("/documents/{documentId}")
+    public DocumentDTO updateDocument(@PathVariable Long documentId,
             @RequestBody DocumentDTO dto) {
-        return documentService.updateDocument(teacherId, documentId, dto);
+        return documentService.updateDocument(documentId, dto);
     }
 
     @GetMapping("{id}")
@@ -44,9 +47,10 @@ public class DocumentController {
         return documentService.getDocumentsByContent(id);
     }
 
-    @DeleteMapping("teachers/{teacherId}/documents/{documentId}")
-    public void deleteDocument(@PathVariable Long teacherId, @PathVariable Long documentId) {
-        documentService.deleteDocument(teacherId, documentId);
+    @DeleteMapping("/documents/{documentId}")
+    @PreAuthorize("@documentSecurity.isDocumentOwner(principal, #documentId)")
+    public void deleteDocument(@PathVariable Long documentId) {
+        documentService.deleteDocument(documentId);
     }
 
 }

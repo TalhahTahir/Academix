@@ -91,32 +91,32 @@ public class CourseController {
         return courseService.courseDisable(courseId);
     }
 
-    @PreAuthorize("hasRole('TEACHER') and @courseSecurity.isCourseOwner(principal, #courseId)")
-    @PostMapping("/state/action/modify/{teacherId}/{courseId}")
-    public CourseDTO courseModification(@PathVariable Long teacherId, @PathVariable Long courseId,
+    @PreAuthorize("@courseSecurity.isCourseOwner(principal, #courseId)")
+    @PostMapping("/state/action/modify/{courseId}")
+    public CourseDTO courseModification(@PathVariable Long courseId,
             @RequestBody CourseDTO dto) {
-        return courseService.courseModification(teacherId, courseId, dto);
+        return courseService.courseModification(courseId, dto);
     }
 
-    @PreAuthorize("hasRole('TEACHER') and @courseSecurity.isCourseOwner(principal, #courseId)")
-    @PostMapping("/state/action/develop/{teacherId}/{courseId}")
-    public CourseDTO courseDevelop(@PathVariable Long teacherId, @PathVariable Long courseId) {
-        return courseService.courseDevelopment(teacherId, courseId);
+    @PreAuthorize("@courseSecurity.isCourseOwner(principal, #courseId)")
+    @PostMapping("/state/action/develop/{courseId}")
+    public CourseDTO courseDevelop(@PathVariable Long courseId) {
+        return courseService.courseDevelopment(courseId);
     }
 
-    @PreAuthorize("hasRole('TEACHER') and @courseSecurity.isCourseOwner(principal, #courseId)")
-    @PostMapping("/state/action/launch/{teacherId}/{courseId}")
-    public CourseDTO courseLaunch(@PathVariable Long teacherId, @PathVariable Long courseId) {
-        return courseService.courseLaunch(teacherId, courseId);
+    @PreAuthorize("@courseSecurity.isCourseOwner(principal, #courseId)")
+    @PostMapping("/state/action/launch/{courseId}")
+    public CourseDTO courseLaunch(@PathVariable Long courseId) {
+        return courseService.courseLaunch(courseId);
     }
 
-    @PreAuthorize("hasRole('TEACHER') and @courseSecurity.isCourseOwner(principal, #id)")
+    @PreAuthorize("@courseSecurity.isCourseOwner(principal, #id)")
     @PutMapping("/{id}")
     public CourseDTO updateCourse(@PathVariable Long id, @RequestBody CourseDTO dto) {
         return courseService.updateCourse(id, dto);
     }
 
-    @PreAuthorize("hasRole('TEACHER') and @courseSecurity.isCourseOwner(principal, #id)")
+    @PreAuthorize("@courseSecurity.isCourseOwner(principal, #id)")
     @DeleteMapping("/{id}")
     public void deleteCourse(@PathVariable Long id) {
         courseService.deleteCourse(id);

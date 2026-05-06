@@ -7,12 +7,10 @@ import org.springframework.stereotype.Service;
 import com.talha.academix.dto.CreateExamRequest;
 import com.talha.academix.dto.ExamResponse;
 import com.talha.academix.exception.ResourceNotFoundException;
-import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.model.Course;
 import com.talha.academix.model.Exam;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.repository.ExamRepo;
-import com.talha.academix.services.CourseService;
 import com.talha.academix.services.ExamService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,14 +21,9 @@ public class ExamServiceImpl implements ExamService {
 
     private final ExamRepo examRepo;
     private final CourseRepo courseRepo;
-    private final CourseService courseService;
 
     @Override
-    public ExamResponse createExam(Long teacherId, CreateExamRequest req) {
-        if (!courseService.teacherOwnership(teacherId, req.getCourseId())) {
-            throw new RoleMismatchException("Only teacher can create exam for this course.");
-        }
-
+    public ExamResponse createExam(CreateExamRequest req) {
         Course course = courseRepo.findById(req.getCourseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
@@ -43,13 +36,9 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
-    public ExamResponse updateExam(Long teacherId, Long examId, CreateExamRequest req) {
+    public ExamResponse updateExam(Long examId, CreateExamRequest req) {
         Exam existing = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
-
-        if (!courseService.teacherOwnership(teacherId, existing.getCourse().getCourseId())) {
-            throw new RoleMismatchException("Only teacher can update exam.");
-        }
 
         if (req.getTitle() != null) {
             existing.setTitle(req.getTitle());
@@ -74,13 +63,9 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
-    public void deleteExam(Long teacherId, Long examId) {
+    public void deleteExam(Long examId) {
         Exam exam = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
-
-        if (!courseService.teacherOwnership(teacherId, exam.getCourse().getCourseId())) {
-            throw new RoleMismatchException("Only teacher can delete exam.");
-        }
 
         examRepo.delete(exam);
     }

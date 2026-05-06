@@ -21,29 +21,29 @@ public class ContentController {
 
     private final ContentService contentService;
 
-    @PreAuthorize("hasRole('TEACHER') and @courseSecurity.isCourseOwner(principal, #dto.courseId)")
-    @PostMapping("/{teacherId}")
-    public ResponseEntity<ContentDTO> createContent(@PathVariable Long teacherId, @RequestBody ContentDTO dto) {
-        return ResponseEntity.ok(contentService.addContent(teacherId, dto));
+    @PreAuthorize("@courseSecurity.isCourseOwner(principal, #dto.courseId)")
+    @PostMapping
+    public ResponseEntity<ContentDTO> createContent(@RequestBody ContentDTO dto) {
+        return ResponseEntity.ok(contentService.addContent(dto));
     }
 
-    @PreAuthorize("hasRole('TEACHER') and @contentSecurity.isContentOwner(principal, #contentId)")
+    @PreAuthorize("@contentSecurity.isContentOwner(principal, #contentId)")
     @PutMapping("/{contentId}/image")
     public ResponseEntity<ContentDTO> setContentImage(@PathVariable Long contentId,
             @RequestBody ContentImageLinkRequestDTO req) {
-        return ResponseEntity.ok(contentService.setContentImage(req.getTeacherId(), contentId, req.getStoredFileId()));
+        return ResponseEntity.ok(contentService.setContentImage(contentId, req.getStoredFileId()));
     }
 
-    @PreAuthorize("hasRole('TEACHER') and @contentSecurity.isContentOwner(principal, #contentId)")
-    @PutMapping("/update/{contentId}/teachers/{teacherId}")
+    @PreAuthorize("@contentSecurity.isContentOwner(principal, #contentId)")
+    @PutMapping("/update/{contentId}")
     public ContentDTO updateContent(@PathVariable Long contentId, @PathVariable Long teacherId, @RequestBody ContentDTO dto) {
-        return contentService.updateContent(teacherId, contentId, dto);
+        return contentService.updateContent(contentId, dto);
     }
 
-    @PreAuthorize("hasRole('TEACHER') and @contentSecurity.isContentOwner(principal, #contentId)")
-    @DeleteMapping("/{contentId}/teachers/{teacherId}")
+    @PreAuthorize("@contentSecurity.isContentOwner(principal, #contentId)")
+    @DeleteMapping("/{contentId}")
     public ResponseEntity<Void> deleteContent(@PathVariable Long contentId, @PathVariable Long teacherId) {
-        contentService.deleteContent(teacherId, contentId);
+        contentService.deleteContent(contentId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -11,12 +11,10 @@ import com.talha.academix.dto.SignedUploadInitRequestDTO;
 import com.talha.academix.dto.SignedUploadInitResponseDTO;
 import com.talha.academix.enums.StoredFileStatus;
 import com.talha.academix.exception.ResourceNotFoundException;
-import com.talha.academix.exception.RoleMismatchException;
 import com.talha.academix.model.Content;
 import com.talha.academix.model.StoredFile;
 import com.talha.academix.repository.ContentRepo;
 import com.talha.academix.repository.StoredFileRepo;
-import com.talha.academix.services.CourseService;
 import com.talha.academix.services.StoredFileService;
 import com.talha.academix.services.SupabaseStorageSignedUrlService;
 
@@ -28,7 +26,6 @@ public class StoredFileServiceImpl implements StoredFileService {
 
     private final StoredFileRepo storedFileRepo;
     private final ContentRepo contentRepo;
-    private final CourseService courseService;
     private final SupabaseConfig supabaseConfig;
     private final SupabaseStorageSignedUrlService signedUrlService;
 
@@ -41,12 +38,6 @@ public class StoredFileServiceImpl implements StoredFileService {
 
         Content content = contentRepo.findById(req.getContentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + req.getContentId()));
-
-        Long courseId = content.getCourse().getCourseId();
-
-        if (!courseService.teacherOwnership(req.getTeacherId(), courseId)) {
-            throw new RoleMismatchException("Only course owner can upload files for this content");
-        }
 
         String bucket = supabaseConfig.getStorage().getBucket();
         if (bucket == null || bucket.isBlank()) {

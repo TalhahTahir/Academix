@@ -14,7 +14,6 @@ import com.talha.academix.model.Content;
 import com.talha.academix.model.Document;
 import com.talha.academix.repository.ContentRepo;
 import com.talha.academix.repository.DocumentRepo;
-import com.talha.academix.services.CourseService;
 import com.talha.academix.services.DocumentService;
 import com.talha.academix.enums.StoredFileStatus;
 import com.talha.academix.enums.StoredFileType;
@@ -29,19 +28,14 @@ public class DocumentServiceImpl implements DocumentService {
 
     private final DocumentRepo documentRepo;
     private final ContentRepo contentRepo;
-    private final CourseService courseService;
     private final StoredFileRepo storedFileRepo;
     private final ModelMapper mapper;
     private final DocumentMapper documentMapper;
 
     @Override
-    public DocumentDTO addDocument(Long userid, DocumentDTO dto) {
+    public DocumentDTO addDocument(DocumentDTO dto) {
         Content content = contentRepo.findById(dto.getContentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
-
-        if (!courseService.teacherOwnership(userid, content.getCourse().getCourseId())) {
-            throw new RoleMismatchException("Only Owner can add document");
-        }
 
         StoredFile file = storedFileRepo.findById(dto.getStoredFileId())
                 .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + dto.getStoredFileId()));
@@ -69,27 +63,21 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public DocumentDTO updateDocument(Long userid, Long documentId, DocumentDTO dto) {
+    public DocumentDTO updateDocument(Long documentId, DocumentDTO dto) {
         Document existing = documentRepo.findById(documentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
 
-        if (courseService.teacherOwnership(userid, existing.getContent().getCourse().getCourseId())) {
+        mapper.getConfiguration().setSkipNullEnabled(true);
+        mapper.map(dto, existing);
 
-            mapper.getConfiguration().setSkipNullEnabled(true);
-            mapper.map(dto, existing);
-
-            if (!existing.getContent().getContentId().equals(dto.getContentId())) {
-                Content content = contentRepo.findById(dto.getContentId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
-                existing.setContent(content);
-            }
-
-            existing = documentRepo.save(existing);
-
-            return documentMapper.toDto(existing);
-        } else {
-            throw new RoleMismatchException("Only teacher can update document");
+        if (!existing.getContent().getContentId().equals(dto.getContentId())) {
+            Content content = contentRepo.findById(dto.getContentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
+            existing.setContent(content);
         }
+
+        existing = documentRepo.save(existing);
+        return documentMapper.toDto(existing);
     }
 
     @Override
@@ -109,17 +97,10 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public void deleteDocument(Long userid, Long documentId) {
+    public void deleteDocument(Long documentId) {
         Document document = documentRepo.findById(documentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
 
-        Content content = contentRepo.findById(document.getContent().getContentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Content not found"));
-
-        if (courseService.teacherOwnership(userid, content.getCourse().getCourseId())) {
-            documentRepo.delete(document);
-        } else {
-            throw new RoleMismatchException("Only teacher can delete document");
-        }
+        documentRepo.delete(document);
     }
 }

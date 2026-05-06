@@ -9,6 +9,7 @@ import com.talha.academix.services.VaultService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -26,19 +27,21 @@ public class VaultController {
         return vaultService.getVaultByUserId(userid);
     }
 
+    @PreAuthorize("@vaultSecurity.isVaultOwner(principal, #id)")
     @GetMapping("/{id}")
     public VaultDTO getVaultById(@PathVariable Long id) {
         return vaultService.getVaultById(id);
     }
 
+    @PreAuthorize("@vaultSecurity.isVaultOwner(principal, #id)")
     @PutMapping("update/{id}")
     public VaultDTO updateVault(@PathVariable Long id, @RequestBody VaultDTO dto) {
         return vaultService.updateVault(Long.valueOf(id), dto);
     }
 
-    @DeleteMapping("{id}")
+    @PreAuthorize("@vaultSecurity.isVaultOwner(principal, #id)")
+    @DeleteMapping("/{id}")
     public void deleteVault(@PathVariable Long id) {
         vaultService.deleteVault(id);
     }
-
 }

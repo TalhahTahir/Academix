@@ -2,6 +2,7 @@ package com.talha.academix.controllers;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.talha.academix.dto.OptionDTO;
@@ -18,18 +19,17 @@ public class OptionController {
     private final OptionService optionService;
 
     // Teacher: add option to question (teacher step 3)
-    @PostMapping("/questions/{questionId}/options/teachers/{teacherId}")
-    public OptionDTO addOption(@PathVariable Long teacherId,
-                               @PathVariable Long questionId,
+    @PreAuthorize("@questionSecurity.isQuestionOwner(principal, #questionId)")
+    @PostMapping("/questions/{questionId}/options")
+    public OptionDTO addOption(@PathVariable Long questionId,
                                @RequestBody OptionDTO dto) {
         dto.setQuestionId(questionId);
-        return optionService.addOption(teacherId, questionId, dto);
+        return optionService.addOption(questionId, dto);
     }
 
     // Teacher: list options (includes isCorrect)
-    @GetMapping("/questions/{questionId}/options/teachers/{teacherId}")
-    public List<OptionDTO> getOptionsByQuestionTeacher(@PathVariable Long teacherId,
-                                                       @PathVariable Long questionId) {
+    @GetMapping("/questions/{questionId}/options")
+    public List<OptionDTO> getOptionsByQuestionTeacher(@PathVariable Long questionId) {
         return optionService.getOptionsByQuestion(questionId);
     }
 
@@ -40,17 +40,17 @@ public class OptionController {
     }
 
     // Teacher: update option
-    @PutMapping("/options/{optionId}/teachers/{teacherId}")
-    public OptionDTO updateOption(@PathVariable Long teacherId,
-                                  @PathVariable Long optionId,
+    @PreAuthorize("@optionSecurity.isOptionOwner(principal, #optionId)")
+    @PutMapping("/options/{optionId}")
+    public OptionDTO updateOption(@PathVariable Long optionId,
                                   @RequestBody OptionDTO dto) {
-        return optionService.updateOption(teacherId, optionId, dto);
+        return optionService.updateOption(optionId, dto);
     }
 
     // Teacher: delete option
-    @DeleteMapping("/options/{optionId}/teachers/{teacherId}")
-    public void deleteOption(@PathVariable Long teacherId,
-                             @PathVariable Long optionId) {
-        optionService.deleteOption(teacherId, optionId);
+    @PreAuthorize("@optionSecurity.isOptionOwner(principal, #optionId)")
+    @DeleteMapping("/options/{optionId}")
+    public void deleteOption(@PathVariable Long optionId) {
+        optionService.deleteOption(optionId);
     }
 }

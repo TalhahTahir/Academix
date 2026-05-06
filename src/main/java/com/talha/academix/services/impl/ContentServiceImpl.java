@@ -15,7 +15,6 @@ import com.talha.academix.model.Course;
 import com.talha.academix.repository.ContentRepo;
 import com.talha.academix.repository.CourseRepo;
 import com.talha.academix.services.ContentService;
-import com.talha.academix.services.CourseService;
 import com.talha.academix.enums.StoredFileStatus;
 import com.talha.academix.enums.StoredFileType;
 import com.talha.academix.model.StoredFile;
@@ -30,22 +29,19 @@ public class ContentServiceImpl implements ContentService {
 
         private final ContentRepo contentRepo;
         private final CourseRepo courseRepo;
-        private final CourseService courseService;
         private final ContentMapper contentMapper;
         private final StoredFileRepo storedFileRepo;
         private final StoredFileService storedFileService;
         Boolean owned;
 
         @Override
-        public ContentDTO addContent(Long userid, ContentDTO dto) {
+        public ContentDTO addContent(ContentDTO dto) {
 
                 Course course = courseRepo.findById(dto.getCourseId())
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Course not found with id: " + dto.getCourseId()));
 
-                owned = courseService.teacherOwnership(userid, course.getCourseId());
-
-                if (owned && (course.getState() == CourseState.DRAFT
+                if ((course.getState() == CourseState.DRAFT
                                 || course.getState() == CourseState.IN_DEVELOPMENT
                                 || course.getState() == CourseState.MODIFIED
                                 || course.getState() == CourseState.REJECTED)) {
@@ -72,24 +68,19 @@ public class ContentServiceImpl implements ContentService {
         }
 
         @Override
-        public ContentDTO updateContent(Long userid, Long contentId, ContentDTO dto) {
+        public ContentDTO updateContent(Long contentId, ContentDTO dto) {
 
-                owned = courseService.teacherOwnership(userid, dto.getCourseId());
+                Content content = contentRepo.findById(contentId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Content not found with id: " + contentId));
 
-                if (owned) {
-                        Content content = contentRepo.findById(contentId)
-                                        .orElseThrow(() -> new ResourceNotFoundException(
-                                                        "Content not found with id: " + contentId));
+                content.setCourse(courseRepo.findById(dto.getCourseId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Course not found with id: " + dto.getCourseId())));
+                content.setDescription(dto.getDescription());
+                content = contentRepo.save(content);
 
-                        content.setCourse(courseRepo.findById(dto.getCourseId())
-                                        .orElseThrow(() -> new ResourceNotFoundException(
-                                                        "Course not found with id: " + dto.getCourseId())));
-                        content.setDescription(dto.getDescription());
-                        content = contentRepo.save(content);
-
-                        return contentMapper.toDto(content);
-                } else
-                        throw new RoleMismatchException("Only Teacher can update content");
+                return contentMapper.toDto(content);
         }
 
         @Override
@@ -120,28 +111,19 @@ public class ContentServiceImpl implements ContentService {
         }
 
         @Override
-        public void deleteContent(Long userid, Long contentId) {
+        public void deleteContent(Long contentId) {
                 Content content = contentRepo.findById(contentId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
-
-                owned = courseService.teacherOwnership(userid, content.getCourse().getCourseId());
-                if (owned) {
-                        contentRepo.delete(content);
-                } else
-                        throw new RoleMismatchException("Only Teacher can delete content");
+                contentRepo.delete(content);
         }
 
         @Override
-        public ContentDTO setContentImage(Long teacherId, Long contentId, Long storedFileId) {
+        public ContentDTO setContentImage(Long contentId, Long storedFileId) {
 
                 Content content = contentRepo.findById(contentId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
 
                 Long courseId = content.getCourse().getCourseId();
-
-                if (!courseService.teacherOwnership(teacherId, courseId)) {
-                        throw new RoleMismatchException("Only course owner can set content image");
-                }
 
                 StoredFile file = storedFileRepo.findById(storedFileId)
                                 .orElseThrow(() -> new ResourceNotFoundException(

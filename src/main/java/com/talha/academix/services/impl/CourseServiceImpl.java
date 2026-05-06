@@ -164,13 +164,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseDTO courseModification(Long teacherId, Long courseId, CourseDTO dto) {
+    public CourseDTO courseModification(Long courseId, CourseDTO dto) {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-        Boolean owned = teacherOwnership(teacherId, courseId);
-
-        if (owned && (course.getState() == CourseState.DRAFT
+        if ( (course.getState() == CourseState.DRAFT
                 || course.getState() == CourseState.MODIFIED
                 || course.getState() == CourseState.REJECTED)) {
 
@@ -182,13 +180,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseDTO courseDevelopment(Long teacherId, Long courseId) {
+    public CourseDTO courseDevelopment(Long courseId) {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-        Boolean owned = teacherOwnership(teacherId, courseId);
-
-        if (owned && course.getState() == CourseState.APPROVED) {
+        if (course.getState() == CourseState.APPROVED) {
             course.setState(CourseState.IN_DEVELOPMENT);
             courseRepo.save(course);
 
@@ -199,11 +195,10 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseDTO courseLaunch(Long teacherId, Long courseId) {
+    public CourseDTO courseLaunch(Long courseId) {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
-        Boolean owned = teacherOwnership(teacherId, courseId);
-        if (owned && course.getState() == CourseState.IN_DEVELOPMENT) {
+        if (course.getState() == CourseState.IN_DEVELOPMENT) {
             course.setState(CourseState.LAUNCHED);
             courseRepo.save(course);
 
@@ -269,13 +264,6 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
         courseRepo.delete(course);
-    }
-
-    @Override
-    public boolean teacherOwnership(Long userid, Long courseId) {
-        Course course = courseRepo.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
-        return course.getTeacher() != null && course.getTeacher().getUserid().equals(userid);
     }
 
     @Override

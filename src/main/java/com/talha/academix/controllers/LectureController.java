@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -25,15 +26,17 @@ public class LectureController {
 
     private final LectureService lectureService;
 
-    @PostMapping("teachers/{teacherid}")
-    public LectureDTO addLecture(@PathVariable Long teacherid, @RequestBody LectureDTO dto) {
-        return lectureService.addLecture(teacherid, dto);
+    @PreAuthorize("@contentSecurity.isContentOwner(principal, #dto.contentId)")
+    @PostMapping
+    public LectureDTO addLecture(@RequestBody LectureDTO dto) {
+        return lectureService.addLecture(dto);
     }
 
-    @PutMapping("update/teachers/{teacherid}/lecture/{lectureId}")
-    public LectureDTO updateLecture(@PathVariable Long teacherid, @PathVariable Long lectureId,
+    @PreAuthorize("@lectureSecurity.isLectureOwner(principal, #lectureId)")
+    @PutMapping("/{lectureId}")
+    public LectureDTO updateLecture(@PathVariable Long lectureId,
             @RequestBody LectureDTO dto) {
-        return lectureService.updateLecture(teacherid, lectureId, dto);
+        return lectureService.updateLecture(lectureId, dto);
     }
 
     @GetMapping("{id}")
@@ -46,9 +49,10 @@ public class LectureController {
         return lectureService.getLecturesByContent(id);
     }
 
-    @DeleteMapping("teachers/{teacherId}/lecture/{lectureId}")
-    public void deleteLecture(@PathVariable Long teacherId, @PathVariable Long lectureId) {
-        lectureService.deleteLecture(teacherId, lectureId);
+    @DeleteMapping("/{lectureId}")
+    @PreAuthorize("@lectureSecurity.isLectureOwner(principal, #lectureId)")
+    public void deleteLecture(@PathVariable Long lectureId) {
+        lectureService.deleteLecture(lectureId);
     }
 
 }

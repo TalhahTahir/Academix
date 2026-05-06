@@ -35,6 +35,7 @@ public class TeacherAccount {
 
     // status enum: PENDING, COMPLETED, RESTRICTED
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     @Column(nullable = false, length = 16)
     private TeacherAccountStatus status = TeacherAccountStatus.PENDING; // default: PENDING, COMPLETED, RESTRICTED
 
