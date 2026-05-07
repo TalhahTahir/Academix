@@ -41,29 +41,15 @@ public class LectureServiceImpl implements LectureService {
         StoredFile file = storedFileRepo.findById(dto.getStoredFileId())
                 .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + dto.getStoredFileId()));
 
-        // verify file belongs to same course
-        if (!file.getContent().getContentId().equals(content.getContentId())) {
-            throw new RoleMismatchException("StoredFile does not belong to this content");
-        }
-
-        // verify correct type and status
-        if (file.getType() != StoredFileType.LECTURE) {
-            throw new RoleMismatchException("StoredFile type must be LECTURE");
-        }
-        if (file.getStatus() != StoredFileStatus.READY) {
-            throw new RoleMismatchException("StoredFile must be READY before linking");
-        }
+        validateStoredFile(file, content);
 
         Lecture lecture = new Lecture();
         lecture.setContent(content);
-        lecture.setTitle(dto.getTitle());
-        lecture.setDuration(dto.getDuration());
         lecture.setVideoUrl(file);
+        lectureMapper.updateEntityFromDto(dto, lecture);
         lecture = lectureRepo.save(lecture);
 
-        LectureDTO out = lectureMapper.toDto(lecture);
-        out.setVideoSignedUrl(storedFileService.getSignedDownloadUrl(file.getId(), 600).getSignedDownloadUrl());
-        return out;
+        return enrichWithSignedUrl(lecture);
     }
 
     @Override
@@ -72,25 +58,37 @@ public class LectureServiceImpl implements LectureService {
         Content content = contentRepo.findById(dto.getContentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
 
-            Lecture existing = lectureRepo.findById(lectureId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
+        Lecture existing = lectureRepo.findById(lectureId)
+                .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
 
-            // if contentId changed, reassign content
-            if (!existing.getContent().getContentId().equals(content.getContentId())) {
-                Content newcontent = contentRepo.findById(dto.getContentId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + dto.getContentId()));
-                existing.setContent(newcontent);
-            }
+        // if contentId changed, reassign content
+        if (!existing.getContent().getContentId().equals(content.getContentId())) {
+            existing.setContent(content);
+        }
 
-            existing = lectureRepo.save(existing);
-            return lectureMapper.toDto(existing);
+        lectureMapper.updateEntityFromDto(dto, existing);
+
+        // if storedFileId changed, reassign File
+        if (dto.getStoredFileId() != null && 
+            (existing.getVideoUrl() == null || !existing.getVideoUrl().getId().equals(dto.getStoredFileId()))) {
+            
+            StoredFile file = storedFileRepo.findById(dto.getStoredFileId())
+                    .orElseThrow(() -> new ResourceNotFoundException("StoredFile not found: " + dto.getStoredFileId()));
+
+            validateStoredFile(file, content);
+            existing.setVideoUrl(file);
+        }
+
+        existing = lectureRepo.save(existing);
+        
+        return enrichWithSignedUrl(existing);
     }
 
     @Override
     public LectureDTO getLectureById(Long lectureId) {
         Lecture lecture = lectureRepo.findById(lectureId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
-        return lectureMapper.toDto(lecture);
+        return enrichWithSignedUrl(lecture);
     }
 
     @Override
@@ -98,7 +96,7 @@ public class LectureServiceImpl implements LectureService {
         Content content = contentRepo.findById(contentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Content not found: " + contentId));
         return lectureRepo.findByContent(content).stream()
-                .map(l -> lectureMapper.toDto(l))
+                .map(this::enrichWithSignedUrl)
                 .toList();
     }
 
@@ -108,6 +106,26 @@ public class LectureServiceImpl implements LectureService {
         Lecture lecture = lectureRepo.findById(lectureId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lecture not found: " + lectureId));
 
-            lectureRepo.delete(lecture);
+        lectureRepo.delete(lecture);
+    }
+
+    private void validateStoredFile(StoredFile file, Content content) {
+        if (!file.getContent().getContentId().equals(content.getContentId())) {
+            throw new RoleMismatchException("StoredFile does not belong to this content");
+        }
+        if (file.getType() != StoredFileType.LECTURE) {
+            throw new RoleMismatchException("StoredFile type must be LECTURE");
+        }
+        if (file.getStatus() != StoredFileStatus.READY) {
+            throw new RoleMismatchException("StoredFile must be READY before linking");
+        }
+    }
+
+    private LectureDTO enrichWithSignedUrl(Lecture lecture) {
+        LectureDTO dto = lectureMapper.toDto(lecture);
+        if (lecture.getVideoUrl() != null) {
+            dto.setVideoSignedUrl(storedFileService.getSignedDownloadUrl(lecture.getVideoUrl().getId(), 600).getSignedDownloadUrl());
+        }
+        return dto;
     }
 }

@@ -23,15 +23,14 @@ public class PaymentController {
 
     @Value("${stripe.publishable-key}")
     private String publishableKey;
-    
+
     @PostMapping("/initiate")
     public ResponseEntity<PaymentInitiateResponse> initiate(@RequestBody PaymentInitiateRequest req) {
         return ResponseEntity.ok(
-                paymentService.initiatePayment(req.getUserId(), req.getCourseId())
-        );
+                paymentService.initiatePayment(req.getUserId(), req.getCourseId()));
     }
 
-        @GetMapping("/config/publishable-key")
+    @GetMapping("/config/publishable-key")
     public String publishableKey() {
         return publishableKey;
     }

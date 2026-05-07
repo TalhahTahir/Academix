@@ -45,6 +45,12 @@ public class AttemptServiceImpl implements AttemptService {
 
     @Override
     public AttemptDTO startAttempt(Long examId, Long studentId) {
+
+        attemptRepo.findByExam_IdAndStudent_Userid(examId, studentId)
+                .filter(a -> a.getCompletedAt() == null)
+                .ifPresent(a -> {
+                    throw new ForbiddenException("You have an ongoing attempt for this exam.");
+                });
         Exam exam = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
         EnrollmentDTO stdEnrollment = enrollmentService.enrollmentValidation(exam.getCourse().getCourseId(), studentId);
@@ -96,10 +102,9 @@ public class AttemptServiceImpl implements AttemptService {
 
         Enrollment enrollment = enrollmentRepo.findByStudent_UseridAndCourse_CourseId(
                 attempt.getStudent().getUserid(),
-                attempt.getExam().getCourse().getCourseId());
-        if (enrollment == null) {
-            throw new ResourceNotFoundException("Enrollment not found for student and course.");
-        }
+                attempt.getExam().getCourse().getCourseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found for student and course."));
+
         enrollment.setMarks(percentage);
         enrollmentRepo.save(enrollment);
 

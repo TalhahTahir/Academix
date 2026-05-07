@@ -77,9 +77,11 @@ public class ContentServiceImpl implements ContentService {
                 content.setCourse(courseRepo.findById(dto.getCourseId())
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "Course not found with id: " + dto.getCourseId())));
-                content.setDescription(dto.getDescription());
-                content = contentRepo.save(content);
 
+                if (!dto.getDescription().isEmpty()) {
+                        content.setDescription(dto.getDescription());
+                }
+                content = contentRepo.save(content);
                 return contentMapper.toDto(content);
         }
 

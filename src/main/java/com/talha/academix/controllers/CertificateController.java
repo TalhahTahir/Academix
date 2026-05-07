@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class CertificateController {
     private final CertificateService certificateService;
 
+    @PreAuthorize("@enrollmentSecurity.isEnrolled(principal, #enrollmentId)")
     @PostMapping("/enrollment/{id}")
     public CertificateDTO awardCertificate(@PathVariable("id") Long enrollmentId) {
         return certificateService.awardCertificate(enrollmentId);

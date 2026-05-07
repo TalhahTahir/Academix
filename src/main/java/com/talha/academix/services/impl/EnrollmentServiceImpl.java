@@ -84,10 +84,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public EnrollmentDTO enrollmentValidation(Long courseId, Long userId) {
-        Enrollment enrollment = enrollmentRepo.findByStudent_UseridAndCourse_CourseId(userId, courseId);
-        if (enrollment == null) {
-            throw new ResourceNotFoundException("Student is not enrolled in this course");
-        }
+        Enrollment enrollment = enrollmentRepo.findByStudent_UseridAndCourse_CourseId(userId, courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found for student and course."));
         return enrollmentMapper.toDto(enrollment);
     }
 

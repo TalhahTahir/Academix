@@ -21,7 +21,7 @@ public interface EnrollmentRepo extends JpaRepository<Enrollment, Long> {
 
         List<Enrollment> findByStatus(EnrollmentStatus status);
 
-        Enrollment findByStudent_UseridAndCourse_CourseId(Long userid, Long courseId);
+        Optional<Enrollment> findByStudent_UseridAndCourse_CourseId(Long userid, Long courseId);
 
         long countByCompletionPercentageGreaterThan(int i);
 
