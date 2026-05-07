@@ -18,5 +18,8 @@ public interface AttemptRepo extends JpaRepository<Attempt, Long>{
 
     @Query("SELECT a FROM Attempt a WHERE a.exam.id = :examId")
     List<Attempt> findByExamId(@Param("examId") Long examId);
+
+    boolean existsByAttemptIdAndStudent_Userid(Long attemptId, Long Userid);
     
 }
+    

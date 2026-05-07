@@ -13,8 +13,6 @@ import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,14 +56,4 @@ public class EnrollmentController {
         enrollmentService.withdrawEnrollment(id);
     }
 
-    @PutMapping("/{id}")
-    public EnrollmentDTO updateEnrollment(@PathVariable("id") Long enrollmentId,
-            @RequestBody EnrollmentDTO enrollmentDTO) {
-        return enrollmentService.updateEnrollment(enrollmentId, enrollmentDTO);
-    }
-
-    @PutMapping("/completion/{id}")
-    public EnrollmentDTO completionEnrollment(@PathVariable("id") Long enrollmentId) {
-        return enrollmentService.enrollmentCompletion(enrollmentId);
-    }
 }

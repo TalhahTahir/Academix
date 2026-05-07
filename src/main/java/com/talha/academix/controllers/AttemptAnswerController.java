@@ -2,6 +2,7 @@ package com.talha.academix.controllers;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.talha.academix.dto.AttemptAnswerDTO;
@@ -16,7 +17,8 @@ public class AttemptAnswerController {
 
     private final AttemptAnswerService attemptAnswerService;
 
-    // Upsert answer for a question in an attempt
+// Upsert answer for a question in an attempt
+@PreAuthorize("@attemptSecurity.isAttemptOwner(principal, #attemptId)")
 @PutMapping("/attempts/{attemptId}/answers/{questionId}/options/{selectedOptionId}")
 public AttemptAnswerDTO submitAnswer(@PathVariable Long attemptId,
                                      @PathVariable Long questionId,
@@ -26,6 +28,7 @@ public AttemptAnswerDTO submitAnswer(@PathVariable Long attemptId,
 
 
     // List answers for an attempt
+    @PreAuthorize("@attemptSecurity.isAttemptOwner(principal, #attemptId) or hasRole('ROLE_TEACHER') or hasRole('ROLE_ADMIN')")
     @GetMapping("/attempts/{attemptId}/answers")
     public List<AttemptAnswerDTO> getAnswersByAttempt(@PathVariable Long attemptId) {
         return attemptAnswerService.getAnswersByAttempt(attemptId);
