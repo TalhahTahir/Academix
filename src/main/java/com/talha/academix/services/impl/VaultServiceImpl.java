@@ -3,7 +3,6 @@ package com.talha.academix.services.impl;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.VaultDTO;
@@ -31,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 public class VaultServiceImpl implements VaultService {
 
     private final VaultRepo vaultRepo;
-    private final ModelMapper mapper;
     private final UserRepo userRepo;
     private final VaultTransactionRepo vaultTxRepo;
     private final VaultTransactionService vaultTxService;
@@ -39,12 +37,7 @@ public class VaultServiceImpl implements VaultService {
 
     @Override
     public VaultDTO createVault(VaultDTO dto) {
-        // VaultDTO exist = getVaultByUserId(dto.getUserId());
-        // if (exist != null) {
-        // throw new AlreadyExistException("Vault already exists for user with ID: " +
-        // dto.getUserId());
-        // }
-        Vault vault = mapper.map(dto, Vault.class);
+        Vault vault = vaultMapper.toEntity(dto);
         vault.setUser(userRepo.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + dto.getUserId())));
         vault = vaultRepo.save(vault);
@@ -55,8 +48,7 @@ public class VaultServiceImpl implements VaultService {
     public VaultDTO updateVault(Long vaultId, VaultDTO dto) {
         Vault exist = vaultRepo.findById(vaultId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vault not found with id : " + vaultId));
-        mapper.getConfiguration().setSkipNullEnabled(true);
-        mapper.map(dto, exist);
+        vaultMapper.updateVaultfromDto(dto, exist);
         exist.setUser(userRepo.findById(dto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + dto.getUserId())));
         exist.setId(vaultId);
@@ -76,7 +68,7 @@ public class VaultServiceImpl implements VaultService {
     public VaultDTO getVaultById(Long vaultId) {
         Vault vault = vaultRepo.findById(vaultId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vault not found with id : " + vaultId));
-        return mapper.map(vault, VaultDTO.class);
+        return vaultMapper.toDto(vault);
     }
 
     @Override

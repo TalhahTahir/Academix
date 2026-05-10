@@ -3,7 +3,6 @@ package com.talha.academix.services.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.OptionDTO;
@@ -25,7 +24,6 @@ public class OptionServiceImpl implements OptionService {
 
     private final OptionRepo optionRepo;
     private final QuestionRepo questionRepo;
-    private final ModelMapper mapper;
     private final OptionMapper optionMapper;
 
     @Override
@@ -41,12 +39,12 @@ public class OptionServiceImpl implements OptionService {
             }
         }
 
-        QuestionOption questionOption = mapper.map(dto, QuestionOption.class);
+        QuestionOption questionOption = optionMapper.toEntity(dto);
         questionOption.setQuestion(question);
         questionOption.setCorrect((dto.isCorrect()));
         questionOption = optionRepo.save(questionOption);
 
-        return mapper.map(questionOption, OptionDTO.class);
+        return optionMapper.toDto(questionOption);
     }
 
     @Override
@@ -66,8 +64,7 @@ public class OptionServiceImpl implements OptionService {
         Question question = questionRepo.findById(questionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
 
-        mapper.getConfiguration().setSkipNullEnabled(true);
-        mapper.map(dto, questionOption);
+        optionMapper.updateOptionFromDto(dto, questionOption);
         questionOption.setQuestion(question);
         questionOption = optionRepo.save(questionOption);
 

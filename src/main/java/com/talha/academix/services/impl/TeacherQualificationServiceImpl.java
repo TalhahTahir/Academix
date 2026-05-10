@@ -2,8 +2,6 @@
 package com.talha.academix.services.impl;
 
 import java.util.List;
-
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.TeacherQualificationDTO;
@@ -25,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 public class TeacherQualificationServiceImpl implements TeacherQualificationService {
     private final TeacherQualificationRepo qualRepo;
     private final UserRepo userRepo;
-    private final ModelMapper mapper;
     private final TeacherQualificationMapper qualificationMapper;
 
     @Override
@@ -52,18 +49,17 @@ public class TeacherQualificationServiceImpl implements TeacherQualificationServ
             throw new ForbiddenException("Qualification does not belong to teacher with ID: " + dto.getTeacherId());
         }
 
-        mapper.getConfiguration().setSkipNullEnabled(true);
-        mapper.map(dto, qual);
+        qualificationMapper.updateQuestionFromDto(dto, qual);
         qual.setTeacher(teacher);
         qual = qualRepo.save(qual);
-        return mapper.map(qual, TeacherQualificationDTO.class);
+        return qualificationMapper.toDto(qual);
     }
 
     @Override
     public TeacherQualificationDTO getQualificationById(Long qualificationId) {
         TeacherQualification qual = qualRepo.findById(qualificationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Qualification not found: " + qualificationId));
-        return mapper.map(qual, TeacherQualificationDTO.class);
+        return qualificationMapper.toDto(qual);
     }
 
     @Override
@@ -71,7 +67,7 @@ public class TeacherQualificationServiceImpl implements TeacherQualificationServ
         User teacher = userRepo.findById(teacherId)
                 .orElseThrow(() -> new ResourceNotFoundException("Teacher not found: " + teacherId));
         return qualRepo.findByTeacher(teacher).stream()
-                .map(q -> mapper.map(q, TeacherQualificationDTO.class))
+                .map(q -> qualificationMapper.toDto(q))
                 .toList();
     }
 
@@ -79,7 +75,7 @@ public class TeacherQualificationServiceImpl implements TeacherQualificationServ
     public List<TeacherQualificationDTO> getQualificationsByDegree(Degree degree) {
         return qualRepo.findByDegree(degree) // if you convert string to enum earlier
                 .stream()
-                .map(q -> mapper.map(q, TeacherQualificationDTO.class))
+                .map(q -> qualificationMapper.toDto(q))
                 .toList();
     }
 

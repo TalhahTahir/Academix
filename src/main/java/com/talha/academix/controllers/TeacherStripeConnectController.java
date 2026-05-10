@@ -3,7 +3,7 @@ package com.talha.academix.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.talha.academix.services.impl.TeacherAccountServiceImpl;
+import com.talha.academix.services.TeacherAccountService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TeacherStripeConnectController {
 
-    private final TeacherAccountServiceImpl teacherAccountService;
+    private final TeacherAccountService teacherAccountService;
 
     @PostMapping("/teachers/{teacherId}/onboarding-link")
     public ResponseEntity<String> onboardingLink(@PathVariable Long teacherId) {

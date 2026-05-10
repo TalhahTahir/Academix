@@ -3,7 +3,6 @@ package com.talha.academix.services.impl;
 import java.util.List;
 import java.util.ArrayList;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.CourseDTO;
@@ -31,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepo courseRepo;
-    private final ModelMapper mapper;
     private final UserRepo userRepo;
     private final EnrollmentRepo enrollmentRepo;
     private final CourseMapper courseMapper;
@@ -82,7 +80,7 @@ public class CourseServiceImpl implements CourseService {
         List<Course> courses = courseRepo.findAll();
         List<CourseViewDTO> coursesview = new ArrayList<>();
         courses.forEach(course -> {
-            CourseViewDTO courseViewDTO = mapper.map(course, CourseViewDTO.class);
+            CourseViewDTO courseViewDTO = courseMapper.toViewDto(course);
             if (enrollmentRepo.existsByStudent_UseridAndCourse_CourseId(studentId, course.getCourseId())) {
                 courseViewDTO.setBadge(CourseBadge.Enrolled);
             }
@@ -252,8 +250,7 @@ public class CourseServiceImpl implements CourseService {
         Course existing = courseRepo.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
-        mapper.getConfiguration().setSkipNullEnabled(true);
-        mapper.map(dto, existing);
+        courseMapper.updateCourseFromDto(dto, existing);
         existing.setState(CourseState.MODIFIED);
         existing = courseRepo.save(existing);
         return courseMapper.toDto(existing);

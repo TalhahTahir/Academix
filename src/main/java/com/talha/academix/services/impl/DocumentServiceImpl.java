@@ -3,7 +3,6 @@ package com.talha.academix.services.impl;
 
 import java.util.List;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.DocumentDTO;
@@ -29,7 +28,6 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepo documentRepo;
     private final ContentRepo contentRepo;
     private final StoredFileRepo storedFileRepo;
-    private final ModelMapper mapper;
     private final DocumentMapper documentMapper;
 
     @Override
@@ -67,8 +65,7 @@ public class DocumentServiceImpl implements DocumentService {
         Document existing = documentRepo.findById(documentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + documentId));
 
-        mapper.getConfiguration().setSkipNullEnabled(true);
-        mapper.map(dto, existing);
+        documentMapper.updateDocumentFromDto(dto, existing);
 
         if (!existing.getContent().getContentId().equals(dto.getContentId())) {
             Content content = contentRepo.findById(dto.getContentId())

@@ -14,7 +14,5 @@ public interface ContentMapper {
     @Mapping(target = "imageSignedUrl", ignore = true)
     ContentDTO toDto(Content content);
 
-    @Mapping(source = "courseId", target = "course.courseId")
-    @Mapping(source = "imageFileId", target = "imageFile.id")
     Content toEntity(ContentDTO dto);
 }

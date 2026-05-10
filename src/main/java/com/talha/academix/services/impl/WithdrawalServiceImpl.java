@@ -32,6 +32,7 @@ import com.talha.academix.repository.VaultRepo;
 import com.talha.academix.repository.VaultTransactionRepo;
 import com.talha.academix.repository.WithdrawalRepo;
 import com.talha.academix.services.StripeConnectPayoutService;
+import com.talha.academix.services.TeacherAccountService;
 import com.talha.academix.services.VaultTransactionService;
 import com.talha.academix.services.WithdrawalService;
 
@@ -56,7 +57,7 @@ public class WithdrawalServiceImpl implements WithdrawalService {
     private final VaultRepo vaultRepo;
     private final VaultTransactionRepo vaultTxRepo;
     private final UserRepo userRepo;
-    private final TeacherAccountServiceImpl teacherAccountService;
+    private final TeacherAccountService teacherAccountService;
     private final StripeConnectPayoutService stripeConnectPayoutService;
     private final VaultTransactionService vaultTransactionService;
     @Override

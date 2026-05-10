@@ -10,6 +10,8 @@ import com.talha.academix.model.TeacherAccount;
 import com.talha.academix.model.User;
 import com.talha.academix.repository.TeacherAccountRepo;
 import com.talha.academix.repository.UserRepo;
+import com.talha.academix.services.TeacherAccountService;
+
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TeacherAccountServiceImpl {
+public class TeacherAccountServiceImpl implements TeacherAccountService {
 
     private static final String PLATFORM_COUNTRY = "US";
 
@@ -39,6 +41,7 @@ public class TeacherAccountServiceImpl {
      * IMPORTANT: This method should not be @Transactional because it calls Stripe API.
      * We want the DB save to commit even if Stripe calls fail later.
      */
+    @Override
     public TeacherAccount getOrCreateStripeAccountForTeacher(Long teacherId) {
 
         Optional<TeacherAccount> existing = teacherAccRepo.findByTeacher_Userid(teacherId);
@@ -97,6 +100,7 @@ public class TeacherAccountServiceImpl {
     /**
      * Not transactional - calls Stripe API.
      */
+    @Override
     public String createOnboardingLink(Long teacherId, String refreshUrl, String returnUrl) {
         TeacherAccount ta = getOrCreateStripeAccountForTeacher(teacherId);
 
@@ -120,6 +124,7 @@ public class TeacherAccountServiceImpl {
      * Not transactional - calls Stripe API.
      * Updates DB in REQUIRES_NEW to avoid rollback cascade.
      */
+    @Override
     public TeacherAccountStatus syncStatusFromStripe(Long teacherId) {
         TeacherAccount ta = teacherAccRepo.findByTeacher_Userid(teacherId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Stripe account not created"));
@@ -129,6 +134,7 @@ public class TeacherAccountServiceImpl {
     /**
      * Overload that accepts a TeacherAccount directly (avoids re-querying DB).
      */
+    @Override
     public TeacherAccountStatus syncStatusFromStripe(TeacherAccount ta) {
         try {
             Account account = Account.retrieve(ta.getStripeAccountId());
@@ -159,6 +165,7 @@ public class TeacherAccountServiceImpl {
         }
     }
 
+    @Override
     public Optional<String> getOnboardingLinkIfNotOnboarded(Long teacherId, String refreshUrl, String returnUrl) {
         TeacherAccount ta = getOrCreateStripeAccountForTeacher(teacherId);
         TeacherAccountStatus status = syncStatusFromStripe(ta);

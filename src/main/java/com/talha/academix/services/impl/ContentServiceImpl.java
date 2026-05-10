@@ -32,7 +32,6 @@ public class ContentServiceImpl implements ContentService {
         private final ContentMapper contentMapper;
         private final StoredFileRepo storedFileRepo;
         private final StoredFileService storedFileService;
-        Boolean owned;
 
         @Override
         public ContentDTO addContent(ContentDTO dto) {

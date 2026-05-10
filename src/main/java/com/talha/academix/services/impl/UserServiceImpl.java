@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +12,7 @@ import com.talha.academix.dto.UserDTO;
 import com.talha.academix.dto.VaultDTO;
 import com.talha.academix.enums.Role;
 import com.talha.academix.exception.ResourceNotFoundException;
+import com.talha.academix.mapper.UserMapper;
 import com.talha.academix.model.User;
 import com.talha.academix.repository.UserRepo;
 import com.talha.academix.services.UserService;
@@ -26,12 +26,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
     private final VaultService vaultService;
-    private final ModelMapper mapper;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     @Override
     public UserDTO createUser(CreateUserDTO dto) {
-        User user = mapper.map(dto, User.class);
+        User user = userMapper.createUser(dto);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setCreatedAt(Instant.now());
 
@@ -47,23 +47,21 @@ public class UserServiceImpl implements UserService {
             vaultDto.setUpdatedAt(Instant.now());
             vaultService.createVault(vaultDto);
         }
-        mapper.getConfiguration().setSkipNullEnabled(true);
-
-        return mapper.map(user, UserDTO.class);
+        return userMapper.toDto(user);
     }
 
     @Override
     public UserDTO getUserById(Long id) {
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + id));
-        return mapper.map(user, UserDTO.class);
+        return userMapper.toDto(user);
     }
 
     @Override
     public List<UserDTO> getAllUsers() {
         List<User> users = userRepo.findAll();
         return users.stream()
-                .map(user -> mapper.map(user, UserDTO.class))
+                .map(user -> userMapper.toDto(user))
                 .toList();
     }
 
@@ -79,12 +77,11 @@ public class UserServiceImpl implements UserService {
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + id));
 
-        mapper.getConfiguration().setSkipNullEnabled(true);
-        mapper.map(dto, user);
+        userMapper.updateUserFromDto(dto, user);
         user.setUserid(id);
 
         User updatedUser = userRepo.save(user);
-        return mapper.map(updatedUser, UserDTO.class);
+        return userMapper.toDto(updatedUser);
     }
 
     @Override

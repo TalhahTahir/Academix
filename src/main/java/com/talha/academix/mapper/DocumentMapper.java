@@ -1,7 +1,10 @@
 package com.talha.academix.mapper;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import com.talha.academix.dto.DocumentDTO;
 import com.talha.academix.model.Document;
@@ -17,4 +20,9 @@ public interface DocumentMapper {
     @Mapping(source = "contentId", target = "content.contentId")
     @Mapping(source = "storedFileId", target = "storedFile.id")
     Document toEntity(DocumentDTO dto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(source = "contentId", target = "content.contentId")
+    @Mapping(source = "storedFileId", target = "storedFile.id")
+    void updateDocumentFromDto(DocumentDTO dto, @MappingTarget Document d);
 }

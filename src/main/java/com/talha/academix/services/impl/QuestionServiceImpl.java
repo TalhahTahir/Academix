@@ -3,7 +3,6 @@ package com.talha.academix.services.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.QuestionDTO;
@@ -23,7 +22,6 @@ public class QuestionServiceImpl implements QuestionService {
 
     private final QuestionRepo questionRepo;
     private final ExamRepo examRepo;
-    private final ModelMapper mapper;
     private final QuestionMapper questionMapper;
 
     @Override
@@ -32,7 +30,7 @@ public class QuestionServiceImpl implements QuestionService {
         Exam exam = examRepo.findById(examId)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
 
-        Question question = mapper.map(dto, Question.class);
+        Question question = questionMapper.toEntity(dto);
         question.setExam(exam);
         question = questionRepo.save(question);
 
