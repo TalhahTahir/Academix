@@ -3,11 +3,11 @@ package com.talha.academix.services;
 import org.springframework.stereotype.Service;
 
 import com.talha.academix.dto.AdminDashBoardDTO;
-import com.talha.academix.services.AdminDashBoard.CertificateDashboardQueryService;
-import com.talha.academix.services.AdminDashBoard.CourseDashboardQueryService;
-import com.talha.academix.services.AdminDashBoard.EnrollmentDashboardQueryService;
-import com.talha.academix.services.AdminDashBoard.ExamDashboardQueryService;
-import com.talha.academix.services.AdminDashBoard.UserDashboardQueryService;
+import com.talha.academix.services.admindashboard.CertificateDashboardQueryService;
+import com.talha.academix.services.admindashboard.CourseDashboardQueryService;
+import com.talha.academix.services.admindashboard.EnrollmentDashboardQueryService;
+import com.talha.academix.services.admindashboard.ExamDashboardQueryService;
+import com.talha.academix.services.admindashboard.UserDashboardQueryService;
 
 import lombok.RequiredArgsConstructor;
 

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.talha.academix.dto.VaultDTO;
 import com.talha.academix.dto.VaultTransactionDTO;
@@ -96,6 +97,7 @@ public class VaultServiceImpl implements VaultService {
         return vaultRepo.getTotalAvailableBalance();
     }
 
+    @Transactional
     @Override
     public Boolean shareDistribution(Payment payment) {
 

@@ -1,4 +1,4 @@
-package com.talha.academix.services.AdminDashBoard;
+package com.talha.academix.services.admindashboard;
 
 import org.springframework.stereotype.Service;
 
