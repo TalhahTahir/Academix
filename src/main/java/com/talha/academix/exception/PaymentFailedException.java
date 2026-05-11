@@ -5,6 +5,10 @@ public class PaymentFailedException extends RuntimeException {
         super(message);
     }
 
+    public PaymentFailedException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     public PaymentFailedException(String message, String clientSecret) {
         super(message + " Client Secret: " + clientSecret);
     }

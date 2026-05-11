@@ -17,6 +17,7 @@ import com.talha.academix.dto.PaymentInitiateResponse;
 import com.talha.academix.enums.PaymentProvider;
 import com.talha.academix.enums.PaymentStatus;
 import com.talha.academix.enums.PaymentType;
+import com.talha.academix.exception.PaymentFailedException;
 import com.talha.academix.exception.ResourceNotFoundException;
 import com.talha.academix.mapper.PaymentMapper;
 import com.talha.academix.model.Course;
@@ -83,11 +84,12 @@ public class PaymentServiceImpl implements PaymentService {
                                         CURRENCY.toLowerCase(),
                                         metadata);
                 } catch (StripeException e) {
-                        log.error("Stripe intent creation failed", e);
+                        log.error("Stripe intent creation failed for paymentId={}, userId={}, courseId={}: {}",
+                                        payment.getId(), user.getUserid(), course.getCourseId(), e.getMessage(), e);
                         payment.setStatus(PaymentStatus.FAILED);
                         payment.setFailedAt(Instant.now());
                         paymentRepo.save(payment);
-                        throw new RuntimeException("Payment initiation failed");
+                        throw new PaymentFailedException("Payment initiation failed", e);
                 }
 
                 // persist stripe detail

@@ -8,15 +8,24 @@ import lombok.AllArgsConstructor;
 
 import com.talha.academix.enums.EnrollmentStatus;
 
+import jakarta.validation.constraints.NotNull;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class EnrollmentDTO {
+
     private Long enrollmentId;
+    @NotNull
     private Long studentId;
+    @NotNull
     private Long courseId;
+    @NotNull
     private Instant enrollmentDate;
+    @NotNull
     private EnrollmentStatus status;
+    @NotNull
     private double completionPercentage;
+    @NotNull
     private double marks;
 }
