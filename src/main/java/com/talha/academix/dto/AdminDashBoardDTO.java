@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminDashBoardDTO {
+public class AdminDashboardDTO {
     private Users users;
     private Courses courses;
     private Enrollments enrollments;

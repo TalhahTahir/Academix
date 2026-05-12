@@ -2,7 +2,7 @@ package com.talha.academix.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.talha.academix.dto.AdminDashBoardDTO;
+import com.talha.academix.dto.AdminDashboardDTO;
 import com.talha.academix.services.AdminDashboardService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class AdminDashboardController {
     private final AdminDashboardService adminDashboardService;
 
     @GetMapping
-    public ResponseEntity<AdminDashBoardDTO> getDashboard() {
+    public ResponseEntity<AdminDashboardDTO> getDashboard() {
         return ResponseEntity.ok(adminDashboardService.getAdminDashboard());
     }
     

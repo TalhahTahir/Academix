@@ -23,7 +23,7 @@ public class VaultController {
     private final VaultService vaultService;
 
     @GetMapping("/users/{id}")
-    public VaultDTO getvaultByUserId(@PathVariable("id") Long userid) {
+    public VaultDTO getVaultByUserId(@PathVariable("id") Long userid) {
         return vaultService.getVaultByUserId(userid);
     }
 
@@ -34,9 +34,9 @@ public class VaultController {
     }
 
     @PreAuthorize("@vaultSecurity.isVaultOwner(principal, #id)")
-    @PutMapping("update/{id}")
+    @PutMapping("/update/{id}")
     public VaultDTO updateVault(@PathVariable Long id, @RequestBody VaultDTO dto) {
-        return vaultService.updateVault(Long.valueOf(id), dto);
+        return vaultService.updateVault(id, dto);
     }
 
     @PreAuthorize("@vaultSecurity.isVaultOwner(principal, #id)")

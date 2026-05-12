@@ -2,7 +2,7 @@ package com.talha.academix.services.admindashboard;
 
 import org.springframework.stereotype.Service;
 
-import com.talha.academix.dto.AdminDashBoardDTO;
+import com.talha.academix.dto.AdminDashboardDTO;
 import com.talha.academix.enums.CourseState;
 import com.talha.academix.repository.CourseRepo;
 
@@ -13,8 +13,8 @@ import lombok.RequiredArgsConstructor;
 public class CourseDashboardQueryService {
     private final CourseRepo courseRepo;
 
-    public AdminDashBoardDTO.Courses coursesSection() {
-        return AdminDashBoardDTO.Courses.builder()
+    public AdminDashboardDTO.Courses coursesSection() {
+        return AdminDashboardDTO.Courses.builder()
                 .totalCourses(courseRepo.count())
                 .launched(courseRepo.countByState(CourseState.LAUNCHED))
                 .draft(courseRepo.countByState(CourseState.DRAFT))

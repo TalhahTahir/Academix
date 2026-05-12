@@ -38,7 +38,7 @@ public class CourseController {
     }
 
     @GetMapping("/count")
-    public Long countAllLong() {
+    public Long countAll() {
         return courseService.countAll();
     }
     

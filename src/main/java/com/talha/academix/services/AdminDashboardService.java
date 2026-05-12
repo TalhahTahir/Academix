@@ -2,7 +2,7 @@ package com.talha.academix.services;
 
 import org.springframework.stereotype.Service;
 
-import com.talha.academix.dto.AdminDashBoardDTO;
+import com.talha.academix.dto.AdminDashboardDTO;
 import com.talha.academix.services.admindashboard.CertificateDashboardQueryService;
 import com.talha.academix.services.admindashboard.CourseDashboardQueryService;
 import com.talha.academix.services.admindashboard.EnrollmentDashboardQueryService;
@@ -21,8 +21,8 @@ public class AdminDashboardService {
     private final ExamDashboardQueryService examDashboardQueryService;
     private final CertificateDashboardQueryService certificateDashboardQueryService;
 
-    public AdminDashBoardDTO getAdminDashboard() {
-        return AdminDashBoardDTO.builder()
+    public AdminDashboardDTO getAdminDashboard() {
+        return AdminDashboardDTO.builder()
                 .users(userDashboardQueryService.usersSection())
                 .courses(courseDashboardQueryService.coursesSection())
                 .enrollments(enrollmentDashboardQueryService.enrollmentsSection())

@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.talha.academix.dto.SignedDownloadResponseDTO;
 import com.talha.academix.dto.SignedUploadInitRequestDTO;
+import com.talha.academix.dto.SignedUploadInitResponseDTO;
 import com.talha.academix.services.StoredFileService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,13 +19,13 @@ public class StoredFileController {
 
     // Step 1: backend generates signed upload URL for private bucket
     @PostMapping("/initiate-signed-upload")
-    public ResponseEntity initiateSignedUpload(@RequestBody SignedUploadInitRequestDTO req) {
+    public ResponseEntity<SignedUploadInitResponseDTO> initiateSignedUpload(@RequestBody SignedUploadInitRequestDTO req) {
         return ResponseEntity.ok(storedFileService.initiateSignedUpload(req));
     }
 
     // Step 3: after successful upload via Postman, mark READY
     @PostMapping("/{id}/mark-ready")
-    public ResponseEntity markReady(@PathVariable Long id) {
+    public ResponseEntity<?> markReady(@PathVariable Long id) {
         storedFileService.markReady(id);
         return ResponseEntity.ok().build();
     }

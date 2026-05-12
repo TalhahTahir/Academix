@@ -2,7 +2,6 @@ package com.talha.academix.services.impl;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -128,7 +127,7 @@ public class AttemptServiceImpl implements AttemptService {
                     d.setStudentId(a.getStudent().getUserid());
                     return d;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -139,6 +138,6 @@ public class AttemptServiceImpl implements AttemptService {
                     d.setStudentId(a.getStudent().getUserid());
                     return d;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 }

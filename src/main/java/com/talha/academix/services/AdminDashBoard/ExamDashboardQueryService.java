@@ -2,7 +2,7 @@ package com.talha.academix.services.admindashboard;
 
 import org.springframework.stereotype.Service;
 
-import com.talha.academix.dto.AdminDashBoardDTO;
+import com.talha.academix.dto.AdminDashboardDTO;
 import com.talha.academix.repository.ExamRepo;
 
 import lombok.RequiredArgsConstructor;
@@ -13,8 +13,8 @@ public class ExamDashboardQueryService {
     
     private final ExamRepo examRepo;
 
-    public AdminDashBoardDTO.Exams examsSection(){
-        return AdminDashBoardDTO.Exams.builder()
+    public AdminDashboardDTO.Exams examsSection(){
+        return AdminDashboardDTO.Exams.builder()
                 .totalExams(examRepo.count())
                 .build();
     }

@@ -86,19 +86,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean adminValidation(Long userid) {
-
-        if (getUserById(userid).getRole().equals(Role.ADMIN)) {
-            return true;
-        } else
-            return false;
+        return getUserById(userid).getRole().equals(Role.ADMIN);
     }
 
     @Override
     public boolean teacherValidation(Long userid) {
-
-        if (getUserById(userid).getRole().equals(Role.TEACHER)) {
-            return true;
-        } else
-            return false;
+        return getUserById(userid).getRole().equals(Role.TEACHER);
     }
 }

@@ -2,7 +2,7 @@ package com.talha.academix.services.admindashboard;
 
 import org.springframework.stereotype.Service;
 
-import com.talha.academix.dto.AdminDashBoardDTO;
+import com.talha.academix.dto.AdminDashboardDTO;
 import com.talha.academix.enums.EnrollmentStatus;
 import com.talha.academix.repository.EnrollmentRepo;
 
@@ -13,8 +13,8 @@ import lombok.RequiredArgsConstructor;
 public class EnrollmentDashboardQueryService {
     private final EnrollmentRepo enrollmentRepo;
 
-    public AdminDashBoardDTO.Enrollments enrollmentsSection(){
-        return AdminDashBoardDTO.Enrollments.builder()
+    public AdminDashboardDTO.Enrollments enrollmentsSection(){
+        return AdminDashboardDTO.Enrollments.builder()
                 .totalEnrollments(enrollmentRepo.count())
                 .activeEnrollments(enrollmentRepo.countByCompletionPercentageGreaterThan(0))
                 .completedEnrollments(enrollmentRepo.countByStatus(EnrollmentStatus.COMPLETED))

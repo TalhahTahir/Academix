@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,9 +50,11 @@ public class WithdrawalServiceImpl implements WithdrawalService {
     private static final BigDecimal MIN_WITHDRAWAL = new BigDecimal("10.00");
     private static final String CURRENCY = "USD";
 
-    // For now hardcoded; later move to application.properties
-    private static final String CONNECT_REFRESH_URL = "http://localhost:8081/api/stripe/connect/refresh";
-    private static final String CONNECT_RETURN_URL  = "http://localhost:8081/api/stripe/connect/return";
+    @Value("${app.stripe.connect.refresh-url}")
+    private String connectRefreshUrl;
+
+    @Value("${app.stripe.connect.return-url}")
+    private String connectReturnUrl;
 
     private final WithdrawalRepo withdrawalRepo;
     private final VaultRepo vaultRepo;
@@ -101,7 +104,7 @@ public class WithdrawalServiceImpl implements WithdrawalService {
         // LAZY onboarding: if teacher not onboarded, respond with onboarding URL and do NOT lock funds
         if (kind == WithdrawalKind.TEACHER) {
             Optional<String> onboardingUrl = teacherAccountService.getOnboardingLinkIfNotOnboarded(
-                    user.getUserid(), CONNECT_REFRESH_URL, CONNECT_RETURN_URL
+                    user.getUserid(), connectRefreshUrl, connectReturnUrl
             );
             if (onboardingUrl.isPresent()) {
                 throw new StripeOnboardingRequiredException(onboardingUrl.get());

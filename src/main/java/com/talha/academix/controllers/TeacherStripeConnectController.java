@@ -1,24 +1,30 @@
 package com.talha.academix.controllers;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.talha.academix.services.TeacherAccountService;
 
-import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/api/stripe/connect")
-@RequiredArgsConstructor
 public class TeacherStripeConnectController {
 
     private final TeacherAccountService teacherAccountService;
 
+    @Value("${app.stripe.connect.refresh-url}")
+    private String connectRefreshUrl;
+
+    @Value("${app.stripe.connect.return-url}")
+    private String connectReturnUrl;
+
+    public TeacherStripeConnectController(TeacherAccountService teacherAccountService) {
+        this.teacherAccountService = teacherAccountService;
+    }
+
     @PostMapping("/teachers/{teacherId}/onboarding-link")
     public ResponseEntity<String> onboardingLink(@PathVariable Long teacherId) {
-        String refreshUrl = "http://localhost:8081/api/stripe/connect/refresh";
-        String returnUrl  = "http://localhost:8081/api/stripe/connect/return";
-        return ResponseEntity.ok(teacherAccountService.createOnboardingLink(teacherId, refreshUrl, returnUrl));
+        return ResponseEntity.ok(teacherAccountService.createOnboardingLink(teacherId, connectRefreshUrl, connectReturnUrl));
     }
 
     @GetMapping("/return")

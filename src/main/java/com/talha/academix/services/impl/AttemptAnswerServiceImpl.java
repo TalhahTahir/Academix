@@ -1,7 +1,6 @@
 package com.talha.academix.services.impl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -71,7 +70,7 @@ public class AttemptAnswerServiceImpl implements AttemptAnswerService {
         return attemptAnswerRepo.findByAttemptId(attemptId)
             .stream()
             .map(a -> attemptAnswerMapper.toDto(a))
-            .collect(Collectors.toList());
+            .toList();
     }
 
 

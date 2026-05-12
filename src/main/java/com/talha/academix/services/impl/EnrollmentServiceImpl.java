@@ -34,17 +34,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     @Transactional
     public EnrollmentDTO enrollStudent(Long studentId, Long courseId) {
-        // 1. Charge the student (or trigger transfer for teacher)
-        // PaymentDTO payment = paymentService.processPayment(studentId, courseId);
-
-        // // 2. If payment requires action, bubble a special exception
-        // if (Boolean.TRUE.equals(payment.getRequiresAction())) {
-        // throw new PaymentFailedException(
-        // "Further authentication required",
-        // payment.getClientSecret());
-        // }
-
-        // 3. If payment succeeded, create the enrollment
         return finalizeEnrollment(studentId, courseId);
     }
 
@@ -122,8 +111,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment updated = enrollmentRepo.save(enrollment);
 
         // 5. Map back to DTO (manual for now, or use MapStruct)
-        EnrollmentDTO updatedDTO = enrollmentMapper.toDto(updated);
-        return updatedDTO;
+        return enrollmentMapper.toDto(updated);
     }
 
     @Override
