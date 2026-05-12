@@ -15,5 +15,5 @@ public class EnrollmentStatsDTO {
     private long totalDocuments;
     private long completedDocuments;
 
-    private double completionPercentage;
+    private Double completionPercentage;
 }

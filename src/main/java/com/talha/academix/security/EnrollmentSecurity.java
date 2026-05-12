@@ -3,7 +3,6 @@ package com.talha.academix.security;
 import org.springframework.stereotype.Component;
 
 import com.talha.academix.exception.ResourceNotFoundException;
-import com.talha.academix.model.Enrollment;
 import com.talha.academix.model.Exam;
 import com.talha.academix.repository.EnrollmentRepo;
 import com.talha.academix.repository.ExamRepo;

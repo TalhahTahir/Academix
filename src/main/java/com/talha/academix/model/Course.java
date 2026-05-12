@@ -19,8 +19,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,12 +33,12 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "courseid")
     private Long courseId;
-    @NotEmpty
+    
     @Column(name = "course_name")
     private String courseName;
-    @NotEmpty
+    
     private String duration;
-    @NotNull
+    
     private BigDecimal fees;
     
     @Enumerated(EnumType.STRING)
@@ -59,6 +57,6 @@ public class Course {
     @OneToMany(mappedBy="course", cascade = CascadeType.ALL, orphanRemoval=true)
     private List<Content> contents;
 
-    @OneToMany(mappedBy="course", cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+    @OneToMany(mappedBy="course", cascade=CascadeType.ALL, orphanRemoval=true, fetch=FetchType.LAZY)
     private List<Enrollment> enrollments;
 }

@@ -43,7 +43,7 @@ public class Enrollment {
     @Enumerated(EnumType.STRING)
     private EnrollmentStatus status; //enum(completed / in progress)
 
-    private double completionPercentage;
+    private Double completionPercentage;
     
-    private double marks; 
+    private Double marks; 
 }

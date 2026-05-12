@@ -95,7 +95,7 @@ public class AttemptServiceImpl implements AttemptService {
                 .filter(ans -> ans.getSelectedOption().isCorrect())
                 .count();
 
-        float percentage = ((float) correctAnswers / totalQuestions) * 100;
+        Double percentage = ((double) correctAnswers / totalQuestions) * 100;
 
         attempt.setCompletedAt(Instant.now());
         attemptRepo.save(attempt);

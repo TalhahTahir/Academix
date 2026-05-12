@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.talha.academix.model.Attempt;
-import com.talha.academix.model.Exam;
 
 public interface AttemptRepo extends JpaRepository<Attempt, Long>{
 

@@ -1,8 +1,7 @@
 package com.talha.academix.security;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,9 +20,8 @@ public class CustomUserDetails implements UserDetails {
         id = user.getUserid();
         name = user.getEmail();
         password = user.getPassword();
-        authorities = Arrays.stream(user.getRole().name().split(","))
-            .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-            .collect(Collectors.toList());
+        authorities = List.of(
+                new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
     public CustomUserDetails(Long id, String name, Collection<? extends GrantedAuthority> authorities) {

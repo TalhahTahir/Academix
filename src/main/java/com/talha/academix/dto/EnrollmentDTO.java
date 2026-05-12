@@ -25,7 +25,7 @@ public class EnrollmentDTO {
     @NotNull
     private EnrollmentStatus status;
     @NotNull
-    private double completionPercentage;
+    private Double completionPercentage;
     @NotNull
-    private double marks;
+    private Double marks;
 }
