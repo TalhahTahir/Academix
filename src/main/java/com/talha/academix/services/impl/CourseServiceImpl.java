@@ -33,7 +33,6 @@ public class CourseServiceImpl implements CourseService {
     private final UserRepo userRepo;
     private final EnrollmentRepo enrollmentRepo;
     private final CourseMapper courseMapper;
-    /*----------------------------------- View Methods ----------------------------------- */
 
     @Override
     public CourseDTO getCourseById(Long id) {
@@ -55,7 +54,7 @@ public class CourseServiceImpl implements CourseService {
         List<Course> courses = courseRepo.findAll();
         return courses.stream()
                 .map(courseMapper::toDto)
-        .toList();
+                .toList();
     }
 
     @Override
@@ -92,46 +91,6 @@ public class CourseServiceImpl implements CourseService {
         return coursesview;
     }
 
-    /*----------------------------------- Action Methods ----------------------------------- */
-
-    // @Override
-    // public CourseDTO createCourseByTeacher(Long userid, CourseDTO dto) {
-    // if (userService.teacherValidation(userid) && Objects.equals(userid,
-    // dto.getTeacherid())) {
-    // return createCourse(dto);
-    // } else
-    // throw new RoleMismatchException("Only Teacher can create course");
-    // }
-
-    // @Override
-    // public CourseDTO updateCourseByAdmin(Long userid, Long courseId, CourseDTO
-    // dto) {
-    // if (userService.adminValidation(userid)) {
-    // return updateCourse(courseId, dto);
-    // } else
-    // throw new RoleMismatchException("Only Admin can update course");
-    // }
-
-    // @Override
-    // public void deleteCourseByTeacher(Long userid, Long courseId) {
-    // Boolean owned = teacherOwnership(userid, courseId);
-    // if (owned) {
-    // Course course = courseRepo.findById(courseId)
-    // .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: "
-    // + courseId));
-    // deleteCourse(courseId);
-    // } else
-    // throw new RoleMismatchException("Only Teacher can delete course");
-    // }
-
-    // @Override
-    // public void deleteCourseByAdmin(Long userid, Long courseId) {
-    // if (userService.adminValidation(userid)) {
-    // deleteCourse(courseId);
-    // } else
-    // throw new RoleMismatchException("Only Admin can delete course");
-    // }
-
     @Override
     public CourseDTO courseRejection(Long courseId) {
 
@@ -166,7 +125,7 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-        if ( (course.getState() == CourseState.DRAFT
+        if ((course.getState() == CourseState.DRAFT
                 || course.getState() == CourseState.MODIFIED
                 || course.getState() == CourseState.REJECTED)) {
 

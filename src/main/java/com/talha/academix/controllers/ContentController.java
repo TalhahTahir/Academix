@@ -8,6 +8,7 @@ import com.talha.academix.dto.ContentDTO;
 import com.talha.academix.dto.ContentImageLinkRequestDTO;
 import com.talha.academix.services.ContentService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,20 +24,20 @@ public class ContentController {
 
     @PreAuthorize("@courseSecurity.isCourseOwner(principal, #dto.courseId)")
     @PostMapping
-    public ResponseEntity<ContentDTO> createContent(@RequestBody ContentDTO dto) {
+    public ResponseEntity<ContentDTO> createContent(@Valid @RequestBody ContentDTO dto) {
         return ResponseEntity.ok(contentService.addContent(dto));
     }
 
     @PreAuthorize("@contentSecurity.isContentOwner(principal, #contentId)")
     @PutMapping("/{contentId}/image")
     public ResponseEntity<ContentDTO> setContentImage(@PathVariable Long contentId,
-            @RequestBody ContentImageLinkRequestDTO req) {
+            @Valid @RequestBody ContentImageLinkRequestDTO req) {
         return ResponseEntity.ok(contentService.setContentImage(contentId, req.getStoredFileId()));
     }
 
     @PreAuthorize("@contentSecurity.isContentOwner(principal, #contentId)")
     @PutMapping("/update/{contentId}")
-    public ContentDTO updateContent(@PathVariable Long contentId, @PathVariable Long teacherId, @RequestBody ContentDTO dto) {
+    public ContentDTO updateContent(@PathVariable Long contentId, @PathVariable Long teacherId, @Valid @RequestBody ContentDTO dto) {
         return contentService.updateContent(contentId, dto);
     }
 

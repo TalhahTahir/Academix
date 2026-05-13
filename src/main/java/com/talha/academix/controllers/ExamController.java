@@ -9,6 +9,7 @@ import com.talha.academix.dto.CreateExamRequest;
 import com.talha.academix.dto.ExamResponse;
 import com.talha.academix.services.ExamService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -22,7 +23,7 @@ public class ExamController {
     @PreAuthorize("@courseSecurity.isCourseOwner(principal, #courseId)")
     @PostMapping("/courses/{courseId}/exams/")
     public ExamResponse createExam(@PathVariable Long courseId,
-                                   @RequestBody CreateExamRequest req) {
+                                   @Valid @RequestBody CreateExamRequest req) {
         // enforce courseId from path (ignore body mismatch)
         req.setCourseId(courseId);
         return examService.createExam(req);
@@ -44,7 +45,7 @@ public class ExamController {
     @PreAuthorize("@examSecurity.isExamOwner(principal, #examId)")
     @PutMapping("/exams/{examId}")
     public ExamResponse updateExam(@PathVariable Long examId,
-                                   @RequestBody CreateExamRequest req) {
+                                   @Valid @RequestBody CreateExamRequest req) {
         // IMPORTANT: courseId is not allowed to change; service ignores it.
         return examService.updateExam(examId, req);
     }

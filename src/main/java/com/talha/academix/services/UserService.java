@@ -11,13 +11,8 @@ public interface UserService {
     UserDTO getUserById(Long userId);
 
     List<UserDTO> getAllUsers();
-
+    
     UserDTO updateUser(Long userId, CreateUserDTO dto);
 
     void deleteUser(Long userId);
-
-    boolean adminValidation(Long userid);
-
-    boolean teacherValidation(Long userid);
-
 }

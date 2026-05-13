@@ -2,6 +2,7 @@ package com.talha.academix.config;
 
 import org.springframework.boot.CommandLineRunner;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +11,9 @@ import org.springframework.stereotype.Component;
 
 import com.talha.academix.enums.Role;
 import com.talha.academix.model.User;
+import com.talha.academix.model.Vault;
 import com.talha.academix.repository.UserRepo;
+import com.talha.academix.repository.VaultRepo;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DatabaseSeeder implements CommandLineRunner {
 
     private final UserRepo userRepo;
+    private final VaultRepo vaultRepo;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${admin.default-email}")
@@ -45,6 +49,19 @@ public class DatabaseSeeder implements CommandLineRunner {
             admin.setCreatedAt(Instant.now());
 
             userRepo.save(admin);
+
+            Vault adminVault = new Vault();
+            adminVault.setUser(admin);
+            adminVault.setAvailableBalance(BigDecimal.ZERO);
+            adminVault.setTotalEarned(BigDecimal.ZERO);
+            adminVault.setTotalWithdrawn(BigDecimal.ZERO);
+            adminVault.setPendingWithdrawal(BigDecimal.ZERO);
+            adminVault.setCurrency("USD");
+            adminVault.setCreatedAt(Instant.now());
+            adminVault.setUpdatedAt(Instant.now());
+
+            vaultRepo.save(adminVault);
+
             log.info("Default admin created with email: {}", email);
         } else {
             log.info("Admin user already exists. Skipping admin seeding.");

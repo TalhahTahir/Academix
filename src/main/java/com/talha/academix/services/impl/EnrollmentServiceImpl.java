@@ -136,6 +136,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         e.setEnrollmentDate(new Date().toInstant());
         e.setStatus(EnrollmentStatus.IN_PROGRESS);
         e.setCompletionPercentage(0.0);
+        e.setMarks(0.0);
         Enrollment saved = enrollmentRepo.save(e);
 
         // 5. Map to DTO and return

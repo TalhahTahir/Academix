@@ -17,6 +17,6 @@ public class AttemptSecurity {
             return false;
         }
 
-        return attemptRepo.existsByAttemptIdAndStudent_Userid(attemptId, principal.getId());
+        return attemptRepo.existsByIdAndStudent_Userid(attemptId, principal.getId());
     }
 }

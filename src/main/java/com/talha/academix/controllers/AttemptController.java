@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.talha.academix.dto.AttemptDTO;
 import com.talha.academix.services.AttemptService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -30,7 +31,7 @@ public class AttemptController {
     @PostMapping("/attempts/{attemptId}/submit/students/{studentId}")
     public AttemptDTO submitAttempt(@PathVariable Long attemptId,
                                     @PathVariable Long studentId,
-                                    @RequestBody AttemptDTO dto) {
+                                    @Valid @RequestBody AttemptDTO dto) {
         dto.setStudentId(studentId);
         return attemptService.submitAttempt(attemptId, dto);
     }

@@ -100,8 +100,7 @@ public class VaultServiceImpl implements VaultService {
     @Transactional
     @Override
     public Boolean shareDistribution(Payment payment) {
-
-        if (vaultTxRepo.findByReferenceTypeAndReferenceId(TxReferenceType.PAYMENT, payment.getId()) != null) {
+        if (vaultTxRepo.findByReferenceTypeAndReferenceId(TxReferenceType.PAYMENT, payment.getId()).isPresent()) {
             throw new AlreadyExistException(
                     "Vault Transaction already exists for payment with id : " + payment.getId());
 

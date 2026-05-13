@@ -3,6 +3,7 @@ package com.talha.academix.controllers;
 import com.talha.academix.dto.TeacherQualificationDTO;
 import com.talha.academix.services.TeacherQualificationService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +20,12 @@ public class TeacherQualificationController {
     private final TeacherQualificationService qualificationService;
 
     @PostMapping
-    public TeacherQualificationDTO addQualification(@RequestBody TeacherQualificationDTO dto) {
+    public TeacherQualificationDTO addQualification(@Valid @RequestBody TeacherQualificationDTO dto) {
         return qualificationService.addQualification(dto);
     }
 
     @PutMapping("/{qualificationId}")
-    public TeacherQualificationDTO updateQualification(@PathVariable Long qualificationId, @RequestBody TeacherQualificationDTO dto) {
+    public TeacherQualificationDTO updateQualification(@PathVariable Long qualificationId, @Valid @RequestBody TeacherQualificationDTO dto) {
         return qualificationService.updateQualification(qualificationId, dto);
     }
 

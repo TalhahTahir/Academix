@@ -9,6 +9,7 @@ import com.talha.academix.dto.CreateUserDTO;
 import com.talha.academix.dto.UserDTO;
 import com.talha.academix.services.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +30,7 @@ public class UserController {
     private final UserService userService;
     
     @PostMapping("/register")
-    public UserDTO createUser(@RequestBody CreateUserDTO dto) {
+    public UserDTO createUser(@Valid @RequestBody CreateUserDTO dto) {
         return userService.createUser(dto);
     }
 
@@ -45,7 +46,7 @@ public class UserController {
     
     @PreAuthorize("hasRole('ADMIN') or @userSecurity.isUserOwner(principal, #id)")
     @PutMapping("/{id}")
-    public UserDTO updateUser(@PathVariable Long id, @RequestBody CreateUserDTO dto){
+    public UserDTO updateUser(@PathVariable Long id, @Valid @RequestBody CreateUserDTO dto){
         return userService.updateUser(id, dto);
     }
 

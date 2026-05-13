@@ -22,7 +22,7 @@ public interface AttemptRepo extends JpaRepository<Attempt, Long>{
 
     Optional<Attempt> findByExamIdAndStudentUserid(Long examId, Long studentId);
 
-    boolean existsByAttemptIdAndStudent_Userid(Long attemptId, Long Userid);
+    boolean existsByIdAndStudent_Userid(Long attemptId, Long Userid);
 
     Optional<Attempt> findByExam_IdAndStudent_Userid(Long examId, Long studentId);
     

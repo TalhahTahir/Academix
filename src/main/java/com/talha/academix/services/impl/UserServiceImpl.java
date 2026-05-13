@@ -79,18 +79,8 @@ public class UserServiceImpl implements UserService {
 
         userMapper.updateUserFromDto(dto, user);
         user.setUserid(id);
-
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User updatedUser = userRepo.save(user);
         return userMapper.toDto(updatedUser);
-    }
-
-    @Override
-    public boolean adminValidation(Long userid) {
-        return getUserById(userid).getRole().equals(Role.ADMIN);
-    }
-
-    @Override
-    public boolean teacherValidation(Long userid) {
-        return getUserById(userid).getRole().equals(Role.TEACHER);
     }
 }

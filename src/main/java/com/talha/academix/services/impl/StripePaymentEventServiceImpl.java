@@ -71,12 +71,13 @@ public class StripePaymentEventServiceImpl implements StripePaymentEventService 
                 webhookEventRepo.save(genericAudit);
                 return;
             }
-            if (event.getType().startsWith("tr_")) {
-                handleTransferEvent(event);
-                genericAudit.setProcessedAt(Instant.now());
-                webhookEventRepo.save(genericAudit);
-                return;
-            }
+            // if (event.getType().startsWith("tr_")) {
+            //     System.out.println("\n\n\n TRANSFER EVENT: " + event.getType() + " - " + event.getId() + "\n\n\n");
+            //     handleTransferEvent(event);
+            //     genericAudit.setProcessedAt(Instant.now());
+            //     webhookEventRepo.save(genericAudit);
+            //     return;
+            // }
             if (event.getType().startsWith("payout.")) {
                 handlePayoutEvent(event);
                 genericAudit.setProcessedAt(Instant.now());

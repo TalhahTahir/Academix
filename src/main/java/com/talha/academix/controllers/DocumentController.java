@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.talha.academix.dto.DocumentDTO;
 import com.talha.academix.services.DocumentService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -26,14 +27,14 @@ public class DocumentController {
 
     @PreAuthorize("@contentSecurity.isContentOwner(principal, #dto.contentId)")
     @PostMapping
-    public DocumentDTO addDocument( @RequestBody DocumentDTO dto) {
+    public DocumentDTO addDocument(@Valid @RequestBody DocumentDTO dto) {
         return documentService.addDocument(dto);
     }
 
     @PreAuthorize("@documentSecurity.isDocumentOwner(principal, #documentId)")
     @PutMapping("/documents/{documentId}")
     public DocumentDTO updateDocument(@PathVariable Long documentId,
-            @RequestBody DocumentDTO dto) {
+            @Valid @RequestBody DocumentDTO dto) {
         return documentService.updateDocument(documentId, dto);
     }
 

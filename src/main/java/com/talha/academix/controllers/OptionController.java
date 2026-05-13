@@ -9,6 +9,7 @@ import com.talha.academix.dto.OptionDTO;
 import com.talha.academix.dto.StudentOptionResponse;
 import com.talha.academix.services.OptionService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -22,7 +23,7 @@ public class OptionController {
     @PreAuthorize("@questionSecurity.isQuestionOwner(principal, #questionId)")
     @PostMapping("/questions/{questionId}/options")
     public OptionDTO addOption(@PathVariable Long questionId,
-                               @RequestBody OptionDTO dto) {
+                               @Valid @RequestBody OptionDTO dto) {
         dto.setQuestionId(questionId);
         return optionService.addOption(questionId, dto);
     }
@@ -34,7 +35,7 @@ public class OptionController {
     }
 
     // Student: list options (NO isCorrect)
-    @GetMapping("/questions/{questionId}/options")
+    @GetMapping("/questions/{questionId}/options/student")
     public List<StudentOptionResponse> getOptionsByQuestionStudent(@PathVariable Long questionId) {
         return optionService.getOptionsByQuestionForStudent(questionId);
     }
@@ -43,7 +44,7 @@ public class OptionController {
     @PreAuthorize("@optionSecurity.isOptionOwner(principal, #optionId)")
     @PutMapping("/options/{optionId}")
     public OptionDTO updateOption(@PathVariable Long optionId,
-                                  @RequestBody OptionDTO dto) {
+                                  @Valid @RequestBody OptionDTO dto) {
         return optionService.updateOption(optionId, dto);
     }
 

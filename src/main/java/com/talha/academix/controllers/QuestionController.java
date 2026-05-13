@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.talha.academix.dto.QuestionDTO;
 import com.talha.academix.services.QuestionService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -21,7 +22,7 @@ public class QuestionController {
     @PreAuthorize("@examSecurity.isExamOwner(principal, #examId)")
     @PostMapping("/exams/{examId}/questions")
     public QuestionDTO addQuestion(@PathVariable Long examId,
-                                   @RequestBody QuestionDTO dto) {
+                                   @Valid @RequestBody QuestionDTO dto) {
         dto.setExamId(examId);
         return questionService.addQuestion(examId, dto);
     }
@@ -36,7 +37,7 @@ public class QuestionController {
     @PreAuthorize("@questionSecurity.isQuestionOwner(principal, #questionId)")
     @PutMapping("/questions/{questionId}")
     public QuestionDTO updateQuestion(@PathVariable Long questionId,
-                                      @RequestBody QuestionDTO dto) {
+                                      @Valid @RequestBody QuestionDTO dto) {
         return questionService.updateQuestion(questionId, dto);
     }
 

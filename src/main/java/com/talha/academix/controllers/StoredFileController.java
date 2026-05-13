@@ -8,6 +8,7 @@ import com.talha.academix.dto.SignedUploadInitRequestDTO;
 import com.talha.academix.dto.SignedUploadInitResponseDTO;
 import com.talha.academix.services.StoredFileService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -19,7 +20,7 @@ public class StoredFileController {
 
     // Step 1: backend generates signed upload URL for private bucket
     @PostMapping("/initiate-signed-upload")
-    public ResponseEntity<SignedUploadInitResponseDTO> initiateSignedUpload(@RequestBody SignedUploadInitRequestDTO req) {
+    public ResponseEntity<SignedUploadInitResponseDTO> initiateSignedUpload(@Valid @RequestBody SignedUploadInitRequestDTO req) {
         return ResponseEntity.ok(storedFileService.initiateSignedUpload(req));
     }
 

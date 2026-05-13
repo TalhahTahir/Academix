@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.talha.academix.dto.VaultDTO;
 import com.talha.academix.services.VaultService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +36,7 @@ public class VaultController {
 
     @PreAuthorize("@vaultSecurity.isVaultOwner(principal, #id)")
     @PutMapping("/update/{id}")
-    public VaultDTO updateVault(@PathVariable Long id, @RequestBody VaultDTO dto) {
+    public VaultDTO updateVault(@PathVariable Long id, @Valid @RequestBody VaultDTO dto) {
         return vaultService.updateVault(id, dto);
     }
 

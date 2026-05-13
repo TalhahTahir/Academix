@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.talha.academix.dto.LectureDTO;
 import com.talha.academix.services.LectureService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,14 +29,14 @@ public class LectureController {
 
     @PreAuthorize("@contentSecurity.isContentOwner(principal, #dto.contentId)")
     @PostMapping
-    public LectureDTO addLecture(@RequestBody LectureDTO dto) {
+    public LectureDTO addLecture(@Valid @RequestBody LectureDTO dto) {
         return lectureService.addLecture(dto);
     }
 
     @PreAuthorize("@lectureSecurity.isLectureOwner(principal, #lectureId)")
     @PutMapping("/{lectureId}")
     public LectureDTO updateLecture(@PathVariable Long lectureId,
-            @RequestBody LectureDTO dto) {
+            @Valid @RequestBody LectureDTO dto) {
         return lectureService.updateLecture(lectureId, dto);
     }
 
