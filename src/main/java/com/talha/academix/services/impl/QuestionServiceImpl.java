@@ -32,9 +32,9 @@ public class QuestionServiceImpl implements QuestionService {
 
         Question question = questionMapper.toEntity(dto);
         question.setExam(exam);
-        question = questionRepo.save(question);
+        final Question savedQuestion = questionRepo.save(question);
 
-        return questionMapper.toDto(question);
+        return questionMapper.toDto(savedQuestion);
     }
 
     @Override
@@ -50,15 +50,15 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = questionRepo.findById(questionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
 
-        Long examId = question.getExam().getId();
-        Exam exam = examRepo.findById(examId)
-                .orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + examId));
+        questionMapper.updateQuestionFromDto(dto, question);
+        Exam exam = examRepo.findById(question.getExam().getId())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Exam not found with id: " + question.getExam().getId()));
 
         question.setId(questionId); // Ensure ID is set for update
         question.setExam(exam); // Reassign exam to ensure it's not null
-        question = questionRepo.save(question);
-
-        return questionMapper.toDto(question);
+        Question saved = questionRepo.save(question);
+        return questionMapper.toDto(saved);
 
     }
 

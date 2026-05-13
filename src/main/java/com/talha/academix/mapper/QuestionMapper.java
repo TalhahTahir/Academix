@@ -3,11 +3,16 @@ package com.talha.academix.mapper;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import com.talha.academix.dto.CourseDTO;
 import com.talha.academix.dto.QuestionDTO;
+import com.talha.academix.model.Course;
 import com.talha.academix.model.Question;
 import com.talha.academix.model.QuestionOption;
 
@@ -31,4 +36,9 @@ public interface QuestionMapper {
                 .map(QuestionOption::getId)
                 .collect(Collectors.toList());
     }
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(source = "examId", target = "exam.id")
+    @Mapping(target = "options", ignore = true)
+    void updateQuestionFromDto(QuestionDTO dto, @MappingTarget Question entity);
 }

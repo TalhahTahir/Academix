@@ -37,13 +37,13 @@ public class ContentController {
 
     @PreAuthorize("@contentSecurity.isContentOwner(principal, #contentId)")
     @PutMapping("/update/{contentId}")
-    public ContentDTO updateContent(@PathVariable Long contentId, @PathVariable Long teacherId, @Valid @RequestBody ContentDTO dto) {
+    public ContentDTO updateContent(@PathVariable Long contentId, @Valid @RequestBody ContentDTO dto) {
         return contentService.updateContent(contentId, dto);
     }
 
     @PreAuthorize("@contentSecurity.isContentOwner(principal, #contentId)")
     @DeleteMapping("/{contentId}")
-    public ResponseEntity<Void> deleteContent(@PathVariable Long contentId, @PathVariable Long teacherId) {
+    public ResponseEntity<Void> deleteContent(@PathVariable Long contentId) {
         contentService.deleteContent(contentId);
         return ResponseEntity.noContent().build();
     }

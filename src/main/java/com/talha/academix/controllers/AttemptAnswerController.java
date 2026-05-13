@@ -28,7 +28,7 @@ public AttemptAnswerDTO submitAnswer(@PathVariable Long attemptId,
 
 
     // List answers for an attempt
-    @PreAuthorize("@attemptSecurity.isAttemptOwner(principal, #attemptId) or hasRole('ROLE_TEACHER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("@attemptSecurity.isAttemptOwner(principal, #attemptId) or hasRole('TEACHER') or hasRole('ADMIN')")
     @GetMapping("/attempts/{attemptId}/answers")
     public List<AttemptAnswerDTO> getAnswersByAttempt(@PathVariable Long attemptId) {
         return attemptAnswerService.getAnswersByAttempt(attemptId);

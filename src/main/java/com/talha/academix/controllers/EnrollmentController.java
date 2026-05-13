@@ -52,7 +52,7 @@ public class EnrollmentController {
         return enrollmentService.getEnrollmentsByCourse(courseId);
     }
 
-    @PreAuthorize("@enrollmentSecurity.isEnrolled(principal, #id)")
+    @PreAuthorize("@enrollmentSecurity.isEnrolledById(principal, #id)")
     @DeleteMapping("/{id}")
     public void withdrawEnrollment(@PathVariable Long id) {
         enrollmentService.withdrawEnrollment(id);

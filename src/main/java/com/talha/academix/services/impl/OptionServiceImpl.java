@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.talha.academix.dto.OptionDTO;
 import com.talha.academix.dto.StudentOptionResponse;
@@ -32,7 +33,7 @@ public class OptionServiceImpl implements OptionService {
         Question question = questionRepo.findById(questionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
 
-        if ((dto.isCorrect())) {
+        if (Boolean.TRUE.equals(dto.getCorrect())) {
             long count = optionRepo.countByQuestionIdAndIsCorrectTrue(questionId);
             if (count >= 1) {
                 throw new InvalidAttemptException("Only one option can be marked as correct per question.");
@@ -41,7 +42,7 @@ public class OptionServiceImpl implements OptionService {
 
         QuestionOption questionOption = optionMapper.toEntity(dto);
         questionOption.setQuestion(question);
-        questionOption.setCorrect((dto.isCorrect()));
+        questionOption.setCorrect(Boolean.TRUE.equals(dto.getCorrect()));
         questionOption = optionRepo.save(questionOption);
 
         return optionMapper.toDto(questionOption);
@@ -55,21 +56,24 @@ public class OptionServiceImpl implements OptionService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public OptionDTO updateOption(Long optionId, OptionDTO dto) {
-        QuestionOption questionOption = optionRepo.findById(optionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + optionId));
+@Override
+@Transactional 
+public OptionDTO updateOption(Long optionId, OptionDTO dto) {
+    
+    QuestionOption questionOption = optionRepo.findById(optionId)
+            .orElseThrow(() -> new ResourceNotFoundException("Option not found with id: " + optionId));
+            
+    Long questionId = questionOption.getQuestion().getId();
 
-        Long questionId = questionOption.getQuestion().getId();
-        Question question = questionRepo.findById(questionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + questionId));
-
-        optionMapper.updateOptionFromDto(dto, questionOption);
-        questionOption.setQuestion(question);
-        questionOption = optionRepo.save(questionOption);
-
-        return optionMapper.toDto(questionOption);
+    // 1. Auto-Switch Logic: If the new option is being set to true, clear the old ones first
+    if (Boolean.TRUE.equals(dto.getCorrect())) {
+        optionRepo.clearCorrectOptionForQuestion(questionId);
     }
+    optionMapper.updateOptionFromDto(dto, questionOption);
+
+    QuestionOption saved = optionRepo.save(questionOption);
+    return optionMapper.toDto(saved);
+}
 
     @Override
     public void deleteOption(Long optionId) {

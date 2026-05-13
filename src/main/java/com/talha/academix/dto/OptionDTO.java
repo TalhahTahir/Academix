@@ -15,7 +15,7 @@ public class OptionDTO {
     @NotBlank
     private String text;
     
-    private boolean correct;
+    private Boolean correct;
     @NotNull
     private Long questionId;
 }

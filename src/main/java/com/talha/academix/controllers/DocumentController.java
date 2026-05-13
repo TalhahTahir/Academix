@@ -32,7 +32,7 @@ public class DocumentController {
     }
 
     @PreAuthorize("@documentSecurity.isDocumentOwner(principal, #documentId)")
-    @PutMapping("/documents/{documentId}")
+    @PutMapping("/{documentId}")
     public DocumentDTO updateDocument(@PathVariable Long documentId,
             @Valid @RequestBody DocumentDTO dto) {
         return documentService.updateDocument(documentId, dto);
@@ -48,7 +48,7 @@ public class DocumentController {
         return documentService.getDocumentsByContent(id);
     }
 
-    @DeleteMapping("/documents/{documentId}")
+    @DeleteMapping("/{documentId}")
     @PreAuthorize("@documentSecurity.isDocumentOwner(principal, #documentId)")
     public void deleteDocument(@PathVariable Long documentId) {
         documentService.deleteDocument(documentId);

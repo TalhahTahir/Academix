@@ -36,21 +36,21 @@ public class AttemptController {
         return attemptService.submitAttempt(attemptId, dto);
     }
 
-    @PreAuthorize("@attemptSecurity.isAttemptOwner(principal, #attemptId) or hasRole('ROLE_TEACHER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("@attemptSecurity.isAttemptOwner(principal, #attemptId) or hasRole('TEACHER') or hasRole('ADMIN')")
     @GetMapping("/attempts/{attemptId}")
     public AttemptDTO getAttemptById(@PathVariable Long attemptId) {
         return attemptService.getAttemptById(attemptId);
     }
 
     // Teacher/admin: list attempts for an exam
-    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
     @GetMapping("/exams/{examId}/attempts")
     public List<AttemptDTO> getAttemptsByExam(@PathVariable Long examId) {
         return attemptService.getAttemptsByExam(examId);
     }
 
     // Student: list attempts for a student
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (principal != null and principal.id == #studentId)")
+    @PreAuthorize("hasRole('ADMIN') or (principal != null and principal.id == #studentId)")
     @GetMapping("/students/{studentId}/attempts")
     public List<AttemptDTO> getAttemptsByStudent(@PathVariable Long studentId) {
         return attemptService.getAttemptsByStudent(studentId);
